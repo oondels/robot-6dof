@@ -1,4 +1,6 @@
 from dataclasses import dataclass
+from math import isfinite
+from time import monotonic, sleep
 from typing import Any
 
 from models.joint_config import JointConfig
@@ -194,6 +196,23 @@ class Joint:
             within_tolerance=within_tolerance,
         )
 
+    @staticmethod
+    def _validate_wait_parameter(
+        parameter_name: str,
+        value: float,
+    ) -> None:
+        if isinstance(value, bool) or not isinstance(
+            value,
+            (int, float),
+        ):
+            raise TypeError(f"{parameter_name} deve ser um número")
+
+        if not isfinite(value):
+            raise ValueError(f"{parameter_name} deve ser finito")
+
+        if value <= 0:
+            raise ValueError(f"{parameter_name} deve ser maior que zero")
+
     def command(
         self,
         angle: float,
@@ -229,3 +248,63 @@ class Joint:
         )
 
         return target_position
+
+    def move(
+        self,
+        angle: float,
+        speed: int | None = None,
+        acc: int | None = None,
+        timeout: float = 5.0,
+        poll_interval: float = 0.05,
+    ) -> MovementStatus:
+        self._validate_wait_parameter(
+            "timeout",
+            timeout,
+        )
+
+        self._validate_wait_parameter(
+            "poll_interval",
+            poll_interval,
+        )
+
+        target_position = self.command(
+            angle=angle,
+            speed=speed,
+            acc=acc,
+        )
+
+        deadline = monotonic() + timeout
+
+        while True:
+            status = self.movement_status(target_position)
+
+            if status.within_tolerance:
+                return status
+
+            if not status.moving:
+                raise RuntimeError(
+                    f"{self.name}: servo parou fora do alvo "
+                    f"(alvo={status.target_position}, "
+                    f"posição={status.current_position}, "
+                    f"erro={status.position_error} counts, "
+                    f"tolerância="
+                    f"{self.config.tolerance_counts} counts)"
+                )
+
+            remaining_time = deadline - monotonic()
+
+            if remaining_time <= 0:
+                raise TimeoutError(
+                    f"{self.name}: timeout após "
+                    f"{timeout:.3f}s "
+                    f"(alvo={status.target_position}, "
+                    f"posição={status.current_position}, "
+                    f"erro={status.position_error} counts)"
+                )
+
+            sleep(
+                min(
+                    poll_interval,
+                    remaining_time,
+                )
+            )

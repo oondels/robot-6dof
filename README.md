@@ -5,9 +5,9 @@ robótico de seis graus de liberdade usando servos compatíveis com o SDK
 `scservo_sdk`/SMS-STS.
 
 O projeto ainda está em desenvolvimento. Atualmente ele possui uma abstração
-testada para configuração física de juntas, controle individual básico e um
-servo falso para testes sem hardware. Controle coordenado de múltiplas juntas,
-timeout de movimento e cinemática ainda não estão implementados.
+testada para configuração física de juntas, movimento individual robusto e um
+servo falso para testes sem hardware. Controle coordenado de múltiplas juntas e
+cinemática ainda não estão implementados.
 
 ## Estado atual
 
@@ -22,20 +22,20 @@ timeout de movimento e cinemática ainda não estão implementados.
 | Leitura do estado de movimento | Implementada e testada |
 | Comando individual não bloqueante | Implementado e testado |
 | Simulação de movimento | Implementada no `FakeServo` |
-| Movimento individual com timeout | Em desenvolvimento |
+| Movimento individual com timeout | Implementado e testado |
 | Controle de múltiplas juntas | Planejado |
 | Movimento simultâneo com SyncWrite | Planejado |
 | Cinemática direta/inversa | Fora do escopo atual |
 | Configuração física real | Pendente de calibração |
 
-A suíte atual contém **46 testes sem hardware**. `robot_config.py` mantém
+A suíte atual contém **52 testes sem hardware**. `robot_config.py` mantém
 `JOINT_CONFIGS` vazio; por isso, `main.py` recusa a execução antes de abrir a
 porta serial.
 
 > **Atenção:** `Joint.command()` apenas envia o alvo e retorna os counts
-> solicitados. Ele não confirma chegada. `Joint.move()` está temporariamente
-> ausente até a implementação da espera com timeout. `movement_status()` faz
-> apenas uma consulta do estado; ele também não espera o movimento terminar.
+> solicitados. Ele não confirma chegada. Para enviar e aguardar use
+> `Joint.move()`, sempre com configuração calibrada e procedimento seguro.
+> `movement_status()` faz apenas uma consulta e não espera o movimento terminar.
 
 ## Leitura rápida
 

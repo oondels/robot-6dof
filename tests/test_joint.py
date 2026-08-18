@@ -1,4 +1,5 @@
 import unittest
+from unittest.mock import patch
 
 from models.Joint import ADDR_TORQUE_ENABLE, Joint, MovementStatus
 from models.joint_config import JointConfig
@@ -252,6 +253,150 @@ class JointTestCase(unittest.TestCase):
         self.assertFalse(status.moving)
         self.assertFalse(status.within_tolerance)
         self.assertEqual(status.position_error, 12)
+
+    @patch("models.Joint.sleep")
+    def test_move_waits_until_target_is_reached(
+        self,
+        mocked_sleep,
+    ) -> None:
+        self.servo.queue_motion(
+            positions=[2400, 2550],
+            moving_states=[1, 0],
+        )
+
+        status = self.joint.move(
+            angle=45,
+            timeout=1.0,
+            poll_interval=0.01,
+        )
+
+        self.assertTrue(status.within_tolerance)
+        self.assertEqual(status.target_position, 2560)
+        self.assertEqual(status.current_position, 2550)
+        self.assertEqual(status.position_error, 10)
+
+        self.assertEqual(
+            self.servo.position_commands,
+            [(6, 2560, 1000, 100)],
+        )
+
+        mocked_sleep.assert_called_once()
+
+    def test_move_detects_servo_stopped_outside_target(
+        self,
+    ) -> None:
+        self.servo.position = 2500
+        self.servo.moving = 0
+
+        with self.assertRaisesRegex(
+            RuntimeError,
+            "servo parou fora do alvo",
+        ):
+            self.joint.move(
+                angle=45,
+                timeout=1.0,
+                poll_interval=0.01,
+            )
+
+    @patch("models.Joint.sleep")
+    @patch(
+        "models.Joint.monotonic",
+        side_effect=[10.0, 11.0],
+    )
+    def test_move_raises_timeout(
+        self,
+        mocked_monotonic,
+        mocked_sleep,
+    ) -> None:
+        self.servo.position = 2500
+        self.servo.moving = 1
+
+        with self.assertRaisesRegex(
+            TimeoutError,
+            "timeout",
+        ):
+            self.joint.move(
+                angle=45,
+                timeout=0.5,
+                poll_interval=0.01,
+            )
+
+        mocked_sleep.assert_not_called()
+
+    def test_move_keeps_torque_enabled_after_failure(
+        self,
+    ) -> None:
+        self.joint.enable_torque()
+
+        self.servo.position = 2500
+        self.servo.moving = 0
+
+        with self.assertRaises(RuntimeError):
+            self.joint.move(
+                angle=45,
+                timeout=1.0,
+                poll_interval=0.01,
+            )
+
+        self.assertTrue(self.joint.is_torque_enabled())
+
+    def test_move_validates_wait_parameters_before_command(
+        self,
+    ) -> None:
+        invalid_cases = [
+            (
+                {"timeout": 0},
+                ValueError,
+            ),
+            (
+                {"timeout": float("inf")},
+                ValueError,
+            ),
+            (
+                {"timeout": True},
+                TypeError,
+            ),
+            (
+                {"poll_interval": 0},
+                ValueError,
+            ),
+            (
+                {"poll_interval": float("nan")},
+                ValueError,
+            ),
+            (
+                {"poll_interval": False},
+                TypeError,
+            ),
+        ]
+
+        for arguments, expected_error in invalid_cases:
+            with self.subTest(arguments=arguments):
+                with self.assertRaises(expected_error):
+                    self.joint.move(
+                        angle=45,
+                        **arguments,
+                    )
+
+        self.assertEqual(
+            self.servo.position_commands,
+            [],
+        )
+
+    def test_move_propagates_communication_error(
+        self,
+    ) -> None:
+        self.servo.communication_result = -1
+
+        with self.assertRaisesRegex(
+            RuntimeError,
+            "comando de movimento",
+        ):
+            self.joint.move(
+                angle=45,
+                timeout=1.0,
+                poll_interval=0.01,
+            )
 
 
 if __name__ == "__main__":

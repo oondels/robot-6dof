@@ -107,10 +107,13 @@ Métodos públicos atuais:
 | `is_within_tolerance()` | compara o erro com `config.tolerance_counts` |
 | `movement_status()` | lê posição e movimento e retorna `MovementStatus` |
 | `command()` | envia o alvo e retorna os counts, sem aguardar |
+| `move()` | envia o alvo e aguarda tolerância, parada ou timeout |
 
 Método interno:
 
 - `_write_torque(value)`: encapsula escrita e validação do registrador 40.
+- `_validate_wait_parameter(name, value)`: rejeita tempo não numérico, não
+  finito ou não positivo antes de qualquer comando.
 
 Dependências esperadas do objeto `servo`:
 
@@ -180,7 +183,9 @@ Eles não descrevem o hardware real.
 Testa construção, propriedades delegadas, leitura, conversão, direção
 invertida, torque, estado de movimento, comando não bloqueante, erro de posição
 e limite de tolerância. Também testa a fotografia do movimento, inclusive o
-caso em que o servo está parado fora da tolerância.
+caso em que o servo está parado fora da tolerância. A espera bloqueante cobre
+sucesso, parada, timeout, validação anterior ao comando, comunicação e
+preservação de torque.
 
 ### `tests/test_fake_servo.py`
 

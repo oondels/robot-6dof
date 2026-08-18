@@ -234,27 +234,35 @@ chegou numericamente = erro <= tolerance_counts
 ```
 
 As duas operações são puras: recebem posições já conhecidas e não acessam o
-servo. Estar dentro da tolerância é uma condição necessária para concluir um
-movimento, mas o futuro `move()` também observará o estado `moving`.
+servo. Estar dentro da tolerância é a condição de sucesso de `move()`; o estado
+`moving` permite detectar uma parada fora do alvo.
 
 `Joint.movement_status(target)` combina essas informações em um
 `MovementStatus`. Ele consulta o servo uma única vez para posição e uma única
 vez para movimento; não repete leituras, não dorme e não aplica timeout.
 
-## Arquitetura planejada, ainda não implementada
-
 ### Movimento individual robusto
 
-A leitura isolada `Joint.is_moving()` e o comando não bloqueante já estão
-implementados. A continuação da Etapa 3 adicionará novamente `move()`:
+As duas formas de movimento individual estão implementadas:
 
 ```python
-joint.command(angle)  # já implementado: envia e retorna imediatamente
-joint.move(angle)     # envia e aguarda com timeout
+joint.command(angle)  # envia e retorna imediatamente
+status = joint.move(angle, timeout=5.0, poll_interval=0.05)
 ```
 
-`move()` deverá observar `ReadMoving`, tolerância e timeout, distinguindo
-sucesso, servo parado fora do alvo e falha de comunicação.
+`move()` valida os parâmetros temporais antes do comando, usa relógio monotônico
+e repete `movement_status()`. Ele retorna o último snapshot ao entrar na
+tolerância, lança `RuntimeError` se o servo parar fora do alvo e `TimeoutError`
+se o prazo terminar. Falhas de comunicação continuam vindo de
+`validate_result()`.
+
+O método limita cada `sleep` ao tempo restante e não desabilita torque em
+falhas. O timeout controla o laço entre consultas; ele não consegue interromper
+uma chamada do próprio SDK que fique bloqueada internamente. Como posição e
+`moving` são leituras consecutivas, a chegada à tolerância tem prioridade e
+encerra a espera mesmo se o snapshot ainda indicar `moving=True`.
+
+## Arquitetura planejada, ainda não implementada
 
 ### Múltiplas juntas
 

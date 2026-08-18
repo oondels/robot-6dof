@@ -105,6 +105,9 @@ que atravessem a transição do encoder entre `4095` e `0`.
 - Cada consulta será representada por `MovementStatus`, contendo alvo, posição,
   erro, estado de movimento e resultado da comparação com a tolerância.
 - Um servo parado fora da tolerância ou um timeout abortará a operação.
+- A chegada à tolerância concluirá a espera e retornará o último
+  `MovementStatus`, mesmo se a leitura consecutiva de `moving` ainda for
+  verdadeira.
 - O diagnóstico indicará junta, alvo, posição medida e erro.
 - O torque permanecerá habilitado após falhas para reduzir o risco de uma junta
   sustentada pela gravidade cair. O desligamento será sempre explícito.

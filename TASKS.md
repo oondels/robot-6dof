@@ -2,12 +2,10 @@
 
 ## Estado atual
 
-- Etapa atual: **3 — Movimento individual robusto**.
-- Última etapa concluída: **2 — Coordenadas físicas e calibração**.
-- Desenvolvimento retomado após a documentação e a implementação isolada de
-  `Joint.is_moving()`.
-- Snapshot documentado: **46 testes passando**; `Joint.command()` está
-  implementado e `Joint.move()` está temporariamente ausente.
+- Etapa atual: **nenhuma; Etapa 3 concluída e Etapa 4 ainda não iniciada**.
+- Última etapa concluída: **3 — Movimento individual robusto**.
+- Snapshot documentado: **52 testes passando**; `Joint.command()` envia sem
+  aguardar e `Joint.move()` envia e aguarda com tolerância e timeout.
 - Regra inviolável: toda decisão, mudança aplicada ou evolução validada deve
   atualizar a documentação afetada no mesmo ciclo.
 - Regra: somente uma etapa fica em andamento por vez.
@@ -82,15 +80,15 @@ porta serial.
 - [x] Converter tolerância angular para counts do encoder.
 - [x] Calcular erro absoluto e comparar posição com tolerância.
 - [x] Reunir uma leitura do movimento em `MovementStatus` imutável.
-- [ ] Separar comando não bloqueante de movimento bloqueante.
-- [ ] Implementar espera com tolerância, intervalo de consulta e timeout.
-- [ ] Detectar servo parado fora do alvo.
-- [ ] Manter torque habilitado após falha.
-- [ ] Testar sucesso, parada, timeout e erro de comunicação.
+- [x] Separar comando não bloqueante de movimento bloqueante.
+- [x] Implementar espera com tolerância, intervalo de consulta e timeout.
+- [x] Detectar servo parado fora do alvo.
+- [x] Manter torque habilitado após falha.
+- [x] Testar sucesso, parada, timeout e erro de comunicação.
 
-Decisão aplicada: o `move()` antigo foi removido ao criar `command()`. A classe
-ficará temporariamente sem `move()` até que a versão bloqueante, com espera e
-timeout, seja implementada e testada.
+Decisão de transição: o `move()` antigo foi removido ao criar `command()`. Esse
+período temporário terminou com a implementação do novo `move()` bloqueante,
+com espera e timeout.
 
 Decisão aplicada: `JointConfig` converte `tolerance_deg` em `tolerance_counts`,
 com mínimo de um count. A comparação de chegada poderá usar a resolução real do
@@ -104,12 +102,25 @@ Decisão aplicada: uma dataclass imutável `MovementStatus` representa uma únic
 fotografia do movimento, contendo alvo, posição atual, erro, `moving` e
 `within_tolerance`. `Joint.movement_status()` fará uma leitura de posição e uma
 leitura de movimento, sem laço ou timeout. As leituras são consecutivas, não
-simultâneas. A decisão está coberta por dois testes e a suíte soma 46 testes.
+simultâneas. Naquele marco, a decisão estava coberta por dois testes e a suíte
+somava 46 testes.
+
+Decisão aplicada: `Joint.move()` reúne comando e espera bloqueante em uma única
+operação. Ele retornará o último `MovementStatus` ao alcançar a tolerância,
+lançará `RuntimeError` se o servo parar fora dela e `TimeoutError` se o prazo
+terminar. `timeout` e `poll_interval` serão positivos, finitos e validados antes
+do comando. Falhas não desabilitam o torque automaticamente. O relógio
+monotônico evita interferência de ajustes no relógio do sistema e o sleep nunca
+ultrapassa o tempo restante calculado.
 
 ### Critério de conclusão
 
 O movimento deve terminar somente ao atingir a tolerância ou lançar um erro
 diagnosticável e limitado por timeout.
+
+Resultado: **concluído em 52 testes sem hardware**. Foram cobertos sucesso,
+parada fora do alvo, timeout, parâmetros inválidos antes do comando, erro de
+comunicação e preservação do torque após falha.
 
 ## 4. Calibração física da primeira junta
 

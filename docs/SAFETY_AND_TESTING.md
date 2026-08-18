@@ -74,9 +74,11 @@ Internamente, a tolerância angular é arredondada para counts e nunca fica abai
 de um count. Essa tolerância numérica não substitui margens mecânicas de
 segurança.
 
-Uma posição dentro da tolerância não prova, isoladamente, que o movimento foi
-concluído com segurança. A conclusão futura combinará posição, `ReadMoving` e
-timeout.
+Uma posição dentro da tolerância é o critério numérico usado por `Joint.move()`
+para concluir a espera. Isso não prova, isoladamente, que todo movimento físico
+foi seguro: limites calibrados, área livre e supervisão continuam necessários.
+`ReadMoving` é usado para detectar parada fora do alvo e o timeout limita a
+espera.
 
 Esses limites validam o formato do comando; os limites mecânicos reais devem
 ser mais restritivos e específicos para cada junta.
@@ -142,11 +144,14 @@ prova que o servo chegou ao destino.
 ## Limitações conhecidas no snapshot atual
 
 - `Joint.command()` não aguarda conclusão; retornar o alvo não comprova chegada.
-- `Joint.move()` está temporariamente ausente até existir espera com timeout.
 - `Joint.movement_status()` combina uma leitura de posição, uma leitura de
-  `ReadMoving` e a tolerância, mas ainda não existe um laço de espera.
+  `ReadMoving` e a tolerância; `Joint.move()` repete esse snapshot.
 - Posição e movimento são lidos consecutivamente, não simultaneamente; o
-  snapshot não substitui timeout nem leituras periódicas.
+  snapshot não representa um instante físico perfeitamente único.
+- O timeout controla o laço Python, mas não interrompe uma chamada do SDK que
+  fique bloqueada internamente.
+- `move()` não desabilita torque automaticamente em falhas; a decisão de soltar
+  uma junta sustentando carga permanece explícita.
 - Não existe `RobotArm` nem movimento sincronizado.
 - `JOINT_CONFIGS` está vazio porque nenhuma calibração física foi registrada.
 - Mensagens operacionais usam `print`, não logging estruturado.
