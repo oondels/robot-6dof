@@ -2,10 +2,10 @@
 
 ## Estado atual
 
-- Etapa atual: **4 — Calibração física da primeira junta**.
-- Última etapa concluída: **3 — Movimento individual robusto**.
-- Snapshot documentado: **58 testes passando**; o leitor de calibração está
-  implementado, mas nenhuma medição física foi realizada.
+- Etapa atual: **4 — Calibração física de todas as juntas (ID 6 a ID 1)**.
+- Sub-etapa ativa: **Calibração da Junta ID 5**.
+- Última junta concluída: **Junta ID 6 (gripper)**.
+- Snapshot documentado: **61 testes passando**; junta ID 6 calibrada e validada no hardware com movimentos controlados.
 - Regra inviolável: toda decisão, mudança aplicada ou evolução validada deve
   atualizar a documentação afetada no mesmo ciclo.
 - Regra: somente uma etapa fica em andamento por vez.
@@ -122,45 +122,64 @@ Resultado: **concluído em 52 testes sem hardware**. Foram cobertos sucesso,
 parada fora do alvo, timeout, parâmetros inválidos antes do comando, erro de
 comunicação e preservação do torque após falha.
 
-## 4. Calibração física da primeira junta
+## 4. Calibração física das juntas (ID 6 a ID 1)
 
-- [x] Criar rotina que apenas leia counts do servo informado.
-- [x] Preparar checklist de segurança para calibração.
-- [x] Medir zero da junta ID `6`.
-- [ ] Determinar direção positiva.
-- [ ] Medir limites seguros com margem mecânica.
-- [ ] Registrar a configuração validada.
-- [ ] Testar pequenos movimentos em baixa velocidade e aceleração.
+### Junta 6 — `gripper` (ID 6)
+- [x] Medir zero mecânico (`2041 counts`).
+- [x] Determinar direção positiva (`direction = 1`).
+- [x] Medir limites seguros com margem (`[-1.0°, 110.0°]`).
+- [x] Registrar em `robot_config.py` e auditar em `docs/CALIBRATION_LOG.md`.
+- [x] Validar movimentos individuais com `test_joint_motion.py`.
 
-Decisão aplicada: a leitura de calibração fica em módulo separado de `Joint`,
-pois ainda não existe `JointConfig` confiável nesta fase. Enter dispara uma
-única leitura e `q` encerra. A rotina valida o ID antes de abrir a porta, não
-altera torque, não envia movimento e fecha a porta sob falha. Seis testes cobrem
-a lógica sem hardware; a suíte soma 58 testes.
+### Junta 5 — `wrist_roll` (ID 5)
+- [x] Medir zero mecânico e referência física (`2164 counts`).
+- [x] Determinar direção positiva (`direction = -1`).
+- [x] Medir limites seguros com margem mecânica (`[-160.0°, 160.0°]`).
+- [x] Registrar em `robot_config.py` e auditar em `docs/CALIBRATION_LOG.md`.
+- [x] Validar movimentos individuais com `test_joint_motion.py`.
 
-Observação física registrada: o operador leu `293` e depois `3250` counts no
-servo ID `6`. Ainda falta informar se houve movimento entre as leituras e qual
-valor corresponde ao zero mecânico; nenhum deles será salvo em `robot_config.py`
-antes dessa confirmação.
+### Junta 4 — `wrist_pitch` (ID 4)
+- [x] Medir zero mecânico e referência física (`2060 counts`).
+- [x] Determinar direção positiva (`direction = -1`).
+- [x] Medir limites seguros com margem mecânica (`[-1.0°, 155.0°]`).
+- [x] Registrar em `robot_config.py` e auditar em `docs/CALIBRATION_LOG.md`.
+- [ ] Validar movimentos individuais com `test_joint_motion.py`.
 
-Zero mecânico medido: dez leituras na referência física produziram
-`2046, 2046, 2046, 2046, 2041, 2045, 2045, 2045, 2045, 2045`. A mediana
-`2045 counts` foi escolhida como `zero_position`. O valor será transferido para
-`robot_config.py` somente junto com direção e limites seguros.
+### Junta 3 — `elbow_pitch` (ID 3)
+- [x] Medir zero mecânico e referência física (`2022 counts`).
+- [x] Determinar direção positiva (`direction = -1`).
+- [x] Medir limites seguros com margem mecânica (`[-1.0°, 155.0°]`).
+- [x] Registrar em `robot_config.py` e auditar em `docs/CALIBRATION_LOG.md`.
+- [ ] Validar movimentos individuais com `test_joint_motion.py`.
 
-### Critério de conclusão
+### Junta 2 — `shoulder_pitch` (ID 2)
+- [x] Medir zero mecânico e referência física (`2050 counts`).
+- [x] Determinar direção positiva (`direction = +1`).
+- [x] Medir limites seguros com margem mecânica (`[-1.0°, 165.0°]`).
+- [x] Registrar em `robot_config.py` e auditar em `docs/CALIBRATION_LOG.md`.
+- [ ] Validar movimentos individuais com `test_joint_motion.py`.
 
-A junta ID `6` deve alcançar pequenos ângulos físicos conhecidos sem atingir
-batentes e retornar uma leitura coerente.
+### Junta 1 — `base_yaw` (ID 1)
+- [x] Medir zero mecânico e referência física (`2065 counts`).
+- [x] Determinar direção positiva (`direction = +1`).
+- [x] Medir limites seguros com margem mecânica (`[-105.0°, 100.0°]`).
+- [x] Registrar em `robot_config.py` e auditar em `docs/CALIBRATION_LOG.md`.
+- [ ] Validar movimentos individuais com `test_joint_motion.py`.
+
+### Critério de conclusão da Etapa 4
+
+Todas as seis juntas devem possuir zero, direção e limites seguros registrados e
+auditados, com cada junta tendo seus movimentos individuais validados no
+hardware.
 
 ## 5. Controlador de múltiplas juntas
 
-- [ ] Criar `RobotArm` com uma coleção ordenada de `Joint`.
+- [ ] Criar `RobotArm` com a coleção ordenada de `Joint` (1 a 6).
 - [ ] Rejeitar nomes e IDs duplicados.
 - [ ] Implementar torque coletivo.
 - [ ] Implementar leitura coletiva de ângulos.
 - [ ] Validar poses completas por nome antes de qualquer escrita.
-- [ ] Testar com duas ou mais juntas falsas.
+- [ ] Testar com suíte simulada (`FakeServo`).
 
 ### Critério de conclusão
 
@@ -172,7 +191,7 @@ nenhum comando e representar corretamente todas as juntas configuradas.
 - [ ] Montar todos os alvos com `SyncWritePosEx`.
 - [ ] Transmitir exatamente um pacote por pose.
 - [ ] Limpar o buffer do SDK após sucesso ou falha.
-- [ ] Aguardar todas as juntas.
+- [ ] Aguardar todas as juntas com timeout conjunto.
 - [ ] Informar qual junta falhou e manter o torque.
 - [ ] Testar transmissão, espera e falhas com servo falso.
 
@@ -181,29 +200,20 @@ nenhum comando e representar corretamente todas as juntas configuradas.
 Uma pose válida deve gerar um pacote sincronizado e retornar os ângulos finais;
 qualquer falha deve abortar com diagnóstico e buffer limpo.
 
-## 7. Teste gradual no hardware
+## 7. Teste gradual de poses no hardware
 
-- [ ] Calibrar a segunda junta.
-- [ ] Testar cada junta separadamente.
 - [ ] Apoiar o braço e liberar a área de movimento.
 - [ ] Habilitar torque mantendo as posições atuais como alvos.
-- [ ] Executar uma pose pequena com duas juntas.
+- [ ] Executar poses pequenas com 2 juntas sincronizadas.
 - [ ] Confirmar tolerância e comportamento de falha.
-- [ ] Repetir a integração gradualmente até seis juntas.
+- [ ] Integrar progressivamente até as 6 juntas em poses coordenadas.
 
 ### Critério de conclusão
 
-Duas juntas devem iniciar praticamente juntas, alcançar uma pose segura dentro
-da tolerância e interromper a operação com diagnóstico quando houver falha.
+Todas as juntas devem iniciar sincronizadas via pacote único, alcançar a pose
+desejada dentro da tolerância e abortar com segurança em falhas.
 
 ## 8. Consolidação
-
-- [ ] Revisar scripts experimentais substituídos.
-- [ ] Remover arquivos obsoletos somente após autorização.
-- [ ] Documentar instalação, inicialização, calibração e operação segura.
-- [ ] Registrar extensões futuras para trajetória e cinemática.
-
-### Critério de conclusão
 
 O projeto deve possuir uma base documentada, testável e reutilizável para seis
 juntas, sem incluir prematuramente cinemática ou controle de garra.

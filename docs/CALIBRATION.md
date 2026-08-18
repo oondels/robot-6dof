@@ -101,12 +101,19 @@ isolado `2041` não desloca a mediana. As leituras anteriores `293` e `3250` nã
 serão usadas na configuração porque suas posições físicas não foram associadas
 ao zero.
 
-O valor ainda não foi adicionado a `robot_config.py`: primeiro serão medidos
-direção e limites, para que `JointConfig` seja criada completa e validada em uma
-única mudança.
+## Registro da sessão de limites seguros
+
+Com a junta posicionada nos limites operacionais, o operador informou:
+
+- **Zero e limite inferior**: referência de fechamento em `2041 counts` com margem de repouso (`min_angle = -1.0°`).
+- **Sentido positivo**: a abertura aumenta os counts (`direction = 1`).
+- **Batente físico máximo observado**: $\approx 3545\text{ counts}$.
+- **Limite superior seguro escolhido**: `3310 counts` (com margem de ~235 counts antes do batente).
+- **Faixa angular calibrada**: `[-1.0°, 110.0°]`.
+
+O histórico completo de medições e decisões está detalhado em [`docs/CALIBRATION_LOG.md`](CALIBRATION_LOG.md).
 
 ## Estado atual
 
-A ferramenta e seus testes estão concluídos. O zero mecânico foi medido como
-`2045 counts`; direção e limites permanecem pendentes. O assistente não
-executou comandos no hardware.
+A primeira junta (`gripper`, ID `6`) está com configuração calibrada e registrada em `robot_config.py`. Os testes sem hardware continuam passando.
+

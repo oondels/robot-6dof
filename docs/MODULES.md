@@ -19,6 +19,18 @@ Ferramenta interativa para a calibração anterior a `JointConfig`.
 Os argumentos padrão são servo ID `6`, `/dev/ttyUSB0` e `1_000_000` baud. O
 módulo não escreve registradores, não altera torque e não envia movimento.
 
+### `calibration/test_joint_motion.py`
+
+Ferramenta interativa e supervisionada para teste de pequenos movimentos em uma junta calibrada.
+
+| Função | Responsabilidade |
+| --- | --- |
+| `find_joint_config()` | localiza a `JointConfig` pelo nome ou ID em `robot_config.py` |
+| `run_motion_test()` | gerencia checklist, habilitação/desabilitação de torque e execução de `Joint.move()` |
+| `main()` | abre a porta serial, instância a junta e executa o teste |
+
+Exige confirmação explícita do operador antes de ligar torque e fecha a porta serial em `finally`.
+
 ### `main.py`
 
 Responsabilidade: montar os objetos e gerenciar o ciclo de vida da porta.

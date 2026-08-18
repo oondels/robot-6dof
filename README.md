@@ -40,14 +40,12 @@ porta serial.
 
 ## Leitura rápida
 
-- [Arquitetura](docs/ARCHITECTURE.md): responsabilidades, fluxos e modelo
-  angular.
-- [Referência dos módulos](docs/MODULES.md): função e API de cada arquivo do
-  projeto.
-- [Segurança, calibração e testes](docs/SAFETY_AND_TESTING.md): cuidados com o
-  hardware, estratégia de testes e limitações.
-- [Calibração da primeira junta](docs/CALIBRATION.md): ferramenta de leitura,
-  checklist físico e medições pendentes.
+- [Guia de comandos e testes](docs/COMMANDS_AND_TESTING_GUIDE.md): execução de testes, ferramentas de calibração e operação.
+- [Arquitetura](docs/ARCHITECTURE.md): responsabilidades, fluxos e modelo angular.
+- [Referência dos módulos](docs/MODULES.md): função e API de cada arquivo do projeto.
+- [Histórico e auditoria de calibração](docs/CALIBRATION_LOG.md): parâmetros físicos validados de cada junta.
+- [Segurança, calibração e testes](docs/SAFETY_AND_TESTING.md): cuidados com o hardware e limitações.
+- [Calibração da primeira junta](docs/CALIBRATION.md): procedimentos de medição física.
 - [Plano de evolução](PLAN.md): arquitetura pretendida até múltiplas juntas.
 - [Tarefas e progresso](TASKS.md): etapa atual e critérios de conclusão.
 

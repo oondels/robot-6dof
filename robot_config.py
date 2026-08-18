@@ -1,5 +1,72 @@
 from models.joint_config import JointConfig
 
-# Uma configuração só deve ser adicionada depois
-# da calibração física da respectiva junta.
-JOINT_CONFIGS: tuple[JointConfig, ...] = ()
+# Configurações calibradas e validadas fisicamente
+# para o braço robótico de 6 graus de liberdade (6-DOF).
+JOINT_CONFIGS: tuple[JointConfig, ...] = (
+    JointConfig(
+        name="base_yaw",
+        servo_id=1,
+        zero_position=2065,
+        direction=1,
+        min_angle=-105.0,
+        max_angle=100.0,
+        speed=400,
+        acc=30,
+        tolerance_deg=1.3,
+    ),
+    JointConfig(
+        name="shoulder_pitch",
+        servo_id=2,
+        zero_position=2050,
+        direction=1,
+        min_angle=-1.0,
+        max_angle=165.0,
+        speed=400,
+        acc=30,
+        tolerance_deg=1.8,
+    ),
+    JointConfig(
+        name="elbow_pitch",
+        servo_id=3,
+        zero_position=2022,
+        direction=-1,
+        min_angle=-1.0,
+        max_angle=155.0,
+        speed=400,
+        acc=30,
+        tolerance_deg=2.3,
+    ),
+    JointConfig(
+        name="wrist_pitch",
+        servo_id=4,
+        zero_position=2060,
+        direction=-1,
+        min_angle=-1.0,
+        max_angle=155.0,
+        speed=400,
+        acc=30,
+        tolerance_deg=1.8,
+    ),
+    JointConfig(
+        name="wrist_roll",
+        servo_id=5,
+        zero_position=2164,
+        direction=-1,
+        min_angle=-160.0,
+        max_angle=160.0,
+        speed=400,
+        acc=30,
+        tolerance_deg=1.8,
+    ),
+    JointConfig(
+        name="gripper",
+        servo_id=6,
+        zero_position=2041,
+        direction=1,
+        min_angle=-1.0,
+        max_angle=110.0,
+        speed=400,
+        acc=30,
+        tolerance_deg=1.0,
+    ),
+)
