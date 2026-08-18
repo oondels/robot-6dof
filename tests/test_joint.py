@@ -179,6 +179,54 @@ class JointTestCase(unittest.TestCase):
 
         self.assertFalse(self.joint.is_moving())
 
+    def test_calculates_absolute_position_error(
+        self,
+    ) -> None:
+        self.assertEqual(
+            self.joint.position_error(
+                target_position=2560,
+                current_position=2550,
+            ),
+            10,
+        )
+
+        self.assertEqual(
+            self.joint.position_error(
+                target_position=2550,
+                current_position=2560,
+            ),
+            10,
+        )
+
+    def test_accepts_position_at_tolerance_limit(
+        self,
+    ) -> None:
+        self.assertTrue(
+            self.joint.is_within_tolerance(
+                target_position=2560,
+                current_position=2549,
+            )
+        )
+
+    def test_rejects_position_outside_tolerance(
+        self,
+    ) -> None:
+        self.assertFalse(
+            self.joint.is_within_tolerance(
+                target_position=2560,
+                current_position=2548,
+            )
+        )
+
+    def test_position_error_rejects_non_integer(
+        self,
+    ) -> None:
+        with self.assertRaises(TypeError):
+            self.joint.position_error(
+                target_position=2560.0,
+                current_position=2550,
+            )
+
 
 if __name__ == "__main__":
     unittest.main()

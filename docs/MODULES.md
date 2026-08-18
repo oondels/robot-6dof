@@ -97,6 +97,8 @@ Métodos públicos atuais:
 | `is_torque_enabled()` | consulta o registrador de torque |
 | `angle_to_position()` | delega a `JointConfig` |
 | `position_to_angle()` | delega a `JointConfig` |
+| `position_error()` | calcula erro absoluto entre alvo e posição atual |
+| `is_within_tolerance()` | compara o erro com `config.tolerance_counts` |
 | `command()` | envia o alvo e retorna os counts, sem aguardar |
 
 Método interno:
@@ -169,7 +171,8 @@ Eles não descrevem o hardware real.
 ### `tests/test_joint.py`
 
 Testa construção, propriedades delegadas, leitura, conversão, direção
-invertida, torque, estado de movimento e comando não bloqueante.
+invertida, torque, estado de movimento, comando não bloqueante, erro de posição
+e limite de tolerância.
 
 ### `tests/test_fake_servo.py`
 

@@ -205,6 +205,21 @@ No snapshot documentado, `Joint.command(angle, speed, acc)`:
 O método não lê a posição nem consulta `ReadMoving`. A confirmação do SDK
 significa que o comando foi recebido, não que a meta foi alcançada.
 
+### Comparação de chegada
+
+`Joint.position_error(target, current)` calcula o erro absoluto em counts.
+`Joint.is_within_tolerance(target, current)` compara esse erro com
+`config.tolerance_counts`:
+
+```text
+erro = abs(target_position - current_position)
+chegou numericamente = erro <= tolerance_counts
+```
+
+As duas operações são puras: recebem posições já conhecidas e não acessam o
+servo. Estar dentro da tolerância é uma condição necessária para concluir um
+movimento, mas o futuro `move()` também observará o estado `moving`.
+
 ## Arquitetura planejada, ainda não implementada
 
 ### Movimento individual robusto

@@ -134,6 +134,37 @@ class Joint:
     def position_to_angle(self, position: int) -> float:
         return self.config.position_to_angle(position)
 
+    @staticmethod
+    def position_error(
+        target_position: int,
+        current_position: int,
+    ) -> int:
+        if type(target_position) is not int:
+            raise TypeError(
+                "target_position deve ser inteiro"
+            )
+
+        if type(current_position) is not int:
+            raise TypeError(
+                "current_position deve ser inteiro"
+            )
+
+        return abs(
+            target_position - current_position
+        )
+
+    def is_within_tolerance(
+        self,
+        target_position: int,
+        current_position: int,
+    ) -> bool:
+        error = self.position_error(
+            target_position,
+            current_position,
+        )
+
+        return error <= self.config.tolerance_counts
+
     def command(
         self,
         angle: float,

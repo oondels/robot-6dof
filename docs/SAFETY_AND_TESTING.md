@@ -74,6 +74,10 @@ Internamente, a tolerância angular é arredondada para counts e nunca fica abai
 de um count. Essa tolerância numérica não substitui margens mecânicas de
 segurança.
 
+Uma posição dentro da tolerância não prova, isoladamente, que o movimento foi
+concluído com segurança. A conclusão futura combinará posição, `ReadMoving` e
+timeout.
+
 Esses limites validam o formato do comando; os limites mecânicos reais devem
 ser mais restritivos e específicos para cada junta.
 
