@@ -74,6 +74,18 @@ juntas e garante fechamento da porta com `finally`.
 No estado atual ele apenas lê e mostra posição/ângulo. Com `JOINT_CONFIGS` vazio,
 falha antes de criar `PortHandler`, impedindo acesso acidental ao hardware.
 
+### `calibration.read_joint_position`
+
+É uma ferramenta anterior à criação de `JointConfig`. Ela acessa
+`ReadPosSpeed` diretamente para descobrir counts brutos, pois zero, direção e
+limites ainda são desconhecidos. Cada Enter gera uma leitura; nenhum método de
+torque ou escrita de posição é chamado.
+
+O ID é validado antes da abertura da porta. A comunicação passa por
+`validate_result` e `finally` fecha a porta em sucesso ou falha. Essa separação
+impede que valores de calibração inventados sejam exigidos apenas para observar
+o encoder.
+
 ### `utils.validation`
 
 Transforma os dois canais de erro do SDK em exceções Python:

@@ -5,6 +5,20 @@ de `external/` é de terceiros e não é tratado como módulo da aplicação.
 
 ## Entrada e configuração
 
+### `calibration/read_joint_position.py`
+
+Ferramenta interativa para a calibração anterior a `JointConfig`.
+
+| Função | Responsabilidade |
+| --- | --- |
+| `validate_servo_id()` | aceita somente IDs individuais `0..253` |
+| `read_position()` | chama `ReadPosSpeed` e retorna counts validados |
+| `run_reader()` | lê uma vez por Enter e encerra com `q` |
+| `main()` | abre SDK/porta e garante fechamento com `finally` |
+
+Os argumentos padrão são servo ID `6`, `/dev/ttyUSB0` e `1_000_000` baud. O
+módulo não escreve registradores, não altera torque e não envia movimento.
+
 ### `main.py`
 
 Responsabilidade: montar os objetos e gerenciar o ciclo de vida da porta.
@@ -191,6 +205,11 @@ preservação de torque.
 
 Testa consumo das sequências e permanência no último estado depois que uma fila
 simulada termina.
+
+### `tests/test_read_joint_position.py`
+
+Testa leitura bruta sem escritas, ID inválido, erro de comunicação, interação
+por Enter e fechamento da porta quando a rotina falha.
 
 ### `tests/__init__.py`
 

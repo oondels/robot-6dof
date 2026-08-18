@@ -117,6 +117,11 @@ que atravessem a transição do encoder entre `4095` e `0`.
 A calibração será realizada uma junta por vez e não buscará batentes de forma
 automática:
 
+Uma ferramenta separada de `Joint` lerá counts brutos antes de existir uma
+configuração física confiável. Ela não alterará torque nem enviará movimento;
+cada leitura dependerá de uma ação explícita do operador e a porta será fechada
+em falhas.
+
 1. Apoiar mecanicamente o braço e desabilitar o torque.
 2. Posicionar manualmente a junta no zero físico e registrar os counts.
 3. Fazer um pequeno deslocamento no sentido físico positivo para descobrir a

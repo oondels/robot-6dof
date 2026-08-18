@@ -59,6 +59,11 @@ A calibração será manual e não buscará batentes automaticamente:
 
 Intervalos que atravessam a volta do encoder não são aceitos atualmente.
 
+O procedimento operacional completo e o comando do leitor estão em
+[`CALIBRATION.md`](CALIBRATION.md). O leitor não muda torque: antes de mover a
+junta manualmente, o operador deve garantir apoio mecânico e torque desligado.
+Resistência inesperada exige interrupção e corte de alimentação, nunca força.
+
 ## Limites operacionais conhecidos
 
 | Parâmetro | Intervalo aceito |
@@ -154,6 +159,8 @@ prova que o servo chegou ao destino.
   uma junta sustentando carga permanece explícita.
 - Não existe `RobotArm` nem movimento sincronizado.
 - `JOINT_CONFIGS` está vazio porque nenhuma calibração física foi registrada.
+- O leitor de calibração está implementado, mas ainda não produziu medições do
+  hardware real.
 - Mensagens operacionais usam `print`, não logging estruturado.
 - Não há teste integrado com porta e servo reais.
 - Não há compensação de gravidade ou detecção de colisão.

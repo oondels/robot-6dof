@@ -23,12 +23,13 @@ cinemática ainda não estão implementados.
 | Comando individual não bloqueante | Implementado e testado |
 | Simulação de movimento | Implementada no `FakeServo` |
 | Movimento individual com timeout | Implementado e testado |
+| Leitor de counts para calibração | Implementado e testado |
 | Controle de múltiplas juntas | Planejado |
 | Movimento simultâneo com SyncWrite | Planejado |
 | Cinemática direta/inversa | Fora do escopo atual |
 | Configuração física real | Pendente de calibração |
 
-A suíte atual contém **52 testes sem hardware**. `robot_config.py` mantém
+A suíte atual contém **58 testes sem hardware**. `robot_config.py` mantém
 `JOINT_CONFIGS` vazio; por isso, `main.py` recusa a execução antes de abrir a
 porta serial.
 
@@ -45,6 +46,8 @@ porta serial.
   projeto.
 - [Segurança, calibração e testes](docs/SAFETY_AND_TESTING.md): cuidados com o
   hardware, estratégia de testes e limitações.
+- [Calibração da primeira junta](docs/CALIBRATION.md): ferramenta de leitura,
+  checklist físico e medições pendentes.
 - [Plano de evolução](PLAN.md): arquitetura pretendida até múltiplas juntas.
 - [Tarefas e progresso](TASKS.md): etapa atual e critérios de conclusão.
 
@@ -54,6 +57,8 @@ porta serial.
 robotics/
 ├── main.py                    # composição e entrada segura da aplicação
 ├── robot_config.py            # configurações calibradas das juntas
+├── calibration/
+│   └── read_joint_position.py # leitura manual de counts, sem movimento
 ├── models/
 │   ├── Joint.py               # operação de uma junta no hardware
 │   └── joint_config.py        # calibração, limites e conversões
@@ -63,7 +68,8 @@ robotics/
 │   ├── fake_servo.py          # substituto do servo real
 │   ├── test_joint.py
 │   ├── test_joint_config.py
-│   └── test_fake_servo.py
+│   ├── test_fake_servo.py
+│   └── test_read_joint_position.py
 ├── docs/                      # documentação técnica e operacional
 ├── PLAN.md                    # decisões e arquitetura futura
 └── TASKS.md                   # checklist de desenvolvimento

@@ -2,10 +2,10 @@
 
 ## Estado atual
 
-- Etapa atual: **nenhuma; Etapa 3 concluída e Etapa 4 ainda não iniciada**.
+- Etapa atual: **4 — Calibração física da primeira junta**.
 - Última etapa concluída: **3 — Movimento individual robusto**.
-- Snapshot documentado: **52 testes passando**; `Joint.command()` envia sem
-  aguardar e `Joint.move()` envia e aguarda com tolerância e timeout.
+- Snapshot documentado: **58 testes passando**; o leitor de calibração está
+  implementado, mas nenhuma medição física foi realizada.
 - Regra inviolável: toda decisão, mudança aplicada ou evolução validada deve
   atualizar a documentação afetada no mesmo ciclo.
 - Regra: somente uma etapa fica em andamento por vez.
@@ -124,13 +124,19 @@ comunicação e preservação do torque após falha.
 
 ## 4. Calibração física da primeira junta
 
-- [ ] Criar rotina que apenas leia counts do servo informado.
-- [ ] Preparar checklist de segurança para calibração.
+- [x] Criar rotina que apenas leia counts do servo informado.
+- [x] Preparar checklist de segurança para calibração.
 - [ ] Medir zero da junta ID `6`.
 - [ ] Determinar direção positiva.
 - [ ] Medir limites seguros com margem mecânica.
 - [ ] Registrar a configuração validada.
 - [ ] Testar pequenos movimentos em baixa velocidade e aceleração.
+
+Decisão aplicada: a leitura de calibração fica em módulo separado de `Joint`,
+pois ainda não existe `JointConfig` confiável nesta fase. Enter dispara uma
+única leitura e `q` encerra. A rotina valida o ID antes de abrir a porta, não
+altera torque, não envia movimento e fecha a porta sob falha. Seis testes cobrem
+a lógica sem hardware; a suíte soma 58 testes.
 
 ### Critério de conclusão
 
