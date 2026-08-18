@@ -39,7 +39,7 @@ class Joint:
         self._validate_configuration(
             servo_id=servo_id,
             servo=servo,
-            name=name.strip(),
+            name=name,
             min_pos=min_pos,
             max_pos=max_pos,
             speed=speed,
@@ -48,7 +48,7 @@ class Joint:
 
         self.servo_id = servo_id
         self.servo = servo
-        self.name = name
+        self.name = name.strip()
         self.min_pos = min_pos
         self.max_pos = max_pos
         self.speed = speed
