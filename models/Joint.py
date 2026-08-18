@@ -1,6 +1,6 @@
-from scservo_sdk import *
 from typing import Any
 from utils.validation import validate_result
+
 
 DEFAULT_SPEED = 1000
 DEFAULT_ACC = 100
@@ -10,6 +10,9 @@ MAX_SPEED = 3400
 
 MIN_ACC = 0
 MAX_ACC = 254
+
+MIN_SERVO_ID = 0
+MAX_SERVO_ID = 253
 
 MIN_SERVO_POSITION = 0
 MAX_SERVO_POSITION = 4095
@@ -36,7 +39,7 @@ class Joint:
         self._validate_configuration(
             servo_id=servo_id,
             servo=servo,
-            name=name,
+            name=name.strip(),
             min_pos=min_pos,
             max_pos=max_pos,
             speed=speed,
@@ -61,23 +64,28 @@ class Joint:
         speed: int,
         acc: int,
     ) -> None:
-        if not isinstance(servo_id, int):
+        if type(servo_id) is not int:
             raise TypeError("servo_id deve ser um número inteiro")
 
-        if servo_id < 0:
-            raise ValueError("servo_id não pode ser negativo")
+        if not MIN_SERVO_ID <= servo_id <= MAX_SERVO_ID:
+            raise ValueError(
+                f"servo_id deve estar entre "
+                f"{MIN_SERVO_ID} e {MAX_SERVO_ID}"
+            )
 
         if servo is None:
-            raise ValueError("Servo não pode ser None")
+            raise ValueError("servo não pode ser None")
 
         if not isinstance(name, str):
-            raise TypeError("Name deve ser uma string")
+            raise TypeError("name deve ser uma string")
 
         if not name.strip():
-            raise ValueError("Name não pode estar vazio")
+            raise ValueError("name não pode estar vazio")
 
-        if not isinstance(min_pos, int) or not isinstance(max_pos, int):
-            raise TypeError("min_pos e max_pos devem ser números inteiros")
+        if type(min_pos) is not int or type(max_pos) is not int:
+            raise TypeError(
+                "min_pos e max_pos devem ser números inteiros"
+            )
 
         if not MIN_SERVO_POSITION <= min_pos <= MAX_SERVO_POSITION:
             raise ValueError(
@@ -94,21 +102,28 @@ class Joint:
         if min_pos >= max_pos:
             raise ValueError("min_pos deve ser menor que max_pos")
 
+        Joint._validate_speed(speed)
+        Joint._validate_acceleration(acc)
+
     @staticmethod
     def _validate_speed(speed: int) -> None:
-        if not isinstance(speed, int):
+        if type(speed) is not int:
             raise TypeError("speed deve ser um número inteiro")
 
         if not MIN_SPEED <= speed <= MAX_SPEED:
-            raise ValueError(f"speed deve estar entre {MIN_SPEED} e {MAX_SPEED}")
-
+            raise ValueError(
+                f"speed deve estar entre {MIN_SPEED} e {MAX_SPEED}"
+            )
+    
     @staticmethod
     def _validate_acceleration(acc: int) -> None:
-        if not isinstance(acc, int):
+        if type(acc) is not int:
             raise TypeError("acc deve ser um número inteiro")
 
         if not MIN_ACC <= acc <= MAX_ACC:
-            raise ValueError(f"acc deve estar entre {MIN_ACC} e {MAX_ACC}")
+            raise ValueError(
+                f"acc deve estar entre {MIN_ACC} e {MAX_ACC}"
+            )
 
     def current_position(self) -> int:
         position, _, result, error = self.servo.ReadPosSpeed(self.servo_id)
