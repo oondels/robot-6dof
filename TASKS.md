@@ -2,10 +2,9 @@
 
 ## Estado atual
 
-- Etapa atual: **4 — Calibração física de todas as juntas (ID 6 a ID 1)**.
-- Sub-etapa ativa: **Calibração da Junta ID 5**.
-- Última junta concluída: **Junta ID 6 (gripper)**.
-- Snapshot documentado: **61 testes passando**; junta ID 6 calibrada e validada no hardware com movimentos controlados.
+- Etapa atual: **5 — Controlador de múltiplas juntas (`RobotArm`)**.
+- Última etapa concluída: **4 — Calibração física das juntas (ID 6 a ID 1)**.
+- Snapshot documentado: **61 testes passando**; todas as 6 juntas calibradas e registradas.
 - Regra inviolável: toda decisão, mudança aplicada ou evolução validada deve
   atualizar a documentação afetada no mesmo ciclo.
 - Regra: somente uma etapa fica em andamento por vez.
