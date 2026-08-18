@@ -77,7 +77,7 @@ class RobotArmTestCase(unittest.TestCase):
 
     def test_rejects_duplicate_joint_names(self) -> None:
         duplicate_config = JointConfig(
-            name="BASE_YAW",  # Mesmo nome em maiúsculas
+            name="BASE_YAW",
             servo_id=99,
             zero_position=2048,
             direction=1,
@@ -95,7 +95,7 @@ class RobotArmTestCase(unittest.TestCase):
     def test_rejects_duplicate_servo_ids(self) -> None:
         duplicate_id_config = JointConfig(
             name="outra_junta",
-            servo_id=1,  # Mesmo ID 1 da joint1
+            servo_id=1,
             zero_position=2048,
             direction=1,
             min_angle=-90.0,
@@ -156,7 +156,6 @@ class RobotArmTestCase(unittest.TestCase):
             "shoulder_pitch": 30.0,
             "gripper": 50.0,
         }
-        # Não deve lançar exceção
         self.arm.validate_pose(valid_pose)
 
     def test_validate_pose_rejects_non_dict(self) -> None:
@@ -167,7 +166,6 @@ class RobotArmTestCase(unittest.TestCase):
         incomplete_pose = {
             "base_yaw": 45.0,
             "shoulder_pitch": 30.0,
-            # 'gripper' faltando
         }
         with self.assertRaisesRegex(
             ValueError,
@@ -180,7 +178,7 @@ class RobotArmTestCase(unittest.TestCase):
             "base_yaw": 45.0,
             "shoulder_pitch": 30.0,
             "gripper": 50.0,
-            "camera_tilt": 10.0,  # Não existe
+            "camera_tilt": 10.0,
         }
         with self.assertRaisesRegex(
             ValueError,
@@ -192,13 +190,122 @@ class RobotArmTestCase(unittest.TestCase):
         invalid_angle_pose = {
             "base_yaw": 45.0,
             "shoulder_pitch": 30.0,
-            "gripper": 150.0,  # Máximo é 100.0
+            "gripper": 150.0,
         }
         with self.assertRaisesRegex(
             ValueError,
             "gripper: ângulo 150.0° fora do limite",
         ):
             self.arm.validate_pose(invalid_angle_pose)
+
+    def test_command_pose_transmits_sync_packet_and_clears_buffer(self) -> None:
+        pose = {
+            "base_yaw": 45.0,
+            "shoulder_pitch": 30.0,
+            "gripper": 50.0,
+        }
+
+        targets = self.arm.command_pose(pose)
+
+        self.assertEqual(
+            targets,
+            {
+                "base_yaw": 2560,
+                "shoulder_pitch": 2389,
+                "gripper": 2617,
+            },
+        )
+        self.assertEqual(len(self.servo.groupSyncWrite.tx_history), 1)
+        self.assertEqual(len(self.servo.groupSyncWrite.data_dict), 0)
+        self.assertEqual(
+            set(self.servo.groupSyncWrite.tx_history[0].keys()),
+            {1, 2, 3},
+        )
+
+    def test_command_pose_propagates_communication_error(self) -> None:
+        self.servo.communication_result = -1
+        pose = {
+            "base_yaw": 0.0,
+            "shoulder_pitch": 0.0,
+            "gripper": 0.0,
+        }
+
+        with self.assertRaisesRegex(
+            RuntimeError,
+            "envio de pose sincronizada",
+        ):
+            self.arm.command_pose(pose)
+
+        self.assertEqual(len(self.servo.groupSyncWrite.data_dict), 0)
+
+    def test_move_pose_validates_wait_parameters(self) -> None:
+        pose = {"base_yaw": 0.0, "shoulder_pitch": 0.0, "gripper": 0.0}
+
+        for timeout in (-1.0, 0, float("inf"), float("nan"), "invalid"):
+            with self.subTest(timeout=timeout):
+                with self.assertRaises((ValueError, TypeError)):
+                    self.arm.move_pose(pose, timeout=timeout)  # type: ignore
+
+        for poll in (-1.0, 0, float("inf"), float("nan"), "invalid"):
+            with self.subTest(poll_interval=poll):
+                with self.assertRaises((ValueError, TypeError)):
+                    self.arm.move_pose(pose, poll_interval=poll)  # type: ignore
+
+    def test_move_pose_success(self) -> None:
+        # Simula chegada síncrona ao alvo para todas as 3 juntas
+        self.servo.queue_motion([2560], [0], servo_id=1)
+        self.servo.queue_motion([2389], [0], servo_id=2)
+        self.servo.queue_motion([2617], [0], servo_id=3)
+
+        pose = {
+            "base_yaw": 45.0,
+            "shoulder_pitch": 30.0,
+            "gripper": 50.0,
+        }
+
+        statuses = self.arm.move_pose(pose, timeout=1.0)
+
+        self.assertEqual(len(statuses), 3)
+        self.assertTrue(all(st.within_tolerance for st in statuses.values()))
+        self.assertEqual(statuses["base_yaw"].current_position, 2560)
+        self.assertEqual(statuses["shoulder_pitch"].current_position, 2389)
+        self.assertEqual(statuses["gripper"].current_position, 2617)
+
+    def test_move_pose_detects_joint_stopped_outside_tolerance(self) -> None:
+        # Junta 1 e 3 chegam, mas junta 2 para no meio do caminho com moving=0
+        self.servo.queue_motion([2560], [0], servo_id=1)
+        self.servo.queue_motion([2100], [0], servo_id=2)  # Alvo era 2389
+        self.servo.queue_motion([2617], [0], servo_id=3)
+
+        pose = {
+            "base_yaw": 45.0,
+            "shoulder_pitch": 30.0,
+            "gripper": 50.0,
+        }
+
+        with self.assertRaisesRegex(
+            RuntimeError,
+            "Pose falhou: junta 'shoulder_pitch' parou fora do alvo",
+        ):
+            self.arm.move_pose(pose, timeout=1.0)
+
+    def test_move_pose_raises_timeout_with_diagnostics(self) -> None:
+        # Junta 1 e 3 chegam, junta 2 continua moving=1 até estourar o prazo
+        self.servo.queue_motion([2560], [0], servo_id=1)
+        self.servo.queue_motion([2100, 2100, 2100], [1, 1, 1], servo_id=2)
+        self.servo.queue_motion([2617], [0], servo_id=3)
+
+        pose = {
+            "base_yaw": 45.0,
+            "shoulder_pitch": 30.0,
+            "gripper": 50.0,
+        }
+
+        with self.assertRaisesRegex(
+            TimeoutError,
+            "Timeout após 0.050s aguardando pose.*shoulder_pitch",
+        ):
+            self.arm.move_pose(pose, timeout=0.05, poll_interval=0.01)
 
 
 if __name__ == "__main__":

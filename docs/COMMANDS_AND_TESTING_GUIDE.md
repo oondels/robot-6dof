@@ -10,8 +10,9 @@ Este guia documenta e explica todos os comandos disponíveis no projeto para exe
 | :--- | :--- | :---: | :---: |
 | `python -m unittest discover -s tests -v` | Executa todos os testes unitários | ❌ Não (`FakeServo`) | ❌ Não |
 | `python -m calibration.read_joint_position --servo-id 6` | Leitura manual de counts brutos | ✅ Sim | ❌ Não (Passivo) |
-| `python -m calibration.test_joint_motion --joint gripper` | Teste de movimento supervisionado | ✅ Sim | ⚠️ Sim (Sob confirmação) |
-| `python main.py` | Leitura de status de todas as juntas | ✅ Sim | ❌ Não |
+| `python -m calibration.test_joint_motion --joint gripper` | Teste de movimento individual | ✅ Sim | ⚠️ Sim (Sob confirmação) |
+| `python -m calibration.test_arm_poses` | Teste de poses sincronizadas (SyncWrite) | ✅ Sim | ⚠️ Sim (Sob confirmação) |
+| `python main.py` | Leitura de status de todas as 6 juntas | ✅ Sim | ❌ Não |
 
 ---
 
@@ -25,11 +26,14 @@ python -m unittest discover -s tests -v
 ```
 - **O que faz:** Descobre e roda todos os arquivos de teste dentro da pasta `tests/`.
 - **Quando usar:** Antes e depois de qualquer alteração no código para garantir que nenhuma regressão foi introduzida.
-- **Saída esperada:** `Ran 61 tests ... OK`.
+- **Saída esperada:** `Ran 82 tests ... OK`.
 
 ### 1.2 Executar testes por módulo específico
 ```bash
-# Testa apenas a classe Joint (métodos de torque, leitura, comando e move)
+# Testa o controlador do braço completo (RobotArm, SyncWrite e poses)
+python -m unittest tests.test_robot_arm -v
+
+# Testa a classe Joint individual (torque, leitura, comando e move)
 python -m unittest tests.test_joint -v
 
 # Testa a configuração JointConfig (conversões graus <-> counts e limites)
@@ -38,11 +42,8 @@ python -m unittest tests.test_joint_config -v
 # Testa o servo simulado (FakeServo)
 python -m unittest tests.test_fake_servo -v
 
-# Testa o leitor passivo de calibração
-python -m unittest tests.test_read_joint_position -v
-
-# Testa a rotina de teste de movimento da junta
-python -m unittest tests.test_test_joint_motion -v
+# Testa a ferramenta de poses síncronas
+python -m unittest tests.test_test_arm_poses -v
 ```
 
 ---
@@ -96,6 +97,20 @@ python -m calibration.test_joint_motion --joint gripper --port /dev/ttyUSB0 --ba
 4. Permite digitar o ângulo desejado (ex: `15.0`, `30.0`, `0.0`).
 5. O método `Joint.move()` executa o comando e monitora até atingir a tolerância ou acusar timeout/erro.
 6. Ao digitar `q`, solicita confirmação para desabilitar o torque e fecha a porta serial.
+
+### 3.2 Teste de Poses Sincronizadas do Braço Completo (SyncWrite)
+
+Utilizada para testar movimentos coordenados de todas as 6 juntas ao mesmo tempo, disparando um único pacote serial síncrono.
+
+```bash
+python -m calibration.test_arm_poses [--port <PORT>] [--baudrate <BAUD>]
+```
+
+### Recursos da ferramenta:
+- Mostra a posição angular atual de todas as 6 juntas.
+- Pede confirmação antes de ligar o torque de todo o braço.
+- Permite escolher entre poses pré-programadas (`home`, `wave_small`) ou criar poses customizadas.
+- Transmite o comando via `SyncWrite` e monitora a chegada de todas as juntas simultaneamente.
 
 ---
 

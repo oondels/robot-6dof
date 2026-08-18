@@ -1,7 +1,10 @@
 from collections.abc import Sequence
+from math import isfinite
+from time import monotonic, sleep
 from typing import Any
 
-from models.Joint import Joint
+from models.Joint import Joint, MovementStatus
+from utils.validation import validate_result
 
 
 class RobotArm:
@@ -14,6 +17,7 @@ class RobotArm:
         self._joints_by_name: dict[str, Joint] = {
             joint.name.lower(): joint for joint in self._joints
         }
+        self._servo = self._joints[0].servo
 
     @property
     def joints(self) -> tuple[Joint, ...]:
@@ -84,8 +88,103 @@ class RobotArm:
 
         for name, angle in pose.items():
             joint = self._joints_by_name[name.strip().lower()]
-            # Valida limites através da JointConfig
             joint.config.angle_to_position(angle)
+
+    @staticmethod
+    def _validate_wait_parameter(parameter_name: str, value: float) -> None:
+        if isinstance(value, bool) or not isinstance(value, (int, float)):
+            raise TypeError(f"{parameter_name} deve ser um número")
+        if not isfinite(value):
+            raise ValueError(f"{parameter_name} deve ser finito")
+        if value <= 0:
+            raise ValueError(f"{parameter_name} deve ser maior que zero")
+
+    def command_pose(self, pose: dict[str, float]) -> dict[str, int]:
+        """Transmite uma pose síncrona para todas as juntas usando SyncWritePosEx."""
+        self.validate_pose(pose)
+
+        target_positions: dict[str, int] = {}
+        try:
+            self._servo.groupSyncWrite.clearParam()
+
+            for joint in self._joints:
+                angle = pose[joint.name]
+                target_position = joint.angle_to_position(angle)
+                target_positions[joint.name] = target_position
+
+                success = self._servo.SyncWritePosEx(
+                    joint.servo_id,
+                    target_position,
+                    joint.speed,
+                    joint.acc,
+                )
+                if not success:
+                    raise RuntimeError(
+                        f"Falha ao empacotar SyncWrite para a junta '{joint.name}' (ID {joint.servo_id})"
+                    )
+
+            result = self._servo.groupSyncWrite.txPacket()
+            validate_result(
+                self._servo,
+                result,
+                0,
+                "envio de pose sincronizada (SyncWrite)",
+            )
+        finally:
+            self._servo.groupSyncWrite.clearParam()
+
+        return target_positions
+
+    def move_pose(
+        self,
+        pose: dict[str, float],
+        timeout: float = 8.0,
+        poll_interval: float = 0.05,
+    ) -> dict[str, MovementStatus]:
+        """Transmite a pose e aguarda todas as juntas alcançarem a tolerância com timeout conjunto."""
+        self._validate_wait_parameter("timeout", timeout)
+        self._validate_wait_parameter("poll_interval", poll_interval)
+
+        target_positions = self.command_pose(pose)
+        deadline = monotonic() + timeout
+
+        while True:
+            all_within_tolerance = True
+            latest_statuses: dict[str, MovementStatus] = {}
+
+            for joint in self._joints:
+                target_pos = target_positions[joint.name]
+                status = joint.movement_status(target_pos)
+                latest_statuses[joint.name] = status
+
+                if not status.within_tolerance:
+                    all_within_tolerance = False
+
+            if all_within_tolerance:
+                return latest_statuses
+
+            # Verifica se alguma junta parou fora da tolerância
+            for joint in self._joints:
+                status = latest_statuses[joint.name]
+                if not status.within_tolerance and not status.moving:
+                    raise RuntimeError(
+                        f"Pose falhou: junta '{joint.name}' parou fora do alvo "
+                        f"(alvo={status.target_position}, posição={status.current_position}, "
+                        f"erro={status.position_error} counts, tolerância={joint.config.tolerance_counts} counts)"
+                    )
+
+            remaining_time = deadline - monotonic()
+            if remaining_time <= 0:
+                unreached = [
+                    f"{name} (erro={st.position_error} counts)"
+                    for name, st in latest_statuses.items()
+                    if not st.within_tolerance
+                ]
+                raise TimeoutError(
+                    f"Timeout após {timeout:.3f}s aguardando pose. Juntas que não alcançaram o alvo: {unreached}"
+                )
+
+            sleep(min(poll_interval, remaining_time))
 
     @staticmethod
     def _validate_unique_joints(joints: Sequence[Joint]) -> None:

@@ -2,9 +2,9 @@
 
 ## Estado atual
 
-- Etapa atual: **6 — Movimento simultâneo (`SyncWrite`)**.
-- Última etapa concluída: **5 — Controlador de múltiplas juntas (`RobotArm`)**.
-- Snapshot documentado: **74 testes passando**; `RobotArm` implementado e testado.
+- Etapa atual: **7 — Teste gradual de poses no hardware**.
+- Última etapa concluída: **6 — Movimento simultâneo (`SyncWrite`)**.
+- Snapshot documentado: **82 testes passando**; `SyncWritePosEx` e `move_pose` implementados e testados.
 - Regra inviolável: toda decisão, mudança aplicada ou evolução validada deve
   atualizar a documentação afetada no mesmo ciclo.
 - Regra: somente uma etapa fica em andamento por vez.
@@ -193,17 +193,24 @@ Resultado: **concluído em 13 novos testes (total de 74 testes passando)**.
 
 ## 6. Movimento simultâneo
 
-- [ ] Montar todos os alvos com `SyncWritePosEx`.
-- [ ] Transmitir exatamente um pacote por pose.
-- [ ] Limpar o buffer do SDK após sucesso ou falha.
-- [ ] Aguardar todas as juntas com timeout conjunto.
-- [ ] Informar qual junta falhou e manter o torque.
-- [ ] Testar transmissão, espera e falhas com servo falso.
+- [x] Montar todos os alvos com `SyncWritePosEx`.
+- [x] Transmitir exatamente um pacote por pose.
+- [x] Limpar o buffer do SDK após sucesso ou falha.
+- [x] Aguardar todas as juntas com timeout conjunto.
+- [x] Informar qual junta falhou e manter o torque.
+- [x] Testar transmissão, espera e falhas com servo falso.
+
+Decisão aplicada: `RobotArm.command_pose` empacota alvos validados via `SyncWritePosEx`,
+transmite um único pacote síncrono e limpa os buffers em `finally`. `RobotArm.move_pose`
+aguarda a convergência de todas as juntas e diagnostica paradas fora da tolerância ou
+timeout listando as juntas não alcançadas. Criada a ferramenta `calibration/test_arm_poses.py`.
 
 ### Critério de conclusão
 
 Uma pose válida deve gerar um pacote sincronizado e retornar os ângulos finais;
 qualquer falha deve abortar com diagnóstico e buffer limpo.
+
+Resultado: **concluído em 8 novos testes (total de 82 testes passando)**.
 
 ## 7. Teste gradual de poses no hardware
 
