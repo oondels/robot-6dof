@@ -138,6 +138,11 @@ pois ainda não existe `JointConfig` confiável nesta fase. Enter dispara uma
 altera torque, não envia movimento e fecha a porta sob falha. Seis testes cobrem
 a lógica sem hardware; a suíte soma 58 testes.
 
+Observação física registrada: o operador leu `293` e depois `3250` counts no
+servo ID `6`. Ainda falta informar se houve movimento entre as leituras e qual
+valor corresponde ao zero mecânico; nenhum deles será salvo em `robot_config.py`
+antes dessa confirmação.
+
 ### Critério de conclusão
 
 A junta ID `6` deve alcançar pequenos ângulos físicos conhecidos sem atingir

@@ -72,7 +72,22 @@ batentes; não serão os batentes físicos máximos.
 Os valores `2048`, `-90°` e `90°` usados nos testes são apenas exemplos e não
 podem ser copiados como calibração real.
 
+## Registro da primeira sessão física
+
+Foram recebidas duas leituras válidas do servo ID `6`:
+
+| Ordem | Posição lida | Posição física associada |
+| --- | ---: | --- |
+| 1 | 293 counts | aguardando confirmação do operador |
+| 2 | 3250 counts | aguardando confirmação do operador |
+
+Esses valores ainda não definem `zero_position`. É necessário confirmar se a
+junta foi movida entre as leituras e qual delas corresponde à referência física
+de `0°`. Se a junta não foi movida, a diferença deve ser investigada antes de
+qualquer calibração ou comando.
+
 ## Estado atual
 
-A ferramenta e seus testes estão concluídos. Nenhuma leitura do hardware foi
-executada pelo assistente e nenhum valor físico foi registrado ainda.
+A ferramenta e seus testes estão concluídos. O operador realizou duas leituras
+físicas, mas a relação delas com a posição mecânica ainda não foi confirmada. O
+assistente não executou comandos no hardware.
