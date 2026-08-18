@@ -53,6 +53,11 @@ Campos públicos:
 | `acc` | aceleração padrão do SDK |
 | `tolerance_deg` | tolerância angular em graus |
 
+Propriedade derivada:
+
+- `tolerance_counts`: converte `tolerance_deg` para a resolução do encoder e
+  garante o mínimo de um count.
+
 Métodos públicos:
 
 - `angle_to_position(angle) -> int`: valida o limite e converte graus em counts;

@@ -81,7 +81,6 @@ class JointConfigTestCase(unittest.TestCase):
                 max_angle=90,
             )
 
-
     def test_converts_angle_to_position(self) -> None:
         config = self.create_config()
 
@@ -98,7 +97,6 @@ class JointConfigTestCase(unittest.TestCase):
             3072,
         )
 
-
     def test_converts_angle_with_inverted_direction(self) -> None:
         config = self.create_config(direction=-1)
 
@@ -110,7 +108,6 @@ class JointConfigTestCase(unittest.TestCase):
             config.angle_to_position(90),
             1024,
         )
-
 
     def test_converts_position_to_angle(self) -> None:
         config = self.create_config()
@@ -127,7 +124,6 @@ class JointConfigTestCase(unittest.TestCase):
             config.position_to_angle(3072),
             90.0,
         )
-
 
     def test_angle_round_trip_respects_encoder_resolution(
         self,
@@ -146,20 +142,18 @@ class JointConfigTestCase(unittest.TestCase):
             delta=half_count_in_degrees,
         )
 
-
     def test_rejects_angle_outside_joint_limits(self) -> None:
         config = self.create_config()
 
         with self.assertRaises(ValueError):
             config.angle_to_position(91)
 
-
     def test_rejects_position_outside_calibration(self) -> None:
         config = self.create_config()
 
         with self.assertRaises(ValueError):
             config.position_to_angle(1000)
-            
+
     def test_rejects_invalid_speed(self) -> None:
         with self.assertRaises(ValueError):
             self.create_config(speed=3401)
@@ -183,6 +177,26 @@ class JointConfigTestCase(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             JointConfig.validate_acceleration(300)
+
+    def test_converts_tolerance_to_counts(
+        self,
+    ) -> None:
+        config = self.create_config(tolerance_deg=1.0)
+
+        self.assertEqual(
+            config.tolerance_counts,
+            11,
+        )
+
+    def test_tolerance_has_minimum_of_one_count(
+        self,
+    ) -> None:
+        config = self.create_config(tolerance_deg=0.001)
+
+        self.assertEqual(
+            config.tolerance_counts,
+            1,
+        )
 
 
 if __name__ == "__main__":

@@ -70,6 +70,10 @@ Intervalos que atravessam a volta do encoder não são aceitos atualmente.
 | direção | `-1` ou `1` |
 | tolerância angular | maior que `0°` |
 
+Internamente, a tolerância angular é arredondada para counts e nunca fica abaixo
+de um count. Essa tolerância numérica não substitui margens mecânicas de
+segurança.
+
 Esses limites validam o formato do comando; os limites mecânicos reais devem
 ser mais restritivos e específicos para cada junta.
 

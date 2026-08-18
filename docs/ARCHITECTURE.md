@@ -127,7 +127,19 @@ count, aproximadamente `0,04395°`.
 - extremos convertidos dentro do encoder;
 - velocidade entre `0` e `3400`;
 - aceleração entre `0` e `254`;
-- tolerância positiva e números angulares finitos.
+- tolerância positiva e números angulares finitos;
+- tolerância convertida para counts com mínimo de um count.
+
+A tolerância usada nas futuras comparações de chegada é derivada por:
+
+```text
+tolerance_counts = max(
+    1,
+    round(tolerance_deg * 4096 / 360)
+)
+```
+
+Assim, alvo, posição atual e tolerância usam a mesma unidade.
 
 Intervalos que precisariam atravessar `4095 → 0` não são suportados na versão
 atual.

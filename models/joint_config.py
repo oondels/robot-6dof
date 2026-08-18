@@ -70,6 +70,13 @@ class JointConfig:
             float(self.tolerance_deg),
         )
 
+    @property
+    def tolerance_counts(self) -> int:
+        return max(
+            1,
+            round(self.tolerance_deg * STEPS_PER_REVOLUTION / 360.0),
+        )
+
     def angle_to_position(self, angle: float) -> int:
         self._validate_finite_number("angle", angle)
 
@@ -157,27 +164,18 @@ class JointConfig:
     @staticmethod
     def validate_speed(speed: int) -> None:
         if type(speed) is not int:
-            raise TypeError(
-                "speed deve ser um número inteiro"
-            )
+            raise TypeError("speed deve ser um número inteiro")
 
         if not MIN_SPEED <= speed <= MAX_SPEED:
-            raise ValueError(
-                f"speed deve estar entre "
-                f"{MIN_SPEED} e {MAX_SPEED}"
-            )
+            raise ValueError(f"speed deve estar entre " f"{MIN_SPEED} e {MAX_SPEED}")
 
     @staticmethod
     def validate_acceleration(acc: int) -> None:
         if type(acc) is not int:
-            raise TypeError(
-                "acc deve ser um número inteiro"
-            )
+            raise TypeError("acc deve ser um número inteiro")
 
         if not MIN_ACC <= acc <= MAX_ACC:
-            raise ValueError(
-                f"acc deve estar entre {MIN_ACC} e {MAX_ACC}"
-            )
+            raise ValueError(f"acc deve estar entre {MIN_ACC} e {MAX_ACC}")
 
     def _validate_tolerance(self) -> None:
         self._validate_finite_number(

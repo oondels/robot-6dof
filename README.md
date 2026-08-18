@@ -15,6 +15,7 @@ timeout de movimento e cinemática ainda não estão implementados.
 | --- | --- |
 | Configuração física de uma junta | Implementada e testada |
 | Conversão entre graus e counts | Implementada e testada |
+| Conversão da tolerância para counts | Implementada e testada |
 | Leitura e controle de torque | Implementados e testados com servo falso |
 | Leitura do estado de movimento | Implementada e testada |
 | Comando individual não bloqueante | Implementado e testado |
@@ -25,7 +26,7 @@ timeout de movimento e cinemática ainda não estão implementados.
 | Cinemática direta/inversa | Fora do escopo atual |
 | Configuração física real | Pendente de calibração |
 
-A suíte atual contém **38 testes sem hardware**. `robot_config.py` mantém
+A suíte atual contém **40 testes sem hardware**. `robot_config.py` mantém
 `JOINT_CONFIGS` vazio; por isso, `main.py` recusa a execução antes de abrir a
 porta serial.
 
