@@ -1,24 +1,10 @@
 from typing import Any
+
+from models.joint_config import (
+    STEPS_PER_REVOLUTION,
+    JointConfig,
+)
 from utils.validation import validate_result
-
-
-DEFAULT_SPEED = 1000
-DEFAULT_ACC = 100
-
-MIN_SPEED = 0
-MAX_SPEED = 3400
-
-MIN_ACC = 0
-MAX_ACC = 254
-
-MIN_SERVO_ID = 0
-MAX_SERVO_ID = 253
-
-MIN_SERVO_POSITION = 0
-MAX_SERVO_POSITION = 4095
-
-POSITION_TOLERANCE = 10
-STEPS_PER_REVOLUTION = 4096
 
 ADDR_TORQUE_ENABLE = 40
 TORQUE_DISABLED = 0
@@ -28,114 +14,53 @@ TORQUE_ENABLED = 1
 class Joint:
     def __init__(
         self,
-        servo_id: int,
         servo: Any,
-        name: str,
-        min_pos: int,
-        max_pos: int,
-        speed: int = DEFAULT_SPEED,
-        acc: int = DEFAULT_ACC,
+        config: JointConfig,
     ) -> None:
-        self._validate_configuration(
-            servo_id=servo_id,
-            servo=servo,
-            name=name,
-            min_pos=min_pos,
-            max_pos=max_pos,
-            speed=speed,
-            acc=acc,
-        )
-
-        self.servo_id = servo_id
-        self.servo = servo
-        self.name = name.strip()
-        self.min_pos = min_pos
-        self.max_pos = max_pos
-        self.speed = speed
-        self.acc = acc
-
-    @staticmethod
-    def _validate_configuration(
-        servo_id: int,
-        servo: Any,
-        name: str,
-        min_pos: int,
-        max_pos: int,
-        speed: int,
-        acc: int,
-    ) -> None:
-        if type(servo_id) is not int:
-            raise TypeError("servo_id deve ser um número inteiro")
-
-        if not MIN_SERVO_ID <= servo_id <= MAX_SERVO_ID:
-            raise ValueError(
-                f"servo_id deve estar entre "
-                f"{MIN_SERVO_ID} e {MAX_SERVO_ID}"
-            )
-
         if servo is None:
             raise ValueError("servo não pode ser None")
 
-        if not isinstance(name, str):
-            raise TypeError("name deve ser uma string")
+        if not isinstance(config, JointConfig):
+            raise TypeError("config deve ser uma instância de JointConfig")
 
-        if not name.strip():
-            raise ValueError("name não pode estar vazio")
+        self.servo = servo
+        self.config = config
 
-        if type(min_pos) is not int or type(max_pos) is not int:
-            raise TypeError(
-                "min_pos e max_pos devem ser números inteiros"
-            )
+    @property
+    def name(self) -> str:
+        return self.config.name
 
-        if not MIN_SERVO_POSITION <= min_pos <= MAX_SERVO_POSITION:
-            raise ValueError(
-                f"min_pos deve estar entre "
-                f"{MIN_SERVO_POSITION} e {MAX_SERVO_POSITION}"
-            )
+    @property
+    def servo_id(self) -> int:
+        return self.config.servo_id
 
-        if not MIN_SERVO_POSITION <= max_pos <= MAX_SERVO_POSITION:
-            raise ValueError(
-                f"max_pos deve estar entre "
-                f"{MIN_SERVO_POSITION} e {MAX_SERVO_POSITION}"
-            )
+    @property
+    def speed(self) -> int:
+        return self.config.speed
 
-        if min_pos >= max_pos:
-            raise ValueError("min_pos deve ser menor que max_pos")
-
-        Joint._validate_speed(speed)
-        Joint._validate_acceleration(acc)
-
-    @staticmethod
-    def _validate_speed(speed: int) -> None:
-        if type(speed) is not int:
-            raise TypeError("speed deve ser um número inteiro")
-
-        if not MIN_SPEED <= speed <= MAX_SPEED:
-            raise ValueError(
-                f"speed deve estar entre {MIN_SPEED} e {MAX_SPEED}"
-            )
-    
-    @staticmethod
-    def _validate_acceleration(acc: int) -> None:
-        if type(acc) is not int:
-            raise TypeError("acc deve ser um número inteiro")
-
-        if not MIN_ACC <= acc <= MAX_ACC:
-            raise ValueError(
-                f"acc deve estar entre {MIN_ACC} e {MAX_ACC}"
-            )
+    @property
+    def acc(self) -> int:
+        return self.config.acc
 
     def current_position(self) -> int:
         position, _, result, error = self.servo.ReadPosSpeed(self.servo_id)
 
-        validate_result(self.servo, result, error, f"{self.name}: leitura de posição")
+        validate_result(
+            self.servo,
+            result,
+            error,
+            f"{self.name}: leitura de posição",
+        )
 
         return position
 
-    def enable_torque(self):
+    def current_angle(self) -> float:
+        return self.position_to_angle(self.current_position())
+
+    def enable_torque(self) -> None:
         current_position = self.current_position()
 
-        # Evita que o servo tente buscar um alvo antigo ao habilitar o torque.
+        # Evita buscar um alvo antigo ao habilitar o torque.
         result, error = self.servo.WritePosEx(
             self.servo_id,
             current_position,
@@ -195,39 +120,11 @@ class Joint:
         )
 
     def angle_to_position(self, angle: float) -> int:
-        if not isinstance(angle, (int, float)):
-            raise TypeError("Angle deve ser um número")
-
-        if not 0 <= angle <= 360:
-            raise ValueError("Angle deve estar entre 0° e 360°")
-
-        if angle == 360:
-            position = MAX_SERVO_POSITION
-        else:
-            position = round(angle * STEPS_PER_REVOLUTION / 360.0)
-
-        if not self.min_pos <= position <= self.max_pos:
-            raise ValueError(
-                f"{self.name}: ângulo de {angle}° gera a posição "
-                f"{position}, fora do limite "
-                f"[{self.min_pos}, {self.max_pos}]"
-            )
-
-        return position
+        return self.config.angle_to_position(angle)
 
     def position_to_angle(self, position: int) -> float:
-        if not isinstance(position, int):
-            raise TypeError("Position deve ser um número inteiro")
+        return self.config.position_to_angle(position)
 
-        if not self.min_pos <= position <= self.max_pos:
-            raise ValueError(
-                f"{self.name}: posição {position} fora do limite "
-                f"[{self.min_pos}, {self.max_pos}]"
-            )
-
-        return position * 360.0 / STEPS_PER_REVOLUTION
-
-    # Move a junta com target -> angle
     def move(
         self,
         angle: float,
@@ -235,21 +132,29 @@ class Joint:
         acc: int | None = None,
     ) -> int:
         command_speed = self.speed if speed is None else speed
+
         command_acc = self.acc if acc is None else acc
 
-        self._validate_speed(command_speed)
-        self._validate_acceleration(command_acc)
+        JointConfig.validate_speed(command_speed)
+        JointConfig.validate_acceleration(command_acc)
 
         target_position = self.angle_to_position(angle)
         current_position = self.current_position()
 
+        tolerance_counts = max(
+            1,
+            round(self.config.tolerance_deg * STEPS_PER_REVOLUTION / 360.0),
+        )
+
         position_error = abs(target_position - current_position)
 
-        if position_error <= POSITION_TOLERANCE:
+        if position_error <= tolerance_counts:
             print(
                 f"{self.name}: posição já atingida: "
-                f"{current_position} (erro={position_error})"
+                f"{current_position} "
+                f"(erro={position_error} counts)"
             )
+
             return current_position
 
         print(
@@ -271,5 +176,5 @@ class Joint:
             f"{self.name}: comando de movimento",
         )
 
-        # O comando foi recebido, mas o movimento ainda pode estar acontecendo.
+        # A espera pela conclusão será implementada na etapa 3.
         return self.current_position()

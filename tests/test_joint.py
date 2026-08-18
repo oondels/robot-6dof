@@ -4,90 +4,111 @@ from models.Joint import (
     ADDR_TORQUE_ENABLE,
     Joint,
 )
+from models.joint_config import JointConfig
 from tests.fake_servo import FakeServo
 
 
 class JointTestCase(unittest.TestCase):
     def setUp(self) -> None:
-        self.servo = FakeServo(position=1024)
+        self.servo = FakeServo(position=2048)
 
-        self.joint = Joint(
-            servo_id=6,
-            servo=self.servo,
+        self.config = JointConfig(
             name="Joint 1",
-            min_pos=0,
-            max_pos=4095,
+            servo_id=6,
+            zero_position=2048,
+            direction=1,
+            min_angle=-90,
+            max_angle=90,
             speed=1000,
             acc=100,
+            tolerance_deg=1.0,
         )
 
-    def create_joint(self, **changes) -> Joint:
-        configuration = {
-            "servo_id": 6,
-            "servo": self.servo,
-            "name": "Joint 1",
-            "min_pos": 0,
-            "max_pos": 4095,
-            "speed": 1000,
-            "acc": 100,
-        }
-
-        configuration.update(changes)
-
-        return Joint(**configuration)
-
-    def test_normalizes_name(self) -> None:
-        joint = self.create_joint(name="  Joint 1  ")
-
-        self.assertEqual(joint.name, "Joint 1")
-
-    def test_rejects_broadcast_id(self) -> None:
-        with self.assertRaises(ValueError):
-            self.create_joint(servo_id=254)
-
-    def test_rejects_empty_name(self) -> None:
-        with self.assertRaises(ValueError):
-            self.create_joint(name="   ")
+        self.joint = Joint(
+            servo=self.servo,
+            config=self.config,
+        )
 
     def test_rejects_none_servo(self) -> None:
         with self.assertRaises(ValueError):
-            self.create_joint(servo=None)
-
-    def test_rejects_inverted_position_limits(self) -> None:
-        with self.assertRaises(ValueError):
-            self.create_joint(
-                min_pos=3000,
-                max_pos=1000,
+            Joint(
+                servo=None,
+                config=self.config,
             )
 
-    def test_rejects_invalid_default_speed(self) -> None:
-        with self.assertRaises(ValueError):
-            self.create_joint(speed=3401)
-
-    def test_rejects_invalid_default_acceleration(self) -> None:
-        with self.assertRaises(ValueError):
-            self.create_joint(acc=255)
-
-    def test_rejects_boolean_as_integer(self) -> None:
+    def test_rejects_invalid_config(self) -> None:
         with self.assertRaises(TypeError):
-            self.create_joint(speed=True)
+            Joint(
+                servo=self.servo,
+                config=object(),
+            )
+
+    def test_exposes_configuration_properties(self) -> None:
+        self.assertIs(
+            self.joint.config,
+            self.config,
+        )
+        self.assertEqual(self.joint.name, "Joint 1")
+        self.assertEqual(self.joint.servo_id, 6)
+        self.assertEqual(self.joint.speed, 1000)
+        self.assertEqual(self.joint.acc, 100)
 
     def test_reads_current_position(self) -> None:
         position = self.joint.current_position()
 
-        self.assertEqual(position, 1024)
+        self.assertEqual(position, 2048)
 
-    def test_enables_torque_without_initial_jump(self) -> None:
+    def test_reads_current_angle(self) -> None:
+        angle = self.joint.current_angle()
+
+        self.assertEqual(angle, 0.0)
+
+    def test_delegates_angle_conversion(self) -> None:
+        self.assertEqual(
+            self.joint.angle_to_position(90),
+            3072,
+        )
+
+        self.assertEqual(
+            self.joint.position_to_angle(1024),
+            -90.0,
+        )
+
+    def test_supports_inverted_joint(self) -> None:
+        inverted_config = JointConfig(
+            name="Inverted Joint",
+            servo_id=7,
+            zero_position=2048,
+            direction=-1,
+            min_angle=-90,
+            max_angle=90,
+        )
+
+        joint = Joint(
+            servo=self.servo,
+            config=inverted_config,
+        )
+
+        self.assertEqual(
+            joint.angle_to_position(90),
+            1024,
+        )
+
+    def test_enables_torque_without_initial_jump(
+        self,
+    ) -> None:
         self.joint.enable_torque()
 
         self.assertTrue(self.joint.is_torque_enabled())
+
         self.assertEqual(
             self.servo.registers[ADDR_TORQUE_ENABLE],
             1,
         )
+
         self.assertEqual(
             self.servo.position_commands,
-            [(6, 1024, 1000, 100)],
+            [(6, 2048, 1000, 100)],
         )
 
     def test_disables_torque(self) -> None:
@@ -95,9 +116,44 @@ class JointTestCase(unittest.TestCase):
         self.joint.disable_torque()
 
         self.assertFalse(self.joint.is_torque_enabled())
+
         self.assertEqual(
             self.servo.registers[ADDR_TORQUE_ENABLE],
             0,
+        )
+
+    def test_move_uses_configuration_defaults(
+        self,
+    ) -> None:
+        self.joint.move(45)
+
+        self.assertEqual(
+            self.servo.position_commands,
+            [(6, 2560, 1000, 100)],
+        )
+
+    def test_move_rejects_invalid_override(
+        self,
+    ) -> None:
+        with self.assertRaises(ValueError):
+            self.joint.move(
+                45,
+                speed=5000,
+            )
+
+        self.assertEqual(
+            self.servo.position_commands,
+            [],
+        )
+
+    def test_move_skips_target_inside_tolerance(
+        self,
+    ) -> None:
+        self.joint.move(0.5)
+
+        self.assertEqual(
+            self.servo.position_commands,
+            [],
         )
 
 
