@@ -60,7 +60,7 @@ Os valores abaixo só serão preenchidos após observação física:
 
 | Medição | Counts | Como será determinada |
 | --- | ---: | --- |
-| zero mecânico | pendente | posicionar na referência física escolhida |
+| zero mecânico | **2045** | mediana de dez leituras na referência física |
 | pequeno deslocamento positivo | pendente | mover manualmente no sentido positivo |
 | limite mínimo seguro | pendente | aproximar manualmente, mantendo margem |
 | limite máximo seguro | pendente | aproximar manualmente, mantendo margem |
@@ -86,8 +86,27 @@ junta foi movida entre as leituras e qual delas corresponde à referência físi
 de `0°`. Se a junta não foi movida, a diferença deve ser investigada antes de
 qualquer calibração ou comando.
 
+## Registro da sessão de zero mecânico
+
+Com a junta posicionada na referência física escolhida, o operador informou:
+
+```text
+2046, 2046, 2046, 2046, 2041,
+2045, 2045, 2045, 2045, 2045
+```
+
+A mediana é `2045 counts`, adotada como `zero_position` medido. A faixa total
+foi `2041..2046`, equivalente a cinco counts, aproximadamente `0,44°`. O valor
+isolado `2041` não desloca a mediana. As leituras anteriores `293` e `3250` não
+serão usadas na configuração porque suas posições físicas não foram associadas
+ao zero.
+
+O valor ainda não foi adicionado a `robot_config.py`: primeiro serão medidos
+direção e limites, para que `JointConfig` seja criada completa e validada em uma
+única mudança.
+
 ## Estado atual
 
-A ferramenta e seus testes estão concluídos. O operador realizou duas leituras
-físicas, mas a relação delas com a posição mecânica ainda não foi confirmada. O
-assistente não executou comandos no hardware.
+A ferramenta e seus testes estão concluídos. O zero mecânico foi medido como
+`2045 counts`; direção e limites permanecem pendentes. O assistente não
+executou comandos no hardware.

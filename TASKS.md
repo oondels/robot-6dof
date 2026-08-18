@@ -126,7 +126,7 @@ comunicação e preservação do torque após falha.
 
 - [x] Criar rotina que apenas leia counts do servo informado.
 - [x] Preparar checklist de segurança para calibração.
-- [ ] Medir zero da junta ID `6`.
+- [x] Medir zero da junta ID `6`.
 - [ ] Determinar direção positiva.
 - [ ] Medir limites seguros com margem mecânica.
 - [ ] Registrar a configuração validada.
@@ -142,6 +142,11 @@ Observação física registrada: o operador leu `293` e depois `3250` counts no
 servo ID `6`. Ainda falta informar se houve movimento entre as leituras e qual
 valor corresponde ao zero mecânico; nenhum deles será salvo em `robot_config.py`
 antes dessa confirmação.
+
+Zero mecânico medido: dez leituras na referência física produziram
+`2046, 2046, 2046, 2046, 2041, 2045, 2045, 2045, 2045, 2045`. A mediana
+`2045 counts` foi escolhida como `zero_position`. O valor será transferido para
+`robot_config.py` somente junto com direção e limites seguros.
 
 ### Critério de conclusão
 
