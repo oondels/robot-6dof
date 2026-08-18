@@ -17,6 +17,7 @@ timeout de movimento e cinemática ainda não estão implementados.
 | Conversão entre graus e counts | Implementada e testada |
 | Conversão da tolerância para counts | Implementada e testada |
 | Cálculo de erro e comparação com tolerância | Implementados e testados |
+| Fotografia imutável do estado do movimento | Implementada e testada |
 | Leitura e controle de torque | Implementados e testados com servo falso |
 | Leitura do estado de movimento | Implementada e testada |
 | Comando individual não bloqueante | Implementado e testado |
@@ -27,13 +28,14 @@ timeout de movimento e cinemática ainda não estão implementados.
 | Cinemática direta/inversa | Fora do escopo atual |
 | Configuração física real | Pendente de calibração |
 
-A suíte atual contém **44 testes sem hardware**. `robot_config.py` mantém
+A suíte atual contém **46 testes sem hardware**. `robot_config.py` mantém
 `JOINT_CONFIGS` vazio; por isso, `main.py` recusa a execução antes de abrir a
 porta serial.
 
 > **Atenção:** `Joint.command()` apenas envia o alvo e retorna os counts
 > solicitados. Ele não confirma chegada. `Joint.move()` está temporariamente
-> ausente até a implementação da espera com timeout.
+> ausente até a implementação da espera com timeout. `movement_status()` faz
+> apenas uma consulta do estado; ele também não espera o movimento terminar.
 
 ## Leitura rápida
 

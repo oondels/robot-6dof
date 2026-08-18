@@ -71,7 +71,13 @@ acidentais e reduz o estado do objeto ao contrato declarado.
 
 ### `models/Joint.py`
 
-Contém `Joint`, o adaptador operacional de uma junta.
+Contém `Joint`, o adaptador operacional de uma junta, e `MovementStatus`, o
+registro imutável de uma observação do movimento.
+
+`MovementStatus` possui os campos `target_position`, `current_position`,
+`position_error`, `moving` e `within_tolerance`. Como usa `frozen=True` e
+`slots=True`, seus valores não podem ser alterados nem ampliados com atributos
+acidentais depois da criação.
 
 Construção:
 
@@ -99,6 +105,7 @@ Métodos públicos atuais:
 | `position_to_angle()` | delega a `JointConfig` |
 | `position_error()` | calcula erro absoluto entre alvo e posição atual |
 | `is_within_tolerance()` | compara o erro com `config.tolerance_counts` |
+| `movement_status()` | lê posição e movimento e retorna `MovementStatus` |
 | `command()` | envia o alvo e retorna os counts, sem aguardar |
 
 Método interno:
@@ -172,7 +179,8 @@ Eles não descrevem o hardware real.
 
 Testa construção, propriedades delegadas, leitura, conversão, direção
 invertida, torque, estado de movimento, comando não bloqueante, erro de posição
-e limite de tolerância.
+e limite de tolerância. Também testa a fotografia do movimento, inclusive o
+caso em que o servo está parado fora da tolerância.
 
 ### `tests/test_fake_servo.py`
 

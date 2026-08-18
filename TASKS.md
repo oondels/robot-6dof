@@ -6,7 +6,7 @@
 - Última etapa concluída: **2 — Coordenadas físicas e calibração**.
 - Desenvolvimento retomado após a documentação e a implementação isolada de
   `Joint.is_moving()`.
-- Snapshot documentado: **44 testes passando**; `Joint.command()` está
+- Snapshot documentado: **46 testes passando**; `Joint.command()` está
   implementado e `Joint.move()` está temporariamente ausente.
 - Regra inviolável: toda decisão, mudança aplicada ou evolução validada deve
   atualizar a documentação afetada no mesmo ciclo.
@@ -81,6 +81,7 @@ porta serial.
 - [x] Criar `Joint.command()` não bloqueante.
 - [x] Converter tolerância angular para counts do encoder.
 - [x] Calcular erro absoluto e comparar posição com tolerância.
+- [x] Reunir uma leitura do movimento em `MovementStatus` imutável.
 - [ ] Separar comando não bloqueante de movimento bloqueante.
 - [ ] Implementar espera com tolerância, intervalo de consulta e timeout.
 - [ ] Detectar servo parado fora do alvo.
@@ -98,6 +99,12 @@ encoder sem misturar graus e counts.
 Decisão aplicada: `Joint` calcula o erro absoluto entre alvo e posição atual e
 decide se ele está dentro de `config.tolerance_counts`. Essa verificação é pura:
 não faz leitura do servo, espera ou sleep.
+
+Decisão aplicada: uma dataclass imutável `MovementStatus` representa uma única
+fotografia do movimento, contendo alvo, posição atual, erro, `moving` e
+`within_tolerance`. `Joint.movement_status()` fará uma leitura de posição e uma
+leitura de movimento, sem laço ou timeout. As leituras são consecutivas, não
+simultâneas. A decisão está coberta por dois testes e a suíte soma 46 testes.
 
 ### Critério de conclusão
 

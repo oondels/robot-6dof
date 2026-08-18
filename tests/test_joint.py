@@ -1,9 +1,6 @@
 import unittest
 
-from models.Joint import (
-    ADDR_TORQUE_ENABLE,
-    Joint,
-)
+from models.Joint import ADDR_TORQUE_ENABLE, Joint, MovementStatus
 from models.joint_config import JointConfig
 from tests.fake_servo import FakeServo
 
@@ -226,6 +223,35 @@ class JointTestCase(unittest.TestCase):
                 target_position=2560.0,
                 current_position=2550,
             )
+
+    def test_reads_movement_status(self) -> None:
+        self.servo.position = 2550
+        self.servo.moving = 1
+
+        status = self.joint.movement_status(target_position=2560)
+
+        self.assertEqual(
+            status,
+            MovementStatus(
+                target_position=2560,
+                current_position=2550,
+                position_error=10,
+                moving=True,
+                within_tolerance=True,
+            ),
+        )
+
+    def test_movement_status_detects_stopped_outside_tolerance(
+        self,
+    ) -> None:
+        self.servo.position = 2548
+        self.servo.moving = 0
+
+        status = self.joint.movement_status(target_position=2560)
+
+        self.assertFalse(status.moving)
+        self.assertFalse(status.within_tolerance)
+        self.assertEqual(status.position_error, 12)
 
 
 if __name__ == "__main__":

@@ -143,8 +143,10 @@ prova que o servo chegou ao destino.
 
 - `Joint.command()` não aguarda conclusão; retornar o alvo não comprova chegada.
 - `Joint.move()` está temporariamente ausente até existir espera com timeout.
-- `Joint.is_moving()` consulta `ReadMoving`, mas ainda não existe um laço que
-  combine movimento, posição e tolerância.
+- `Joint.movement_status()` combina uma leitura de posição, uma leitura de
+  `ReadMoving` e a tolerância, mas ainda não existe um laço de espera.
+- Posição e movimento são lidos consecutivamente, não simultaneamente; o
+  snapshot não substitui timeout nem leituras periódicas.
 - Não existe `RobotArm` nem movimento sincronizado.
 - `JOINT_CONFIGS` está vazio porque nenhuma calibração física foi registrada.
 - Mensagens operacionais usam `print`, não logging estruturado.

@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from typing import Any
 
 from models.joint_config import JointConfig
@@ -6,6 +7,15 @@ from utils.validation import validate_result
 ADDR_TORQUE_ENABLE = 40
 TORQUE_DISABLED = 0
 TORQUE_ENABLED = 1
+
+
+@dataclass(frozen=True, slots=True)
+class MovementStatus:
+    target_position: int
+    current_position: int
+    position_error: int
+    moving: bool
+    within_tolerance: bool
 
 
 class Joint:
@@ -140,18 +150,12 @@ class Joint:
         current_position: int,
     ) -> int:
         if type(target_position) is not int:
-            raise TypeError(
-                "target_position deve ser inteiro"
-            )
+            raise TypeError("target_position deve ser inteiro")
 
         if type(current_position) is not int:
-            raise TypeError(
-                "current_position deve ser inteiro"
-            )
+            raise TypeError("current_position deve ser inteiro")
 
-        return abs(
-            target_position - current_position
-        )
+        return abs(target_position - current_position)
 
     def is_within_tolerance(
         self,
@@ -164,6 +168,31 @@ class Joint:
         )
 
         return error <= self.config.tolerance_counts
+
+    def movement_status(
+        self,
+        target_position: int,
+    ) -> MovementStatus:
+        current_position = self.current_position()
+        moving = self.is_moving()
+
+        position_error = self.position_error(
+            target_position,
+            current_position,
+        )
+
+        within_tolerance = self.is_within_tolerance(
+            target_position,
+            current_position,
+        )
+
+        return MovementStatus(
+            target_position=target_position,
+            current_position=current_position,
+            position_error=position_error,
+            moving=moving,
+            within_tolerance=within_tolerance,
+        )
 
     def command(
         self,

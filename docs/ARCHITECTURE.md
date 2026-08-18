@@ -59,6 +59,13 @@ Objeto de tempo de execução que combina um `JointConfig` com um servo. Ele:
 Ele não abre nem fecha a porta serial. Essa decisão pertence ao ponto de
 composição da aplicação.
 
+### `MovementStatus`
+
+Dataclass imutável que representa uma única observação do movimento. Ela reúne
+o alvo em counts, a posição lida, o erro absoluto, o sinal `moving` e o resultado
+da comparação com a tolerância. É um valor de diagnóstico, não um controlador:
+não envia comandos e não espera o servo chegar.
+
 ### `main.py`
 
 É o composition root: valida se existem configurações, cria porta e SDK, cria as
@@ -174,10 +181,20 @@ Joint.is_moving()
   → servo.ReadMoving(id)
   → validate_result(...)
   → booleano
+
+Joint.movement_status(target_position)
+  → current_position()
+  → is_moving()
+  → calcula erro e tolerância
+  → MovementStatus imutável
 ```
 
 Uma posição fora do intervalo calibrado pode ser lida como count, mas não pode
 ser convertida em ângulo físico válido.
+
+Posição e `moving` são duas leituras consecutivas do barramento, portanto não
+foram capturados no mesmo instante físico. O objeto representa uma fotografia
+lógica suficientemente pequena para o futuro laço de espera e diagnóstico.
 
 ### Habilitação de torque
 
@@ -219,6 +236,10 @@ chegou numericamente = erro <= tolerance_counts
 As duas operações são puras: recebem posições já conhecidas e não acessam o
 servo. Estar dentro da tolerância é uma condição necessária para concluir um
 movimento, mas o futuro `move()` também observará o estado `moving`.
+
+`Joint.movement_status(target)` combina essas informações em um
+`MovementStatus`. Ele consulta o servo uma única vez para posição e uma única
+vez para movimento; não repete leituras, não dorme e não aplica timeout.
 
 ## Arquitetura planejada, ainda não implementada
 

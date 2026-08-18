@@ -49,6 +49,7 @@ Será responsável somente por uma junta:
 
 - validar e converter graus físicos em counts do servo;
 - ler posição e estado de movimento;
+- produzir uma fotografia imutável do alvo e do estado observado;
 - habilitar e desabilitar torque;
 - enviar um alvo sem bloquear;
 - mover e aguardar a chegada com tolerância e timeout;
@@ -101,6 +102,8 @@ que atravessem a transição do encoder entre `4095` e `0`.
 - `SyncWritePosEx` sincroniza o início dos comandos, mas não garante que as
   juntas cheguem ao destino ao mesmo tempo.
 - A espera consultará periodicamente posição e estado de movimento.
+- Cada consulta será representada por `MovementStatus`, contendo alvo, posição,
+  erro, estado de movimento e resultado da comparação com a tolerância.
 - Um servo parado fora da tolerância ou um timeout abortará a operação.
 - O diagnóstico indicará junta, alvo, posição medida e erro.
 - O torque permanecerá habilitado após falhas para reduzir o risco de uma junta
