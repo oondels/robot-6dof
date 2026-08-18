@@ -57,6 +57,18 @@ class Joint:
     def current_angle(self) -> float:
         return self.position_to_angle(self.current_position())
 
+    def is_moving(self) -> bool:
+        moving, result, error = self.servo.ReadMoving(self.servo_id)
+
+        validate_result(
+            self.servo,
+            result,
+            error,
+            f"{self.name}: leitura do estado de movimento",
+        )
+
+        return moving != 0
+
     def enable_torque(self) -> None:
         current_position = self.current_position()
 

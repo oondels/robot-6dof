@@ -156,6 +156,19 @@ class JointTestCase(unittest.TestCase):
             [],
         )
 
+    def test_reads_moving_state(self) -> None:
+        self.servo.moving = 1
+
+        self.assertTrue(
+            self.joint.is_moving()
+        )
+
+        self.servo.moving = 0
+
+        self.assertFalse(
+            self.joint.is_moving()
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
