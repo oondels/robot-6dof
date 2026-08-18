@@ -2,9 +2,9 @@
 
 ## Estado atual
 
-- Etapa atual: **5 — Controlador de múltiplas juntas (`RobotArm`)**.
-- Última etapa concluída: **4 — Calibração física das juntas (ID 6 a ID 1)**.
-- Snapshot documentado: **61 testes passando**; todas as 6 juntas calibradas e registradas.
+- Etapa atual: **6 — Movimento simultâneo (`SyncWrite`)**.
+- Última etapa concluída: **5 — Controlador de múltiplas juntas (`RobotArm`)**.
+- Snapshot documentado: **74 testes passando**; `RobotArm` implementado e testado.
 - Regra inviolável: toda decisão, mudança aplicada ou evolução validada deve
   atualizar a documentação afetada no mesmo ciclo.
 - Regra: somente uma etapa fica em andamento por vez.
@@ -173,17 +173,23 @@ hardware.
 
 ## 5. Controlador de múltiplas juntas
 
-- [ ] Criar `RobotArm` com a coleção ordenada de `Joint` (1 a 6).
-- [ ] Rejeitar nomes e IDs duplicados.
-- [ ] Implementar torque coletivo.
-- [ ] Implementar leitura coletiva de ângulos.
-- [ ] Validar poses completas por nome antes de qualquer escrita.
-- [ ] Testar com suíte simulada (`FakeServo`).
+- [x] Criar `RobotArm` com a coleção ordenada de `Joint` (1 a 6).
+- [x] Rejeitar nomes e IDs duplicados.
+- [x] Implementar torque coletivo.
+- [x] Implementar leitura coletiva de ângulos.
+- [x] Validar poses completas por nome antes de qualquer escrita.
+- [x] Testar com suíte simulada (`FakeServo`).
+
+Decisão aplicada: `RobotArm` encapsula a coleção imutável de juntas e garante
+unicidade de nomes e IDs. O dicionário de poses é validado contra juntas ausentes,
+desconhecidas e limites angulares físicos antes de qualquer comando serial.
 
 ### Critério de conclusão
 
 O controlador deve rejeitar uma pose incompleta ou desconhecida sem enviar
 nenhum comando e representar corretamente todas as juntas configuradas.
+
+Resultado: **concluído em 13 novos testes (total de 74 testes passando)**.
 
 ## 6. Movimento simultâneo
 

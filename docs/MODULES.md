@@ -156,9 +156,28 @@ getRxPacketError
 `is_moving()` valida os dois canais de erro antes de converter o valor numérico
 de `ReadMoving` em `bool`.
 
+### `models/RobotArm.py`
+
+Contém a classe agregadora `RobotArm`, responsável pelo gerenciamento de múltiplas juntas.
+
+| Método / Propriedade | Responsabilidade |
+| --- | --- |
+| `joints` | Retorna a tupla ordenada e imutável de todas as juntas |
+| `joint_names` | Retorna os nomes de todas as juntas cadastradas |
+| `joint(name)` / `arm[name]` | Acesso indexado por nome com validação |
+| `current_angles()` | Retorna dicionário `{nome: angulo_em_graus}` |
+| `current_positions()` | Retorna dicionário `{nome: posicao_em_counts}` |
+| `enable_torque()` | Habilita torque em todas as juntas |
+| `disable_torque()` | Desabilita torque em todas as juntas |
+| `is_torque_enabled()` | Verifica se todas as juntas estão energizadas |
+| `validate_pose(pose)` | Valida presença de todas as juntas e limites angulares |
+
+Valida invariantes no construtor: rejeita coleções vazias, nomes duplicados e IDs duplicados.
+
 ### `models/__init__.py`
 
 Marcador de pacote. Não expõe uma API agregada.
+
 
 ## Utilitários
 
