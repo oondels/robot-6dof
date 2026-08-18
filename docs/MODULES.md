@@ -92,7 +92,7 @@ Métodos públicos atuais:
 | `is_torque_enabled()` | consulta o registrador de torque |
 | `angle_to_position()` | delega a `JointConfig` |
 | `position_to_angle()` | delega a `JointConfig` |
-| `move()` | envia movimento, mas ainda não aguarda conclusão |
+| `command()` | envia o alvo e retorna os counts, sem aguardar |
 
 Método interno:
 
@@ -164,7 +164,7 @@ Eles não descrevem o hardware real.
 ### `tests/test_joint.py`
 
 Testa construção, propriedades delegadas, leitura, conversão, direção
-invertida, torque e o comportamento atual de movimento.
+invertida, torque, estado de movimento e comando não bloqueante.
 
 ### `tests/test_fake_servo.py`
 

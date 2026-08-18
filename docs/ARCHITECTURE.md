@@ -179,29 +179,29 @@ ler posição atual
 Preparar o alvo atual reduz o risco de o servo buscar um alvo antigo ao receber
 torque. Isso não elimina a necessidade de apoiar o braço.
 
-### Movimento atual
+### Comando atual
 
-No snapshot documentado, `Joint.move(angle, speed, acc)`:
+No snapshot documentado, `Joint.command(angle, speed, acc)`:
 
-1. valida velocidade e aceleração;
-2. converte e valida o ângulo;
-3. lê a posição atual;
-4. evita escrita se já estiver dentro da tolerância;
-5. chama `WritePosEx`;
-6. lê a posição imediatamente e retorna.
+1. escolhe os valores informados ou os padrões da configuração;
+2. valida velocidade e aceleração;
+3. converte e valida o ângulo;
+4. chama `WritePosEx`;
+5. valida a comunicação;
+6. retorna os counts enviados como alvo.
 
-O passo 6 **não espera o movimento terminar**. A confirmação do SDK significa
-que o comando foi recebido, não que a meta foi alcançada.
+O método não lê a posição nem consulta `ReadMoving`. A confirmação do SDK
+significa que o comando foi recebido, não que a meta foi alcançada.
 
 ## Arquitetura planejada, ainda não implementada
 
 ### Movimento individual robusto
 
-A leitura isolada `Joint.is_moving()` já está implementada. A continuação da
-Etapa 3 separará:
+A leitura isolada `Joint.is_moving()` e o comando não bloqueante já estão
+implementados. A continuação da Etapa 3 adicionará novamente `move()`:
 
 ```python
-joint.command(angle)  # envia e retorna imediatamente
+joint.command(angle)  # já implementado: envia e retorna imediatamente
 joint.move(angle)     # envia e aguarda com timeout
 ```
 

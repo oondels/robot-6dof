@@ -17,6 +17,7 @@ timeout de movimento e cinemática ainda não estão implementados.
 | Conversão entre graus e counts | Implementada e testada |
 | Leitura e controle de torque | Implementados e testados com servo falso |
 | Leitura do estado de movimento | Implementada e testada |
+| Comando individual não bloqueante | Implementado e testado |
 | Simulação de movimento | Implementada no `FakeServo` |
 | Movimento individual com timeout | Em desenvolvimento |
 | Controle de múltiplas juntas | Planejado |
@@ -24,13 +25,13 @@ timeout de movimento e cinemática ainda não estão implementados.
 | Cinemática direta/inversa | Fora do escopo atual |
 | Configuração física real | Pendente de calibração |
 
-A suíte atual contém **37 testes sem hardware**. `robot_config.py` mantém
+A suíte atual contém **38 testes sem hardware**. `robot_config.py` mantém
 `JOINT_CONFIGS` vazio; por isso, `main.py` recusa a execução antes de abrir a
 porta serial.
 
-> **Atenção:** o método `Joint.move()` atual ainda não espera o servo chegar ao
-> destino. Ele envia o comando e lê a posição imediatamente. Não o trate como
-> movimento bloqueante ou concluído.
+> **Atenção:** `Joint.command()` apenas envia o alvo e retorna os counts
+> solicitados. Ele não confirma chegada. `Joint.move()` está temporariamente
+> ausente até a implementação da espera com timeout.
 
 ## Leitura rápida
 

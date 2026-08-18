@@ -101,7 +101,7 @@ joint = Joint(servo=servo, config=config)
 Verificação de comando:
 
 ```python
-joint.move(45)
+joint.command(45)
 assert servo.position_commands == [
     (config.servo_id, target, config.speed, config.acc)
 ]
@@ -133,9 +133,10 @@ prova que o servo chegou ao destino.
 
 ## Limitações conhecidas no snapshot atual
 
-- `Joint.move()` não aguarda conclusão e não possui timeout.
-- `Joint.is_moving()` consulta `ReadMoving`, mas `move()` ainda não usa essa
-  informação para aguardar ou diagnosticar a conclusão.
+- `Joint.command()` não aguarda conclusão; retornar o alvo não comprova chegada.
+- `Joint.move()` está temporariamente ausente até existir espera com timeout.
+- `Joint.is_moving()` consulta `ReadMoving`, mas ainda não existe um laço que
+  combine movimento, posição e tolerância.
 - Não existe `RobotArm` nem movimento sincronizado.
 - `JOINT_CONFIGS` está vazio porque nenhuma calibração física foi registrada.
 - Mensagens operacionais usam `print`, não logging estruturado.

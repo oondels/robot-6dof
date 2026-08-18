@@ -122,21 +122,35 @@ class JointTestCase(unittest.TestCase):
             0,
         )
 
-    def test_move_uses_configuration_defaults(
+    def test_command_uses_configuration_defaults(
         self,
     ) -> None:
-        self.joint.move(45)
+        target_position = self.joint.command(45)
+
+        self.assertEqual(target_position, 2560)
 
         self.assertEqual(
             self.servo.position_commands,
             [(6, 2560, 1000, 100)],
         )
 
-    def test_move_rejects_invalid_override(
+    def test_command_accepts_overrides(self) -> None:
+        self.joint.command(
+            45,
+            speed=500,
+            acc=50,
+        )
+
+        self.assertEqual(
+            self.servo.position_commands,
+            [(6, 2560, 500, 50)],
+        )
+
+    def test_command_rejects_invalid_override(
         self,
     ) -> None:
         with self.assertRaises(ValueError):
-            self.joint.move(
+            self.joint.command(
                 45,
                 speed=5000,
             )
@@ -146,28 +160,24 @@ class JointTestCase(unittest.TestCase):
             [],
         )
 
-    def test_move_skips_target_inside_tolerance(
+    def test_command_always_sends_valid_target(
         self,
     ) -> None:
-        self.joint.move(0.5)
+        self.joint.command(0.5)
 
         self.assertEqual(
             self.servo.position_commands,
-            [],
+            [(6, 2054, 1000, 100)],
         )
 
     def test_reads_moving_state(self) -> None:
         self.servo.moving = 1
 
-        self.assertTrue(
-            self.joint.is_moving()
-        )
+        self.assertTrue(self.joint.is_moving())
 
         self.servo.moving = 0
 
-        self.assertFalse(
-            self.joint.is_moving()
-        )
+        self.assertFalse(self.joint.is_moving())
 
 
 if __name__ == "__main__":

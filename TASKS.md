@@ -6,8 +6,8 @@
 - Última etapa concluída: **2 — Coordenadas físicas e calibração**.
 - Desenvolvimento retomado após a documentação e a implementação isolada de
   `Joint.is_moving()`.
-- Snapshot documentado: **37 testes passando**; `Joint.move()` ainda possui o
-  comportamento antigo, sem espera e sem timeout.
+- Snapshot documentado: **38 testes passando**; `Joint.command()` está
+  implementado e `Joint.move()` está temporariamente ausente.
 - Regra inviolável: toda decisão, mudança aplicada ou evolução validada deve
   atualizar a documentação afetada no mesmo ciclo.
 - Regra: somente uma etapa fica em andamento por vez.
@@ -78,12 +78,16 @@ porta serial.
 
 - [x] Preparar `FakeServo` para simular posição e estado de movimento.
 - [x] Implementar e testar `Joint.is_moving()`.
-- [ ] Criar `Joint.command()` não bloqueante.
+- [x] Criar `Joint.command()` não bloqueante.
 - [ ] Separar comando não bloqueante de movimento bloqueante.
 - [ ] Implementar espera com tolerância, intervalo de consulta e timeout.
 - [ ] Detectar servo parado fora do alvo.
 - [ ] Manter torque habilitado após falha.
 - [ ] Testar sucesso, parada, timeout e erro de comunicação.
+
+Decisão aplicada: o `move()` antigo foi removido ao criar `command()`. A classe
+ficará temporariamente sem `move()` até que a versão bloqueante, com espera e
+timeout, seja implementada e testada.
 
 ### Critério de conclusão
 
