@@ -1,7 +1,7 @@
 from collections.abc import Callable
 
 from calibration.test_arm_poses import run_pose_tester
-from actions.mirror_action import run_mirror_action
+from actions.mirror_action import main_mirror
 from models.RobotArm import RobotArm
 
 
@@ -20,6 +20,6 @@ def execute_action(
     if normalized == "test":
         run_pose_tester(arm, input_fn=input_fn, output_fn=output_fn)
     elif normalized == "mirror":
-        run_mirror_action(arm, input_fn=input_fn, output_fn=output_fn)
+        main_mirror(arm, input_fn=input_fn, output_fn=output_fn)
     else:
         raise ValueError(f"Ação desconhecida: '{action}'")

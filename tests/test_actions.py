@@ -56,13 +56,15 @@ class ActionsTestCase(unittest.TestCase):
         self.assertTrue(any("Teste de Poses Sincronizadas" in out for out in outputs))
 
     def test_execute_action_mirror(self) -> None:
+        inputs = ["n"]  # Recusa avançar para sair imediatamente
         outputs: list[str] = []
         execute_action(
             "mirror",
             self.arm,
+            input_fn=lambda _: inputs.pop(0),
             output_fn=outputs.append,
         )
-        self.assertTrue(any("mirror" in out.lower() for out in outputs))
+        self.assertTrue(any("espelhamento" in out.lower() or "mirror" in out.lower() for out in outputs))
 
     def test_main_parse_args_defaults(self) -> None:
         import sys

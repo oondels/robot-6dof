@@ -293,3 +293,23 @@ Código, documentação e binários de projetos de terceiros, incluindo referên
 de robótica e ferramentas do fabricante. Não importar automaticamente módulos
 da aplicação a partir desse diretório e não editar seus arquivos como parte de
 uma mudança comum no controlador.
+
+## Ações e Espelhamento (`actions/`)
+
+### `actions/router.py`
+Roteador central de comandos da CLI. Encapsula o despacho de ações para o [`RobotArm`](../models/RobotArm.py), eliminando duplicação de inicialização de hardware.
+
+### `actions/mirror_action.py`
+Implementa o sistema completo de **Teach and Repeat / Espelhamento de Movimentos**:
+
+#### 1. Módulos Desenvolvidos pelo Usuário:
+- `set_robot_home_pose(arm)`: Posicionamento suave na pose Home ($0^\circ$).
+- `save_result(mirror_positions)`: Serialização da trajetória capturada em JSON (`mirror_positions.json`).
+- `load_mirror_result()`: Desserialização e leitura da trajetória salva.
+- `main_mirror(arm)`: Fluxo interativo de captura manual (*Teach Mode*), com desligamento supervisionado de torque e detecção de movimento por limiar angular (`ANGLE_BASE_TOLERANCE = 2.5°`).
+- `replay_trajectory(arm)` (**Modo 1**): Reprodução fiel dos pontos gravados em tempo real com as pausas humanas originais.
+
+#### 2. Módulos Adicionados para Suavização:
+- `generate_smooth_trajectory(trajectory, target_speed_deg_s, sample_interval)`: Algoritmo puro de reamostragem por comprimento de arco e interpolação linear (LERP a $25\text{ Hz}$), eliminando hesitações manuais e gerando velocidade constante uniforme.
+- `replay_smooth_trajectory(arm, ...)` (**Modo 2**): Execução contínua da trajetória suavizada via `SyncWrite` com alinhamento prévio seguro ao ponto $P_0$.
+- `select_and_run_replay(arm)`: Menu seletor interativo que permite ao operador escolher entre o Modo 1 (Original) e o Modo 2 (Suavizado).

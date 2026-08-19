@@ -34,7 +34,7 @@ JOINT_CONFIGS: tuple[JointConfig, ...] = (
         max_angle=155.0,
         speed=400,
         acc=30,
-        tolerance_deg=2.3,
+        tolerance_deg=4,
     ),
     JointConfig(
         name="wrist_pitch",
