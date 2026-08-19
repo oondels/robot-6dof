@@ -67,6 +67,6 @@ JOINT_CONFIGS: tuple[JointConfig, ...] = (
         max_angle=110.0,
         speed=400,
         acc=30,
-        tolerance_deg=1.0,
+        tolerance_deg=2,
     ),
 )
