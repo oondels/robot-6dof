@@ -87,6 +87,16 @@ class JointConfig:
             )
 
         return self._position_without_validation(angle)
+    
+    def _convert_position_to_angle(self, position: int) -> float:
+        if type(position) is not int:
+            raise TypeError("position deve ser um número inteiro")
+
+        return (
+            (position - self.zero_position)
+            * 360.0
+            / (self.direction * STEPS_PER_REVOLUTION)
+        )
 
     def position_to_angle(self, position: int) -> float:
         if type(position) is not int:
@@ -104,11 +114,7 @@ class JointConfig:
                 f"calibrado [{min_position}, {max_position}]"
             )
 
-        return (
-            (position - self.zero_position)
-            * 360.0
-            / (self.direction * STEPS_PER_REVOLUTION)
-        )
+        return self._convert_position_to_angle(position)
 
     def _validate_name(self) -> None:
         if not isinstance(self.name, str):
