@@ -136,6 +136,8 @@ def replay_trajectory(
 
         if time_to_wait > 0:
             time.sleep(time_to_wait)
+    arm.disable_torque()
+    output_fn("PlayBack da ação de espelhamento concluído.")
 
 
 def run_mirror_action(
