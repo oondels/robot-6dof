@@ -18,7 +18,7 @@ O projeto prioriza **segurança física**, **separação estrita de responsabili
 | **Movimento Simultâneo Atômico (`SyncWrite`)** | ✅ Concluído | Despacho de pacote broadcast único via `SyncWritePosEx` para início simultâneo de todas as juntas com monitoramento conjunto de convergência. |
 | **Roteamento de Ações e CLI (`actions/` e `main.py`)** | ✅ Concluído | CLI com suporte a flags (`--action`, `--port`, `--baudrate`), despachando para status, testador interativo de poses ou módulo mirror. |
 | **Ferramentas de Calibração e Bancada (`calibration/`)** | ✅ Concluído | Leitor de counts sob demanda, leitor contínuo por movimento, testador de junta individual e testador de poses sincronizadas. |
-| **Suíte de Testes Automatizados (`tests/`)** | ✅ Concluído | **93 testes unitários** passando com `unittest` e simulador de alta fidelidade (`FakeServo`), com 0% de dependência de hardware conectado. |
+| **Suíte de Testes Automatizados (`tests/`)** | ✅ Concluído | **103 testes unitários** passando com `unittest` e simulador de alta fidelidade (`FakeServo`), com 0% de dependência de hardware conectado. |
 | **Cinemática Direta / Inversa e Trajetórias Cartesianas** | ⏳ Futuro | Planejado para versões posteriores após consolidação da camada de controle angular. |
 
 ---
@@ -90,15 +90,23 @@ python main.py --action test
 # Executa a ação de espelhamento / gravação de movimentos
 python main.py --action mirror
 
+# Lista todas as ações gravadas disponíveis em recorded_actions/
+python main.py --action list
+
+# Executa diretamente uma ação gravada previamente (sempre alinha na Home antes)
+python main.py --action pegar_copo
+
 # Especificando porta serial e baudrate customizados
 python main.py --action status --port /dev/ttyUSB0 --baudrate 1000000
 ```
 
 #### Flags de Linha de Comando do `main.py`:
-- `--action {status, test, mirror}`: Ação a ser executada (padrão: `status`).
+- `--action {status, test, mirror, list, <nome_da_acao>}`: Ação a ser executada (padrão: `status`).
   - `status`: Lê a telemetria atual de todas as juntas sem habilitar torque e exibe no terminal.
   - `test`: Inicia o menu interativo de poses síncronas (`home`, `wave_small`, customizada).
-  - `mirror`: Roteia para o módulo de espelhamento e gravação de poses (Teach & Repeat), com gravação manual, persistência em JSON e seleção entre Modo 1 (Replay Original em tempo real) e Modo 2 (Replay Suavizado a velocidade constante e interpolação a 25 Hz).
+  - `mirror`: Roteia para o módulo de espelhamento e gravação de poses (Teach & Repeat), com gravação manual, persistência em JSON, opção de salvar como ação nomeada e seleção entre Modo 1 (Original) e Modo 2 (Suavizado).
+  - `list`: Lista em tabela todas as ações salvas no diretório `recorded_actions/`.
+  - `<nome_da_acao>`: Carrega e executa a ação suavizada correspondente em `recorded_actions/`, posicionando o robô na pose Home antes da execução.
 - `--port PORT`: Caminho do dispositivo serial (padrão: `/dev/ttyUSB0`).
 - `--baudrate BAUDRATE`: Taxa de transmissão em baud (padrão: `1000000`).
 

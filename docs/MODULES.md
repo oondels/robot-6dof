@@ -313,3 +313,18 @@ Implementa o sistema completo de **Teach and Repeat / Espelhamento de Movimentos
 - `generate_smooth_trajectory(trajectory, target_speed_deg_s, sample_interval)`: Algoritmo puro de reamostragem por comprimento de arco e interpolação linear (LERP a $25\text{ Hz}$), eliminando hesitações manuais e gerando velocidade constante uniforme.
 - `replay_smooth_trajectory(arm, ...)` (**Modo 2**): Execução contínua da trajetória suavizada via `SyncWrite` com alinhamento prévio seguro ao ponto $P_0$.
 - `select_and_run_replay(arm)`: Menu seletor interativo que permite ao operador escolher entre o Modo 1 (Original) e o Modo 2 (Suavizado).
+
+### `actions/recorded_actions.py`
+Gerencia o ciclo de vida e a execução de **Ações Gravadas Nomeadas** salvas em `recorded_actions/`:
+- `save_named_action(name, trajectory, description, ...)`: Salva a trajetória garantindo conversão para o formato `smooth`, adicionando data/hora ISO, duração e lista de juntas.
+- `load_named_action(name)`: Carrega o arquivo JSON da ação.
+- `list_named_actions()`: Varre o diretório e retorna a lista com metadados.
+- `print_named_actions()`: Imprime tabela com as ações disponíveis.
+- `play_named_action(arm, action_name)`: Executa a ação gravada, garantindo **SEMPRE** o posicionamento prévio na pose Default (Home), alinhamento suave com o ponto $P_0$ e streaming contínuo via `SyncWrite`.
+
+### `utils/trajectory.py`
+Módulo puramente funcional para processamento, reamostragem e interpolação de trajetórias:
+- `calculate_joint_distance(pose_a, pose_b)`: Calcula o maior deslocamento angular entre juntas.
+- `filter_noise_waypoints(trajectory, min_delta_deg)`: Descarta ruídos de encoder menores que a tolerância estática.
+- `generate_smooth_trajectory(trajectory, target_speed_deg_s, sample_interval)`: Converte trajetórias brutas em trajetórias de alta taxa ($25\text{ Hz}$) a velocidade constante.
+- `calculate_trajectory_duration(trajectory)`: Retorna a duração total da trajetória.
