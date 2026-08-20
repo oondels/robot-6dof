@@ -16,9 +16,8 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Controlador do Braço Robótico 6-DOF.")
     parser.add_argument(
         "--action",
-        choices=["status", "test", "mirror"],
         default="status",
-        help="Ação a ser executada pelo robô (padrão: 'status')",
+        help="Ação a ser executada: status, test, mirror, list ou <nome_da_acao_gravada> (padrão: 'status')",
     )
     parser.add_argument("--port", default=DEFAULT_PORT, help="Porta serial de comunicação")
     parser.add_argument("--baudrate", type=int, default=DEFAULT_BAUDRATE, help="Taxa de transmissão em baud")
@@ -49,6 +48,12 @@ def print_arm_status(arm: RobotArm) -> None:
 def main() -> None:
     args = parse_args()
 
+    # 1. Ação de listagem não requer abertura de hardware
+    if args.action == "list":
+        execute_action("list")
+        return
+
+    # 2. Demais ações requerem configuração de juntas e hardware
     if not JOINT_CONFIGS:
         raise RuntimeError(
             "Nenhuma junta calibrada. "

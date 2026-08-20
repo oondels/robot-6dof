@@ -7,9 +7,11 @@ import json
 
 from scservo_sdk import PortHandler, sms_sts
 
+from actions.recorded_actions import save_named_action
 from models.Joint import Joint
 from models.RobotArm import RobotArm
 from robot_config import JOINT_CONFIGS
+from utils.trajectory import generate_smooth_trajectory
 
 DEFAULT_PORT = "/dev/ttyUSB0"
 DEFAULT_BAUDRATE = 1_000_000
@@ -107,7 +109,7 @@ def replay_trajectory(
     if not reset_position.strip().lower() in ("s", "sim", "y", "yes"):
         output_fn("PlayBack cancelado pelo operador.")
         return
-
+    
     time.sleep(1)  # Tempo de segurança antes de mover o braço
     set_robot_home_pose(arm, output_fn=output_fn)
 
@@ -136,126 +138,7 @@ def replay_trajectory(
 
         if time_to_wait > 0:
             time.sleep(time_to_wait)
-    arm.disable_torque()
     output_fn("PlayBack da ação de espelhamento concluído.")
-
-
-# ==============================================================================
-# [MODO 2 ADICIONAL] Pipeline de Suavização e Reamostragem com Velocidade Constante
-# ==============================================================================
-
-
-def generate_smooth_trajectory(
-    trajectory: list[dict[str, Any]],
-    target_speed_deg_s: float = 35.0,
-    sample_interval: float = 0.04,
-) -> list[dict[str, Any]]:
-    """Gera uma nova trajetória reamostrada com velocidade angular constante e interpolação linear densa.
-
-    Matemática aplicada:
-    1. Filtro de Ruído: Remove pontos consecutivos com variação angular desprezível (< 0.2°).
-    2. Reamostragem por Arco: O tempo de cada trecho é recalculado como (Δθ_max / target_speed),
-       eliminando pausas e hesitações manuais gravadas acidentalmente.
-    3. Interpolação a 25 Hz (40ms): Cria waypoints intermediários a cada sample_interval para garantir
-       que o envio via SyncWrite seja contínuo e sem degraus/trancos.
-
-    Args:
-        trajectory: Lista de poses brutas gravadas [{"time": float, "angles": dict[str, float]}].
-        target_speed_deg_s: Velocidade angular da junta líder em graus/s (padrão: 35°/s).
-        sample_interval: Período de amostragem em segundos (padrão: 0.04s = 25Hz).
-
-    Returns:
-        Nova lista de waypoints suavizados e interpolados.
-    """
-    if not trajectory:
-        return []
-
-    if len(trajectory) == 1:
-        return [{"time": 0.0, "angles": trajectory[0]["angles"].copy()}]
-
-    # 1. Filtra waypoints redundantes (ruído estático de encoder < 0.2°)
-    clean_waypoints = [trajectory[0]]
-    for wp in trajectory[1:]:
-        last_angles = clean_waypoints[-1]["angles"]
-        curr_angles = wp["angles"]
-        max_delta = max(
-            abs(curr_angles[name] - last_angles[name]) for name in curr_angles
-        )
-        if max_delta >= 0.2:
-            clean_waypoints.append(wp)
-
-    if len(clean_waypoints) == 1:
-        return [{"time": 0.0, "angles": clean_waypoints[0]["angles"].copy()}]
-
-    # 2. Recalcula os tempos de cada trecho para velocidade angular constante
-    cumulative_times: list[float] = [0.0]
-    total_time = 0.0
-
-    for i in range(1, len(clean_waypoints)):
-        prev_angles = clean_waypoints[i - 1]["angles"]
-        curr_angles = clean_waypoints[i]["angles"]
-        # Junta líder: a que percorre a maior amplitude angular no trecho
-        max_delta = max(
-            abs(curr_angles[name] - prev_angles[name]) for name in curr_angles
-        )
-        # Duração necessária para percorrer max_delta a target_speed_deg_s
-        duration = max(sample_interval, max_delta / target_speed_deg_s)
-        total_time += duration
-        cumulative_times.append(total_time)
-
-    # 3. Interpolação de alta densidade a 25 Hz (sample_interval = 0.04s)
-    smooth_trajectory: list[dict[str, Any]] = []
-    current_time = 0.0
-    joint_names = list(clean_waypoints[0]["angles"].keys())
-    num_segments = len(clean_waypoints) - 1
-    seg_idx = 0
-
-    while current_time <= total_time + 1e-6:
-        # Avança para o segmento correspondente ao tempo atual
-        while (
-            seg_idx < num_segments - 1 and current_time > cumulative_times[seg_idx + 1]
-        ):
-            seg_idx += 1
-
-        t_start = cumulative_times[seg_idx]
-        t_end = cumulative_times[seg_idx + 1]
-        seg_duration = t_end - t_start
-
-        if seg_duration > 0:
-            alpha = (current_time - t_start) / seg_duration
-            alpha = max(0.0, min(1.0, alpha))
-        else:
-            alpha = 1.0
-
-        p_start = clean_waypoints[seg_idx]["angles"]
-        p_end = clean_waypoints[seg_idx + 1]["angles"]
-
-        # Interpolação linear (LERP) para cada uma das 6 juntas
-        interpolated_angles = {
-            name: p_start[name] + alpha * (p_end[name] - p_start[name])
-            for name in joint_names
-        }
-
-        smooth_trajectory.append(
-            {
-                "time": round(current_time, 4),
-                "angles": interpolated_angles,
-            }
-        )
-
-        current_time += sample_interval
-
-    # Garante que a última pose exata esteja presente
-    last_expected_pose = clean_waypoints[-1]["angles"]
-    if smooth_trajectory and smooth_trajectory[-1]["angles"] != last_expected_pose:
-        smooth_trajectory.append(
-            {
-                "time": round(total_time, 4),
-                "angles": last_expected_pose.copy(),
-            }
-        )
-
-    return smooth_trajectory
 
 
 def replay_smooth_trajectory(
@@ -266,15 +149,13 @@ def replay_smooth_trajectory(
     sample_interval: float = 0.04,
 ) -> None:
     """[Modo 2] Reproduz a trajetória gravada de forma suavizada, contínua e a velocidade constante."""
-    output_fn(
-        "\n\n=== Iniciando PlayBack Modo 2 (Velocidade Constante Suavizada) ===\n"
-    )
+    output_fn("\n\n=== Iniciando PlayBack Modo 2 (Velocidade Constante Suavizada) ===\n")
     raw_trajectory = load_mirror_result()
     if not raw_trajectory:
         output_fn("Nenhum resultado de espelhamento encontrado para teste.")
         return
 
-    # Gera a trajetória reamostrada e interpolada
+    # Gera a trajetória reamostrada e interpolada usando o módulo desacoplado
     smooth_traj = generate_smooth_trajectory(
         raw_trajectory,
         target_speed_deg_s=target_speed_deg_s,
@@ -344,7 +225,7 @@ def select_and_run_replay(
 
     choice = input_fn("Selecione a opção desejada (1 ou 2): ").strip()
     if choice == "2":
-        replay_smooth_trajectory(arm, input_fn=input_fn, output_fn=output_fn)
+        replay_smooth_trajectory(arm, input_fn=input_fn, output_fn=output_fn, target_speed_deg_s=60.0, sample_interval=0.01)
     elif choice == "1":
         replay_trajectory(arm, input_fn=input_fn, output_fn=output_fn)
     else:
@@ -352,7 +233,7 @@ def select_and_run_replay(
         replay_trajectory(arm, input_fn=input_fn, output_fn=output_fn)
 
 
-def main_mirror(
+def run_mirror_action(
     arm: RobotArm,
     input_fn: Callable[[str], str] = input,
     output_fn: Callable[[str], None] = print,
@@ -401,50 +282,78 @@ def main_mirror(
     last_motion_time = None
     last_angles = arm.current_angles()
 
-    while recording:
-        now = time.monotonic()
-        current_angles = arm.current_angles()
+    output_fn("Gravando... Mova o braço. Pressione Ctrl+C para finalizar.")
+    try:
+        while recording:
+                now = time.monotonic()
+                current_angles = arm.current_angles()
 
-        moved = any(
-            abs(current_angles[name] - last_angles[name]) > ANGLE_BASE_TOLERANCE
-            for name in arm.joint_names
-        )
+                moved = any(
+                    abs(current_angles[name] - last_angles[name]) > ANGLE_BASE_TOLERANCE
+                    for name in arm.joint_names
+                )
 
-        if moved:
-            if start_time is None:
-                start_time = now
+                if moved:
+                    if start_time is None:
+                        start_time = now
 
-            last_motion_time = now
+                    last_motion_time = now
 
-            mirror_positions.append(
-                {
-                    "time": now - start_time,
-                    "angles": current_angles.copy(),
-                }
-            )
+                    mirror_positions.append(
+                        {
+                            "time": now - start_time,
+                            "angles": current_angles.copy(),
+                        }
+                    )
 
-            last_angles = current_angles.copy()
+                    last_angles = current_angles.copy()
 
-            output_fn(f"Movimento detectado -> registrando pose")
+                    output_fn(f"Movimento detectado -> registrando pose")
+                    
+                
+                if (
+                    start_time is not None
+                    and last_motion_time is not None
+                    and now - last_motion_time >= STOP_RECORD_TIME_TOLERANCE
+                ):
+                    output_fn("Braço parado. Finalizando gravação.")
+                    arm.disable_torque()
+                    recording = False
 
-        if (
-            start_time is not None
-            and last_motion_time is not None
-            and now - last_motion_time >= STOP_RECORD_TIME_TOLERANCE
-        ):
-            output_fn("Braço parado. Finalizando gravação.")
-            arm.disable_torque()
-            recording = False
+                    save_result(mirror_positions)
+                    break
 
-            # Salva Resultados em JSON
-            save_result(mirror_positions)
-            break
+                time.sleep(RECORD_TIME_GAP)
+            
+    except KeyboardInterrupt:
+        output_fn("\nGravação finalizada pelo operador (Ctrl+C).")
 
-        time.sleep(RECORD_TIME_GAP)
-
+    # 1. Executa a reprodução (com seleção de Modo 1 ou 2)
     select_and_run_replay(arm, input_fn=input_fn, output_fn=output_fn)
-    disable_torque = input_fn("\n\nDesabilitar torque? (s/n): ")
 
-    if disable_torque:
+    # 2. Pergunta se deseja salvar o movimento gravado como uma ação nomeada
+    if mirror_positions:
+        save_result(mirror_positions)
+        
+        salvar_acao = input_fn("\n\nDeseja salvar esse movimento como uma ação? (s/n): ")
+        if salvar_acao.strip().lower() in ("s", "sim", "y", "yes"):
+            nome_acao = input_fn("Digite o identificador da ação (ex: pegar_copo, danca, tchau): ").strip()
+            if nome_acao:
+                desc = input_fn("Digite uma breve descrição (opcional): ").strip()
+                try:
+                    saved_path = save_named_action(
+                        name=nome_acao,
+                        trajectory=mirror_positions,
+                        description=desc,
+                    )
+                    output_fn(f"-> Ação '{nome_acao}' salva com sucesso em: {saved_path}")
+                except Exception as e:
+                    output_fn(f"ERRO ao salvar ação: {e}")
+    
+    disable_torque = input_fn("\n\nDesabilitar torque voltar ao home e desabilitar torque? (s/n): ")
+
+    if disable_torque.strip().lower() in ("s", "sim", "y", "yes"):
+        set_robot_home_pose(arm, output_fn=output_fn)
+        time.sleep(1)  # Tempo de segurança antes de desabilitar torque
         arm.disable_torque()
         output_fn("Torque desabilitado. Ação de espelhamento concluída.")

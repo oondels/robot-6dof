@@ -39,10 +39,14 @@ class ActionsTestCase(unittest.TestCase):
 
     def test_execute_action_rejects_unknown_action(self) -> None:
         with self.assertRaises(ValueError):
-            execute_action("invalid_action", self.arm)
+            execute_action("invalid_action_xyz", self.arm)
+
+    def test_execute_action_list(self) -> None:
+        outputs: list[str] = []
+        execute_action("list", output_fn=outputs.append)
+        self.assertTrue(any("Ações Gravadas Disponíveis" in out for out in outputs))
 
     def test_execute_action_test(self) -> None:
-        # Testa chamada da action "test", que executa run_pose_tester
         inputs = ["n"]  # Recusa ligar torque para sair imediatamente
         outputs: list[str] = []
 
@@ -84,7 +88,6 @@ class ActionsTestCase(unittest.TestCase):
         self.assertEqual(len(arm), len(main.JOINT_CONFIGS))
 
     def test_main_print_arm_status(self) -> None:
-        # Garante que print_arm_status roda sem exceção
         main.print_arm_status(self.arm)
 
 
