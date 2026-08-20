@@ -272,7 +272,7 @@ def run_mirror_action(
 
     ANGLE_BASE_TOLERANCE = 2.5
     STOP_RECORD_TIME_TOLERANCE = 10
-    RECORD_TIME_GAP = 0.3
+    RECORD_TIME_GAP = 0.1
     arm.disable_torque()
 
     mirror_positions: list[dict[str, Any]] = []
