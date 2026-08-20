@@ -2,672 +2,199 @@
     {
         "time": 0.0,
         "angles": {
-            "base_yaw": -0.791015625,
-            "shoulder_pitch": 1.7578125,
-            "elbow_pitch": 6.85546875,
-            "wrist_pitch": 1.494140625,
-            "wrist_roll": -1.40625,
+            "base_yaw": -0.17578125,
+            "shoulder_pitch": -0.3515625,
+            "elbow_pitch": 0.087890625,
+            "wrist_pitch": 5.44921875,
+            "wrist_roll": 1.142578125,
             "gripper": 2.021484375
         }
     },
     {
-        "time": 0.31350074600049993,
+        "time": 0.3145787579996977,
         "angles": {
-            "base_yaw": -0.791015625,
-            "shoulder_pitch": 15.99609375,
-            "elbow_pitch": 22.67578125,
-            "wrist_pitch": 1.494140625,
-            "wrist_roll": -1.40625,
+            "base_yaw": -0.17578125,
+            "shoulder_pitch": -0.3515625,
+            "elbow_pitch": 0.087890625,
+            "wrist_pitch": 28.30078125,
+            "wrist_roll": 0.791015625,
             "gripper": 2.021484375
         }
     },
     {
-        "time": 0.6269980709985248,
+        "time": 0.6283509560016682,
         "angles": {
-            "base_yaw": -0.791015625,
-            "shoulder_pitch": 23.203125,
-            "elbow_pitch": 36.03515625,
-            "wrist_pitch": 1.494140625,
-            "wrist_roll": -1.40625,
+            "base_yaw": -0.263671875,
+            "shoulder_pitch": -0.3515625,
+            "elbow_pitch": 0.087890625,
+            "wrist_pitch": 32.431640625,
+            "wrist_roll": 0.791015625,
             "gripper": 2.021484375
         }
     },
     {
-        "time": 0.9413316179998219,
+        "time": 0.942854212000384,
         "angles": {
-            "base_yaw": -0.791015625,
-            "shoulder_pitch": 26.19140625,
-            "elbow_pitch": 44.208984375,
-            "wrist_pitch": 1.494140625,
-            "wrist_roll": -1.40625,
+            "base_yaw": -0.263671875,
+            "shoulder_pitch": -0.3515625,
+            "elbow_pitch": 0.087890625,
+            "wrist_pitch": 43.41796875,
+            "wrist_roll": 0.87890625,
             "gripper": 2.021484375
         }
     },
     {
-        "time": 1.2574367150009493,
+        "time": 1.2571091380013968,
         "angles": {
-            "base_yaw": -0.791015625,
-            "shoulder_pitch": 26.103515625,
-            "elbow_pitch": 52.20703125,
-            "wrist_pitch": 1.494140625,
-            "wrist_roll": -1.40625,
+            "base_yaw": -0.263671875,
+            "shoulder_pitch": -0.3515625,
+            "elbow_pitch": 0.087890625,
+            "wrist_pitch": 52.646484375,
+            "wrist_roll": 0.966796875,
             "gripper": 2.021484375
         }
     },
     {
-        "time": 1.5709325110001373,
+        "time": 1.5711087719973875,
         "angles": {
-            "base_yaw": -0.703125,
-            "shoulder_pitch": 25.3125,
-            "elbow_pitch": 57.12890625,
-            "wrist_pitch": 1.494140625,
-            "wrist_roll": -1.40625,
+            "base_yaw": -0.263671875,
+            "shoulder_pitch": -0.3515625,
+            "elbow_pitch": 0.087890625,
+            "wrist_pitch": 65.654296875,
+            "wrist_roll": 1.0546875,
             "gripper": 2.021484375
         }
     },
     {
-        "time": 1.8843324710032903,
+        "time": 1.884730876001413,
         "angles": {
-            "base_yaw": -0.703125,
-            "shoulder_pitch": 25.224609375,
-            "elbow_pitch": 62.138671875,
-            "wrist_pitch": 1.494140625,
-            "wrist_roll": -1.40625,
+            "base_yaw": -0.263671875,
+            "shoulder_pitch": -0.3515625,
+            "elbow_pitch": 0.087890625,
+            "wrist_pitch": 77.34375,
+            "wrist_roll": 1.142578125,
             "gripper": 2.021484375
         }
     },
     {
-        "time": 4.082211927001481,
+        "time": 2.2012327460033703,
         "angles": {
-            "base_yaw": -0.52734375,
-            "shoulder_pitch": 25.13671875,
-            "elbow_pitch": 60.99609375,
-            "wrist_pitch": 14.4140625,
-            "wrist_roll": -1.0546875,
+            "base_yaw": -0.263671875,
+            "shoulder_pitch": -0.3515625,
+            "elbow_pitch": 0.087890625,
+            "wrist_pitch": 88.681640625,
+            "wrist_roll": 1.142578125,
             "gripper": 2.021484375
         }
     },
     {
-        "time": 4.395797769000637,
+        "time": 2.514668857002107,
         "angles": {
-            "base_yaw": -0.615234375,
-            "shoulder_pitch": 25.224609375,
-            "elbow_pitch": 60.99609375,
-            "wrist_pitch": 19.951171875,
-            "wrist_roll": -1.0546875,
+            "base_yaw": -0.263671875,
+            "shoulder_pitch": -0.3515625,
+            "elbow_pitch": 0.087890625,
+            "wrist_pitch": 103.359375,
+            "wrist_roll": 1.142578125,
             "gripper": 2.021484375
         }
     },
     {
-        "time": 7.2228485840023495,
+        "time": 2.8286637060009525,
         "angles": {
             "base_yaw": -0.17578125,
-            "shoulder_pitch": 25.3125,
-            "elbow_pitch": 61.083984375,
-            "wrist_pitch": 20.302734375,
-            "wrist_roll": -1.494140625,
-            "gripper": 20.56640625
+            "shoulder_pitch": -0.439453125,
+            "elbow_pitch": 0.087890625,
+            "wrist_pitch": 110.478515625,
+            "wrist_roll": 1.142578125,
+            "gripper": 2.021484375
         }
     },
     {
-        "time": 7.536511061000056,
-        "angles": {
-            "base_yaw": -0.17578125,
-            "shoulder_pitch": 25.3125,
-            "elbow_pitch": 61.083984375,
-            "wrist_pitch": 20.302734375,
-            "wrist_roll": -1.494140625,
-            "gripper": 29.619140625
-        }
-    },
-    {
-        "time": 7.850235153004178,
-        "angles": {
-            "base_yaw": -0.17578125,
-            "shoulder_pitch": 25.3125,
-            "elbow_pitch": 61.083984375,
-            "wrist_pitch": 20.126953125,
-            "wrist_roll": -1.494140625,
-            "gripper": 35.595703125
-        }
-    },
-    {
-        "time": 8.163808147000964,
-        "angles": {
-            "base_yaw": -0.17578125,
-            "shoulder_pitch": 25.3125,
-            "elbow_pitch": 60.99609375,
-            "wrist_pitch": 20.302734375,
-            "wrist_roll": -1.494140625,
-            "gripper": 47.373046875
-        }
-    },
-    {
-        "time": 8.47727000300074,
-        "angles": {
-            "base_yaw": -0.17578125,
-            "shoulder_pitch": 25.3125,
-            "elbow_pitch": 60.99609375,
-            "wrist_pitch": 19.775390625,
-            "wrist_roll": -1.494140625,
-            "gripper": 56.42578125
-        }
-    },
-    {
-        "time": 8.791917686001398,
-        "angles": {
-            "base_yaw": -0.17578125,
-            "shoulder_pitch": 25.3125,
-            "elbow_pitch": 60.99609375,
-            "wrist_pitch": 19.775390625,
-            "wrist_roll": -1.494140625,
-            "gripper": 62.75390625
-        }
-    },
-    {
-        "time": 10.677687449002406,
+        "time": 3.142138993003755,
         "angles": {
             "base_yaw": -0.263671875,
-            "shoulder_pitch": 25.3125,
-            "elbow_pitch": 61.083984375,
-            "wrist_pitch": 20.0390625,
-            "wrist_roll": 14.853515625,
-            "gripper": 63.80859375
+            "shoulder_pitch": -0.439453125,
+            "elbow_pitch": 0.087890625,
+            "wrist_pitch": 123.310546875,
+            "wrist_roll": 1.142578125,
+            "gripper": 2.021484375
         }
     },
     {
-        "time": 10.991439814999467,
-        "angles": {
-            "base_yaw": -0.087890625,
-            "shoulder_pitch": 25.3125,
-            "elbow_pitch": 61.083984375,
-            "wrist_pitch": 20.302734375,
-            "wrist_roll": 41.748046875,
-            "gripper": 63.80859375
-        }
-    },
-    {
-        "time": 11.305313055003353,
-        "angles": {
-            "base_yaw": -0.087890625,
-            "shoulder_pitch": 25.3125,
-            "elbow_pitch": 61.171875,
-            "wrist_pitch": 20.21484375,
-            "wrist_roll": 57.744140625,
-            "gripper": 63.80859375
-        }
-    },
-    {
-        "time": 11.620244217003346,
-        "angles": {
-            "base_yaw": -0.087890625,
-            "shoulder_pitch": 25.3125,
-            "elbow_pitch": 61.171875,
-            "wrist_pitch": 19.6875,
-            "wrist_roll": 76.904296875,
-            "gripper": 63.80859375
-        }
-    },
-    {
-        "time": 11.934787536003569,
-        "angles": {
-            "base_yaw": -0.087890625,
-            "shoulder_pitch": 25.3125,
-            "elbow_pitch": 61.171875,
-            "wrist_pitch": 19.6875,
-            "wrist_roll": 82.44140625,
-            "gripper": 63.80859375
-        }
-    },
-    {
-        "time": 13.191795427002944,
+        "time": 5.025676060002297,
         "angles": {
             "base_yaw": -0.263671875,
-            "shoulder_pitch": 25.224609375,
-            "elbow_pitch": 61.083984375,
-            "wrist_pitch": 20.0390625,
-            "wrist_roll": 69.609375,
-            "gripper": 64.248046875
+            "shoulder_pitch": -0.087890625,
+            "elbow_pitch": 0.087890625,
+            "wrist_pitch": 125.15625,
+            "wrist_roll": 0.87890625,
+            "gripper": 14.58984375
         }
     },
     {
-        "time": 13.505828589004523,
-        "angles": {
-            "base_yaw": -0.439453125,
-            "shoulder_pitch": 25.224609375,
-            "elbow_pitch": 61.083984375,
-            "wrist_pitch": 20.21484375,
-            "wrist_roll": 42.01171875,
-            "gripper": 64.248046875
-        }
-    },
-    {
-        "time": 13.820163374002732,
-        "angles": {
-            "base_yaw": -0.439453125,
-            "shoulder_pitch": 25.224609375,
-            "elbow_pitch": 61.083984375,
-            "wrist_pitch": 20.0390625,
-            "wrist_roll": 17.9296875,
-            "gripper": 64.248046875
-        }
-    },
-    {
-        "time": 14.134953911001503,
-        "angles": {
-            "base_yaw": -0.263671875,
-            "shoulder_pitch": 25.224609375,
-            "elbow_pitch": 61.083984375,
-            "wrist_pitch": 20.0390625,
-            "wrist_roll": -6.15234375,
-            "gripper": 64.16015625
-        }
-    },
-    {
-        "time": 14.448361216003832,
-        "angles": {
-            "base_yaw": -0.263671875,
-            "shoulder_pitch": 25.224609375,
-            "elbow_pitch": 61.083984375,
-            "wrist_pitch": 19.775390625,
-            "wrist_roll": -26.3671875,
-            "gripper": 63.984375
-        }
-    },
-    {
-        "time": 14.762937206003699,
-        "angles": {
-            "base_yaw": -0.263671875,
-            "shoulder_pitch": 25.224609375,
-            "elbow_pitch": 61.083984375,
-            "wrist_pitch": 19.6875,
-            "wrist_roll": -46.23046875,
-            "gripper": 63.896484375
-        }
-    },
-    {
-        "time": 15.07689130500512,
-        "angles": {
-            "base_yaw": -0.263671875,
-            "shoulder_pitch": 25.224609375,
-            "elbow_pitch": 61.171875,
-            "wrist_pitch": 19.6875,
-            "wrist_roll": -69.521484375,
-            "gripper": 63.80859375
-        }
-    },
-    {
-        "time": 15.391101023000374,
+        "time": 5.342415300998255,
         "angles": {
             "base_yaw": -0.17578125,
-            "shoulder_pitch": 25.224609375,
-            "elbow_pitch": 61.171875,
-            "wrist_pitch": 19.6875,
-            "wrist_roll": -75.146484375,
-            "gripper": 63.80859375
+            "shoulder_pitch": -0.17578125,
+            "elbow_pitch": 0.087890625,
+            "wrist_pitch": 125.244140625,
+            "wrist_roll": 0.87890625,
+            "gripper": 43.330078125
         }
     },
     {
-        "time": 16.647400080000807,
-        "angles": {
-            "base_yaw": -0.263671875,
-            "shoulder_pitch": 25.13671875,
-            "elbow_pitch": 61.259765625,
-            "wrist_pitch": 20.126953125,
-            "wrist_roll": -64.423828125,
-            "gripper": 64.248046875
-        }
-    },
-    {
-        "time": 16.961144075998163,
-        "angles": {
-            "base_yaw": -0.087890625,
-            "shoulder_pitch": 25.13671875,
-            "elbow_pitch": 61.171875,
-            "wrist_pitch": 19.775390625,
-            "wrist_roll": -36.5625,
-            "gripper": 64.248046875
-        }
-    },
-    {
-        "time": 17.27554060100374,
-        "angles": {
-            "base_yaw": -0.087890625,
-            "shoulder_pitch": 25.13671875,
-            "elbow_pitch": 61.171875,
-            "wrist_pitch": 19.775390625,
-            "wrist_roll": -21.62109375,
-            "gripper": 64.248046875
-        }
-    },
-    {
-        "time": 17.590173686003254,
-        "angles": {
-            "base_yaw": -0.087890625,
-            "shoulder_pitch": 25.13671875,
-            "elbow_pitch": 61.171875,
-            "wrist_pitch": 19.775390625,
-            "wrist_roll": -6.6796875,
-            "gripper": 64.248046875
-        }
-    },
-    {
-        "time": 17.904774997005006,
-        "angles": {
-            "base_yaw": -0.087890625,
-            "shoulder_pitch": 25.13671875,
-            "elbow_pitch": 61.171875,
-            "wrist_pitch": 19.6875,
-            "wrist_roll": -3.515625,
-            "gripper": 64.248046875
-        }
-    },
-    {
-        "time": 19.787524904000747,
-        "angles": {
-            "base_yaw": -0.615234375,
-            "shoulder_pitch": 25.224609375,
-            "elbow_pitch": 61.083984375,
-            "wrist_pitch": 20.390625,
-            "wrist_roll": -4.04296875,
-            "gripper": 61.171875
-        }
-    },
-    {
-        "time": 20.101269940001657,
-        "angles": {
-            "base_yaw": -0.52734375,
-            "shoulder_pitch": 25.224609375,
-            "elbow_pitch": 61.083984375,
-            "wrist_pitch": 19.6875,
-            "wrist_roll": -3.779296875,
-            "gripper": 40.25390625
-        }
-    },
-    {
-        "time": 20.415560396002547,
-        "angles": {
-            "base_yaw": -0.263671875,
-            "shoulder_pitch": 25.224609375,
-            "elbow_pitch": 60.99609375,
-            "wrist_pitch": 19.6875,
-            "wrist_roll": -3.779296875,
-            "gripper": 24.43359375
-        }
-    },
-    {
-        "time": 20.7298722800042,
-        "angles": {
-            "base_yaw": -0.263671875,
-            "shoulder_pitch": 25.224609375,
-            "elbow_pitch": 60.99609375,
-            "wrist_pitch": 19.6875,
-            "wrist_roll": -3.779296875,
-            "gripper": 9.580078125
-        }
-    },
-    {
-        "time": 21.04465724599868,
-        "angles": {
-            "base_yaw": -0.263671875,
-            "shoulder_pitch": 25.3125,
-            "elbow_pitch": 60.99609375,
-            "wrist_pitch": 19.6875,
-            "wrist_roll": -3.779296875,
-            "gripper": 2.900390625
-        }
-    },
-    {
-        "time": 22.301187950004532,
+        "time": 5.6563259289978305,
         "angles": {
             "base_yaw": -0.17578125,
-            "shoulder_pitch": 25.3125,
-            "elbow_pitch": 60.99609375,
-            "wrist_pitch": 19.599609375,
-            "wrist_roll": -3.69140625,
-            "gripper": 9.4921875
+            "shoulder_pitch": -0.17578125,
+            "elbow_pitch": 0.087890625,
+            "wrist_pitch": 125.244140625,
+            "wrist_roll": 0.87890625,
+            "gripper": 53.4375
         }
     },
     {
-        "time": 22.61477293200005,
+        "time": 5.970409932000621,
         "angles": {
             "base_yaw": -0.17578125,
-            "shoulder_pitch": 25.224609375,
-            "elbow_pitch": 61.083984375,
-            "wrist_pitch": 19.951171875,
-            "wrist_roll": -3.69140625,
-            "gripper": 23.994140625
+            "shoulder_pitch": -0.17578125,
+            "elbow_pitch": 0.087890625,
+            "wrist_pitch": 125.244140625,
+            "wrist_roll": 0.87890625,
+            "gripper": 58.095703125
         }
     },
     {
-        "time": 22.928417271003127,
+        "time": 6.284563392000564,
         "angles": {
             "base_yaw": -0.17578125,
-            "shoulder_pitch": 25.224609375,
-            "elbow_pitch": 61.083984375,
-            "wrist_pitch": 19.6875,
-            "wrist_roll": -3.69140625,
-            "gripper": 27.7734375
+            "shoulder_pitch": -0.17578125,
+            "elbow_pitch": 0.087890625,
+            "wrist_pitch": 125.244140625,
+            "wrist_roll": 0.87890625,
+            "gripper": 70.400390625
         }
     },
     {
-        "time": 23.24218569700315,
+        "time": 6.598128053003165,
         "angles": {
             "base_yaw": -0.17578125,
-            "shoulder_pitch": 25.224609375,
-            "elbow_pitch": 60.99609375,
-            "wrist_pitch": 19.6875,
-            "wrist_roll": -3.69140625,
-            "gripper": 36.826171875
+            "shoulder_pitch": -0.17578125,
+            "elbow_pitch": 0.087890625,
+            "wrist_pitch": 125.244140625,
+            "wrist_roll": 0.87890625,
+            "gripper": 80.771484375
         }
     },
     {
-        "time": 24.49783465600194,
+        "time": 6.9128687609991175,
         "angles": {
             "base_yaw": -0.17578125,
-            "shoulder_pitch": 25.13671875,
-            "elbow_pitch": 60.99609375,
-            "wrist_pitch": 19.775390625,
-            "wrist_roll": -4.306640625,
-            "gripper": 30.9375
-        }
-    },
-    {
-        "time": 24.811422634003975,
-        "angles": {
-            "base_yaw": -0.17578125,
-            "shoulder_pitch": 25.224609375,
-            "elbow_pitch": 60.8203125,
-            "wrist_pitch": 19.599609375,
-            "wrist_roll": -4.306640625,
-            "gripper": 9.580078125
-        }
-    },
-    {
-        "time": 25.124956154002575,
-        "angles": {
-            "base_yaw": -0.17578125,
-            "shoulder_pitch": 25.224609375,
-            "elbow_pitch": 60.8203125,
-            "wrist_pitch": 19.51171875,
-            "wrist_roll": -4.306640625,
-            "gripper": 4.74609375
-        }
-    },
-    {
-        "time": 26.38325263900333,
-        "angles": {
-            "base_yaw": -0.17578125,
-            "shoulder_pitch": 25.13671875,
-            "elbow_pitch": 51.15234375,
-            "wrist_pitch": 20.302734375,
-            "wrist_roll": -3.779296875,
-            "gripper": 4.74609375
-        }
-    },
-    {
-        "time": 26.69677810500434,
-        "angles": {
-            "base_yaw": -0.17578125,
-            "shoulder_pitch": 25.224609375,
-            "elbow_pitch": 45.3515625,
-            "wrist_pitch": 20.56640625,
-            "wrist_roll": -3.8671875,
-            "gripper": 4.658203125
-        }
-    },
-    {
-        "time": 27.010417392004456,
-        "angles": {
-            "base_yaw": -0.17578125,
-            "shoulder_pitch": 25.3125,
-            "elbow_pitch": 40.341796875,
-            "wrist_pitch": 29.35546875,
-            "wrist_roll": -3.8671875,
-            "gripper": 4.5703125
-        }
-    },
-    {
-        "time": 27.323786501998256,
-        "angles": {
-            "base_yaw": -0.087890625,
-            "shoulder_pitch": 25.224609375,
-            "elbow_pitch": 27.0703125,
-            "wrist_pitch": 49.921875,
-            "wrist_roll": -3.8671875,
-            "gripper": 4.5703125
-        }
-    },
-    {
-        "time": 27.638375679998717,
-        "angles": {
-            "base_yaw": -0.087890625,
-            "shoulder_pitch": 25.3125,
-            "elbow_pitch": 26.455078125,
-            "wrist_pitch": 65.126953125,
-            "wrist_roll": -3.8671875,
-            "gripper": 4.5703125
-        }
-    },
-    {
-        "time": 27.952778309001587,
-        "angles": {
-            "base_yaw": -0.17578125,
-            "shoulder_pitch": 25.3125,
-            "elbow_pitch": 26.455078125,
-            "wrist_pitch": 82.001953125,
-            "wrist_roll": -3.8671875,
-            "gripper": 4.5703125
-        }
-    },
-    {
-        "time": 28.26633020400186,
-        "angles": {
-            "base_yaw": -0.263671875,
-            "shoulder_pitch": 25.3125,
-            "elbow_pitch": 26.3671875,
-            "wrist_pitch": 96.767578125,
-            "wrist_roll": -3.8671875,
-            "gripper": 4.658203125
-        }
-    },
-    {
-        "time": 28.893436994003423,
-        "angles": {
-            "base_yaw": -0.263671875,
-            "shoulder_pitch": 25.83984375,
-            "elbow_pitch": 26.3671875,
-            "wrist_pitch": 89.47265625,
-            "wrist_roll": -3.603515625,
-            "gripper": 4.74609375
-        }
-    },
-    {
-        "time": 29.2070691800036,
-        "angles": {
-            "base_yaw": -0.087890625,
-            "shoulder_pitch": 25.224609375,
-            "elbow_pitch": 27.333984375,
-            "wrist_pitch": 68.37890625,
-            "wrist_roll": -3.8671875,
-            "gripper": 4.74609375
-        }
-    },
-    {
-        "time": 29.521323136003048,
-        "angles": {
-            "base_yaw": -0.087890625,
-            "shoulder_pitch": 25.224609375,
-            "elbow_pitch": 27.421875,
-            "wrist_pitch": 54.931640625,
-            "wrist_roll": -4.04296875,
-            "gripper": 4.74609375
-        }
-    },
-    {
-        "time": 29.835660689001088,
-        "angles": {
-            "base_yaw": 0.0,
-            "shoulder_pitch": 25.13671875,
-            "elbow_pitch": 27.685546875,
-            "wrist_pitch": 44.384765625,
-            "wrist_roll": -4.04296875,
-            "gripper": 4.74609375
-        }
-    },
-    {
-        "time": 30.150058462000743,
-        "angles": {
-            "base_yaw": 0.0,
-            "shoulder_pitch": 25.224609375,
-            "elbow_pitch": 35.068359375,
-            "wrist_pitch": 33.486328125,
-            "wrist_roll": -4.04296875,
-            "gripper": 4.74609375
-        }
-    },
-    {
-        "time": 30.46469173800142,
-        "angles": {
-            "base_yaw": -0.087890625,
-            "shoulder_pitch": 25.13671875,
-            "elbow_pitch": 43.59375,
-            "wrist_pitch": 22.412109375,
-            "wrist_roll": -4.04296875,
-            "gripper": 4.74609375
-        }
-    },
-    {
-        "time": 30.779492134002794,
-        "angles": {
-            "base_yaw": -0.087890625,
-            "shoulder_pitch": 25.13671875,
-            "elbow_pitch": 48.8671875,
-            "wrist_pitch": 14.4140625,
-            "wrist_roll": -4.04296875,
-            "gripper": 4.74609375
-        }
-    },
-    {
-        "time": 31.09442236799805,
-        "angles": {
-            "base_yaw": -0.087890625,
-            "shoulder_pitch": 25.13671875,
-            "elbow_pitch": 54.4921875,
-            "wrist_pitch": 7.3828125,
-            "wrist_roll": -4.04296875,
-            "gripper": 4.74609375
-        }
-    },
-    {
-        "time": 31.409243801004777,
-        "angles": {
-            "base_yaw": -0.087890625,
-            "shoulder_pitch": 25.048828125,
-            "elbow_pitch": 56.6015625,
-            "wrist_pitch": 4.39453125,
-            "wrist_roll": -4.04296875,
-            "gripper": 4.74609375
+            "shoulder_pitch": -0.17578125,
+            "elbow_pitch": 0.087890625,
+            "wrist_pitch": 125.244140625,
+            "wrist_roll": 0.87890625,
+            "gripper": 86.044921875
         }
     }
 ]
