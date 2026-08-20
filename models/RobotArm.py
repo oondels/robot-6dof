@@ -99,8 +99,8 @@ class RobotArm:
         if value <= 0:
             raise ValueError(f"{parameter_name} deve ser maior que zero")
 
-    def command_pose(self, pose: dict[str, float]) -> dict[str, int]:
-        """Transmite uma pose síncrona para todas as juntas usando SyncWritePosEx."""
+    def command_pose(self, pose: dict[str, float], acc: float | None = None, speed: float | None = None) -> dict[str, int]:
+        """Transmite uma pose síncrona para todas as juntas usando SyncWritePosEx."""            
         self.validate_pose(pose)
 
         target_positions: dict[str, int] = {}
@@ -115,8 +115,8 @@ class RobotArm:
                 success = self._servo.SyncWritePosEx(
                     joint.servo_id,
                     target_position,
-                    joint.speed,
-                    joint.acc,
+                    speed if speed else joint.speed,
+                    acc if acc else joint.acc,
                 )
                 if not success:
                     raise RuntimeError(

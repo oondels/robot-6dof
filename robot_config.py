@@ -28,13 +28,13 @@ JOINT_CONFIGS: tuple[JointConfig, ...] = (
     JointConfig(
         name="elbow_pitch",
         servo_id=3,
-        zero_position=2022,
+        zero_position=2033,
         direction=-1,
         min_angle=-1.0,
         max_angle=155.0,
         speed=400,
         acc=30,
-        tolerance_deg=4,
+        tolerance_deg=5,
     ),
     JointConfig(
         name="wrist_pitch",

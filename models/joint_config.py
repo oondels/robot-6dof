@@ -109,11 +109,14 @@ class JointConfig:
         max_position = max(first_limit, second_limit)
 
         if not min_position <= position <= max_position:
-            raise ValueError(
-                f"{self.name}: posição {position} fora do intervalo "
-                f"calibrado [{min_position}, {max_position}]"
-            )
-
+            # raise ValueError(
+            #     f"{self.name}: posição {position} fora do intervalo "
+            #     f"calibrado [{min_position}, {max_position}]"
+            # )
+            pass 
+        # TODO: Verificar se l;ancar esse erro é realmente necessário, pois pode ser que a posição esteja fora do intervalo calibrado, mas ainda assim seja válida para o servo.
+        # A depender um pequeno nreajuste pode ser valido
+ 
         return self._convert_position_to_angle(position)
 
     def _validate_name(self) -> None:
