@@ -42,7 +42,7 @@ def run_reader(
     servo_id: int,
     input_fn: Callable[[str], str] = input,
     output_fn: Callable[[str], None] = print,
-) -> None:
+) -> int | None:
     validate_servo_id(servo_id)
 
     output_fn(
@@ -56,7 +56,7 @@ def run_reader(
         )
 
         if command.strip().lower() == "q":
-            return
+            return None
 
         if command.strip():
             output_fn("Comando inválido. Use apenas Enter ou q.")
@@ -64,6 +64,7 @@ def run_reader(
 
         position = read_position(servo, servo_id)
         output_fn(f"servo {servo_id}: posição={position} counts")
+        return position
 
 
 def parse_args() -> argparse.Namespace:
