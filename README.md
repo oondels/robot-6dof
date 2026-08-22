@@ -231,7 +231,8 @@ Para detalhes técnicos avançados, consulte os guias dedicados em `docs/`:
 - ⚡ [**Guia de Comandos e Operação**](docs/COMMANDS_AND_TESTING_GUIDE.md): Referência rápida de todas as linhas de comando, opções e comportamentos operacionais.
 - 🛡️ [**Segurança e Boas Práticas**](docs/SAFETY_AND_TESTING.md): Protocolos de energização, mitigação de colisão, proteção de torque e manuseio de bancada.
 - 📐 [**Procedimento de Calibração Manual**](docs/CALIBRATION.md): Metodologia passo a passo para levantamento de parâmetros de novos servomotores.
-- 🗺️ [**Plano de Evolução**](PLAN.md): Roadmap técnico e evolução planejada para controle cartesiano e cinemática.
+- 🗺️ [**Roadmap de Evolução e Próximos Passos**](ROADMAP.md): Planejamento detalhado das Fases 1 (Pré-Cinemática / Telemetria), 2 (Cinemática Direta / FK) e 3 (Cinemática Inversa / IK).
+- 📖 [**Plano Pedagógico**](PLAN.md): Arquitetura base e histórico do projeto.
 - ✅ [**Tarefas e Progresso**](TASKS.md): Histórico de etapas concluídas e critérios de aceite.
 
 ---
