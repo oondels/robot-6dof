@@ -48,12 +48,18 @@ def print_arm_status(arm: RobotArm) -> None:
 def main() -> None:
     args = parse_args()
 
-    # 1. Ação de listagem não requer abertura de hardware
+    # Ação de listagem não requer abertura de hardware
     if args.action == "list":
         execute_action("list")
         return
 
-    # 2. Demais ações requerem configuração de juntas e hardware
+    # ! TODO: Mover para apos a criacao da instancia do RobotArm, pois a calibracao precisa de hardware
+    # *: Fazer correta configuracao da acao calibrate para recener como instancia nos args RobotArm
+    if args.action == "calibrate":
+        execute_action("calibrate")
+        return
+
+    # Demais ações requerem configuração de juntas e hardware
     if not JOINT_CONFIGS:
         raise RuntimeError(
             "Nenhuma junta calibrada. "
@@ -70,7 +76,8 @@ def main() -> None:
 
         if not port.setBaudRate(args.baudrate):
             raise RuntimeError(f"Erro configurando baudrate {args.baudrate}")
-
+        
+        # Cria objeto RobotArm com as juntas configuradas
         arm = create_arm(servo)
 
         if args.action == "status":

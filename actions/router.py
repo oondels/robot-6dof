@@ -10,6 +10,7 @@ from actions.recorded_actions import (
 )
 from calibration.test_arm_poses import run_pose_tester
 from models.RobotArm import RobotArm
+from calibration.calibration import run_calibration
 
 
 def execute_action(
@@ -37,7 +38,13 @@ def execute_action(
         return
 
     if arm is None:
-        raise ValueError(f"Para executar a ação '{action}', uma instância de RobotArm é necessária.")
+        raise ValueError(
+            f"Para executar a ação '{action}', uma instância de RobotArm é necessária."
+        )
+
+    if normalized == "calibrate":
+        run_calibration(input_fn=input_fn, output_fn=output_fn)
+        return
 
     # 2. Ações nativas do sistema
     if normalized == "test":
@@ -50,7 +57,9 @@ def execute_action(
             clean_name = sanitize_action_name(normalized)
             action_file = DEFAULT_RECORDED_ACTIONS_DIR / f"{clean_name}.json"
             if action_file.exists():
-                play_named_action(arm, clean_name, input_fn=input_fn, output_fn=output_fn)
+                play_named_action(
+                    arm, clean_name, input_fn=input_fn, output_fn=output_fn
+                )
                 return
         except Exception:
             pass
