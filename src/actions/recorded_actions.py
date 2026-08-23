@@ -6,8 +6,8 @@ import re
 import time
 from typing import Any
 
-from models.RobotArm import RobotArm
-from utils.trajectory import (
+from src.models.RobotArm import RobotArm
+from src.utils.trajectory import (
     calculate_trajectory_duration,
     generate_smooth_trajectory,
 )

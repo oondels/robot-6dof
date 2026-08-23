@@ -1,11 +1,11 @@
 import unittest
 from unittest.mock import Mock, patch
 
-from calibration import test_arm_poses as pose_module
-from calibration.test_arm_poses import run_pose_tester
-from models.Joint import Joint
-from models.joint_config import JointConfig
-from models.RobotArm import RobotArm
+from src.calibration import test_arm_poses as pose_module
+from src.calibration.test_arm_poses import run_pose_tester
+from src.models.Joint import Joint
+from src.models.joint_config import JointConfig
+from src.models.RobotArm import RobotArm
 from tests.fake_servo import FakeServo
 
 

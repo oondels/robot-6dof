@@ -1,3 +1,11 @@
+# Arhitetura e Planejamento do Projeto
+
+Iniciando revisao de organizacao arquitetural do projeto, com foco em separacao de responsabilidades, testabilidade e seguranca fisica. O objetivo e permitir que o controle do braço robotico seja feito de forma segura, deterministica e em tempo real, mesmo em caso de falha de comunicacao ou interrupcao inesperada.
+
+-> Um dos focos principais é o meu aprendizado de engenharia robotica.
+
+Pasta `robots/` ccontem os perfis salvos para cada braco/robo
+
 # Robotics — Braço Robótico 6-DOF
 
 Framework modular e didático em Python para controle determinístico, seguro e em tempo real de um **braço robótico articulado de 6 graus de liberdade (6-DOF)**, utilizando servomotores inteligentes seriais com protocolo **SMS-STS / SCServo** (Feetech / Waveshare) via barramento serial RS485/TTL a **1.000.000 baud** (`/dev/ttyUSB0`).

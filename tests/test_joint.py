@@ -1,8 +1,8 @@
 import unittest
 from unittest.mock import patch
 
-from models.Joint import ADDR_TORQUE_ENABLE, Joint, MovementStatus
-from models.joint_config import JointConfig
+from src.models.Joint import ADDR_TORQUE_ENABLE, Joint, MovementStatus
+from src.models.joint_config import JointConfig
 from tests.fake_servo import FakeServo
 
 

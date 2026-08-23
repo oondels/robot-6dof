@@ -1,16 +1,16 @@
 from collections.abc import Callable
 
-from actions.mirror_action import run_mirror_action
-from actions.recorded_actions import (
+from src.actions.mirror_action import run_mirror_action
+from src.actions.recorded_actions import (
     DEFAULT_RECORDED_ACTIONS_DIR,
     list_named_actions,
     play_named_action,
     print_named_actions,
     sanitize_action_name,
 )
-from calibration.test_arm_poses import run_pose_tester
-from models.RobotArm import RobotArm
-from calibration.calibration import run_calibration
+from src.calibration.test_arm_poses import run_pose_tester
+from src.models.RobotArm import RobotArm
+from src.calibration.calibration import run_calibration
 
 
 def execute_action(

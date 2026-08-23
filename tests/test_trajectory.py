@@ -1,6 +1,6 @@
 import unittest
 
-from utils.trajectory import (
+from src.utils.trajectory import (
     calculate_joint_distance,
     calculate_trajectory_duration,
     filter_noise_waypoints,

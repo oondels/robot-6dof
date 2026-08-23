@@ -4,8 +4,8 @@ from typing import Any
 
 from scservo_sdk import PortHandler, sms_sts
 
-from models.Joint import Joint
-from models.joint_config import JointConfig
+from src.models.Joint import Joint
+from src.models.joint_config import JointConfig
 from robot_config import JOINT_CONFIGS
 
 DEFAULT_PORT = "/dev/ttyUSB0"

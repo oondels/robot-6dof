@@ -1,10 +1,10 @@
 import unittest
 from unittest.mock import Mock, patch
 
-from calibration import test_joint_motion as motion_module
-from calibration.test_joint_motion import find_joint_config, run_motion_test
-from models.Joint import Joint
-from models.joint_config import JointConfig
+from src.calibration import test_joint_motion as motion_module
+from src.calibration.test_joint_motion import find_joint_config, run_motion_test
+from src.models.Joint import Joint
+from src.models.joint_config import JointConfig
 from tests.fake_servo import FakeServo
 
 

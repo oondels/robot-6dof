@@ -7,11 +7,11 @@ import json
 
 from scservo_sdk import PortHandler, sms_sts
 
-from actions.recorded_actions import save_named_action
-from models.Joint import Joint
-from models.RobotArm import RobotArm
+from src.actions.recorded_actions import save_named_action
+from src.models.Joint import Joint
+from src.models.RobotArm import RobotArm
 from robot_config import JOINT_CONFIGS
-from utils.trajectory import generate_smooth_trajectory
+from src.utils.trajectory import generate_smooth_trajectory
 
 DEFAULT_PORT = "/dev/ttyUSB0"
 DEFAULT_BAUDRATE = 1_000_000

@@ -2,8 +2,8 @@ import unittest
 from argparse import Namespace
 from unittest.mock import Mock, patch
 
-from calibration import read_joint_position as reader_module
-from calibration.read_joint_position import (
+from src.calibration import read_joint_position as reader_module
+from src.calibration.read_joint_position import (
     read_position,
     run_reader,
     validate_servo_id,

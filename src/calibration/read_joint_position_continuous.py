@@ -6,8 +6,8 @@ import time
 
 from scservo_sdk import PortHandler, sms_sts
 
-from models.joint_config import MAX_SERVO_ID, MIN_SERVO_ID
-from utils.validation import validate_result
+from src.models.joint_config import MAX_SERVO_ID, MIN_SERVO_ID
+from src.utils.validation import validate_result
 
 DEFAULT_PORT = "/dev/ttyUSB0"
 DEFAULT_BAUDRATE = 1_000_000

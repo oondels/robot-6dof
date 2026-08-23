@@ -3,8 +3,8 @@ from math import isfinite
 from time import monotonic, sleep
 from typing import Any
 
-from models.joint_config import JointConfig
-from utils.validation import validate_result
+from src.models.joint_config import JointConfig
+from src.utils.validation import validate_result
 
 ADDR_TORQUE_ENABLE = 40
 TORQUE_DISABLED = 0

@@ -3,8 +3,8 @@ from math import isfinite
 from time import monotonic, sleep
 from typing import Any
 
-from models.Joint import Joint, MovementStatus
-from utils.validation import validate_result
+from src.models.Joint import Joint, MovementStatus
+from src.utils.validation import validate_result
 
 
 class RobotArm:

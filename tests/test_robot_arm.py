@@ -1,8 +1,8 @@
 import unittest
 
-from models.Joint import Joint
-from models.joint_config import JointConfig
-from models.RobotArm import RobotArm
+from src.models.Joint import Joint
+from src.models.joint_config import JointConfig
+from src.models.RobotArm import RobotArm
 from tests.fake_servo import FakeServo
 
 

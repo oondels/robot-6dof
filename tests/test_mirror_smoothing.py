@@ -1,14 +1,14 @@
 import unittest
 from unittest.mock import patch
 
-from actions.mirror_action import (
+from src.actions.mirror_action import (
     generate_smooth_trajectory,
     replay_smooth_trajectory,
     select_and_run_replay,
 )
-from models.Joint import Joint
-from models.joint_config import JointConfig
-from models.RobotArm import RobotArm
+from src.models.Joint import Joint
+from src.models.joint_config import JointConfig
+from src.models.RobotArm import RobotArm
 from tests.fake_servo import FakeServo
 
 

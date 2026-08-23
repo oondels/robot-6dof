@@ -2,7 +2,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from actions.recorded_actions import (
+from src.actions.recorded_actions import (
     list_named_actions,
     load_named_action,
     play_named_action,
@@ -10,9 +10,9 @@ from actions.recorded_actions import (
     sanitize_action_name,
     save_named_action,
 )
-from models.Joint import Joint
-from models.joint_config import JointConfig
-from models.RobotArm import RobotArm
+from src.models.Joint import Joint
+from src.models.joint_config import JointConfig
+from src.models.RobotArm import RobotArm
 from tests.fake_servo import FakeServo
 
 
