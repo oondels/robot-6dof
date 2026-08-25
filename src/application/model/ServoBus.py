@@ -1,7 +1,6 @@
 from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import Protocol
-from src.infrastructure.scservo_bus import ScServoBus
 
 
 @dataclass(frozen=True, slots=True)
@@ -24,6 +23,7 @@ class ServoBus(Protocol):
     def is_moving(self, servo_id: int) -> bool:
         """Informa se o servo está executando um movimento."""
         ...
+
 
     def command_position(
         self,
