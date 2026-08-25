@@ -1,7 +1,9 @@
-from .ServoBus import ServoBus
+from math import isfinite
+from time import monotonic, sleep
+
 from .JointConfig import JointConfig
 from .MovementStatus import MovementStatus
-from typing import Any
+from .ServoBus import ServoBus
 
 
 class Joint:
@@ -14,8 +16,7 @@ class Joint:
             raise TypeError("config deve ser uma instância de JointConfig")
 
         self._config = config
-        self._servo = servo_bus
-
+        self._servo_bus = servo_bus
 
     @property
     def name(self) -> str:
@@ -33,9 +34,13 @@ class Joint:
     def acc(self) -> int:
         return self._config.acc
 
+    @property
+    def tolerance_counts(self) -> int:
+        return self._config.tolerance_counts
+
     def current_position(self) -> int:
         """Lê a posição atual da junta em counts."""
-        return self._servo.read_position(self._config.servo_id)
+        return self._servo_bus.read_position(self.servo_id)
 
     def current_angle(self) -> float:
         """Converte a posição atual da junta em ângulo."""
@@ -44,17 +49,28 @@ class Joint:
 
     def is_torque_enabled(self) -> bool:
         """Verifica se o torque do servo da junta está habilitado."""
-        return self._servo.is_torque_enabled(self._config.servo_id)
+        return self._servo_bus.is_torque_enabled(self.servo_id)
 
     def enable_torque(self) -> None:
+        """Habilita o torque sem buscar um alvo antigo do servo."""
         current_position = self.current_position()
-        
-        """Habilita o torque do servo da junta."""
-        self._servo.enable_torque(self._config.servo_id)
+        self._servo_bus.command_position(
+            self.servo_id,
+            current_position,
+            self.speed,
+            self.acc,
+        )
+        self._servo_bus.enable_torque(self.servo_id)
+
+        if not self.is_torque_enabled():
+            raise RuntimeError(f"{self.name}: torque não foi habilitado")
 
     def disable_torque(self) -> None:
         """Desabilita o torque do servo da junta."""
-        self._servo.disable_torque(self._config.servo_id)
+        self._servo_bus.disable_torque(self.servo_id)
+
+        if self.is_torque_enabled():
+            raise RuntimeError(f"{self.name}: torque não foi desabilitado")
 
     def angle_to_position(self, angle: float) -> int:
         """Converte um ângulo em posição (counts) para a junta."""
@@ -66,15 +82,14 @@ class Joint:
 
     def is_moving(self) -> bool:
         """Verifica se a junta está em movimento."""
-        return self._servo.is_moving(self._config.servo_id)
-        
+        return self._servo_bus.is_moving(self.servo_id)
+
     @staticmethod
     def position_error(
         target_position: int,
         current_position: int,
     ) -> int:
         """Calcula a diferença absoluta entre a posição alvo e a posição atual."""
-        # Verificacao para acoes de movimento da Joitn
         if type(target_position) is not int:
             raise TypeError("target_position deve ser inteiro")
 
@@ -94,101 +109,15 @@ class Joint:
             current_position,
         )
 
-        return error <= self._config.tolerance_counts
+        return error <= self.tolerance_counts
 
     def movement_status(
         self,
         target_position: int,
-    ) -> Any:
+    ) -> MovementStatus:
         """Retorna o status do movimento da junta em relação à posição alvo."""
         current_position = self.current_position()
         moving = self.is_moving()
-
-        position_error = self.position_error(
-            target_position,
-            current_position,
-        )
-
-        within_tolerance = self.is_within_tolerance(
-            target_position,
-            current_position,
-        )
-
-        return MovementStatus (
-            target_position=target_position,
-            current_position=current_position,
-            position_error=position_error,
-            moving=moving,
-            within_tolerance=within_tolerance,
-        )
-        
-    @staticmethod
-    def _validate_wait_parameter(
-        parameter_name: str,
-        value: float,
-    ) -> None:
-        """Valida se o parâmetro de espera é um número finito."""
-        if isinstance(value, bool) or not isinstance(value, (int, float)):
-            raise TypeError(f"{parameter_name} deve ser um número finito")
-
-        if not (value >= 0):
-            raise ValueError(f"{parameter_name} deve ser maior ou igual a zero")
-
-    def command(
-        self,
-        angle: float,
-        speed: int | None = None,
-        acc: int | None = None,
-    ) -> int:
-        """Comanda a junta para mover-se para o ângulo especificado [Não espera servo chegar, apenas envia o comando]."""
-        if speed is None:
-            speed = self._config.speed
-        else:
-            self._config.validate_speed(speed)
-
-        if acc is None:
-            acc = self._config.acc
-        else:
-            self._config.validate_acceleration(acc)
-
-        position = self.angle_to_position(angle)
-        self._servo.command_position(
-            self._config.servo_id,
-            position,
-            speed,
-            acc,
-        )
-        return position
-    
-    def move(
-        self,
-        angle: float,
-        speed: int | None = None,
-        acc: int | None = None,
-        timeout: float | None = None,
-        poll_interval: float = 0.1, # Tempo em segundos entre cada verificação do status do movimento
-    ) -> MovementStatus:
-        """Comanda a junta para mover-se para o ângulo especificado e aguarda até que o movimento seja concluído ou o tempo limite seja atingido."""
-        target_position = self.command(angle, speed, acc)
-
-        if timeout is not None:
-            self._validate_wait_parameter("timeout", timeout)
-        self._validate_wait_parameter("poll_interval", poll_interval)
-
-        import time
-        start_time = time.time()
-
-        while True:
-            current_position = self.current_position()
-            moving = self.is_moving()
-
-            if not moving:
-                break
-
-            if timeout is not None and (time.time() - start_time) > timeout:
-                break
-
-            time.sleep(poll_interval)
 
         position_error = self.position_error(
             target_position,
@@ -207,3 +136,81 @@ class Joint:
             moving=moving,
             within_tolerance=within_tolerance,
         )
+
+    @staticmethod
+    def _validate_wait_parameter(
+        parameter_name: str,
+        value: float,
+    ) -> None:
+        """Valida um intervalo de espera usado no controle de movimento."""
+        if isinstance(value, bool) or not isinstance(value, (int, float)):
+            raise TypeError(f"{parameter_name} deve ser um número")
+
+        if not isfinite(value):
+            raise ValueError(f"{parameter_name} deve ser finito")
+
+        if value <= 0:
+            raise ValueError(f"{parameter_name} deve ser maior que zero")
+
+    def command(
+        self,
+        angle: float,
+        speed: int | None = None,
+        acc: int | None = None,
+    ) -> int:
+        """Envia um comando de posição sem aguardar sua conclusão."""
+        command_speed = self.speed if speed is None else speed
+        command_acc = self.acc if acc is None else acc
+
+        JointConfig.validate_speed(command_speed)
+        JointConfig.validate_acceleration(command_acc)
+
+        position = self.angle_to_position(angle)
+        self._servo_bus.command_position(
+            self.servo_id,
+            position,
+            command_speed,
+            command_acc,
+        )
+        return position
+
+    def move(
+        self,
+        angle: float,
+        speed: int | None = None,
+        acc: int | None = None,
+        timeout: float = 5.0,
+        poll_interval: float = 0.05,
+    ) -> MovementStatus:
+        """Envia o movimento e aguarda o alvo ou uma condição de falha."""
+        self._validate_wait_parameter("timeout", timeout)
+        self._validate_wait_parameter("poll_interval", poll_interval)
+
+        target_position = self.command(angle, speed, acc)
+        deadline = monotonic() + timeout
+
+        while True:
+            status = self.movement_status(target_position)
+
+            if status.within_tolerance:
+                return status
+
+            if not status.moving:
+                raise RuntimeError(
+                    f"{self.name}: servo parou fora do alvo "
+                    f"(alvo={status.target_position}, "
+                    f"posição={status.current_position}, "
+                    f"erro={status.position_error} counts, "
+                    f"tolerância={self.tolerance_counts} counts)"
+                )
+
+            remaining_time = deadline - monotonic()
+            if remaining_time <= 0:
+                raise TimeoutError(
+                    f"{self.name}: timeout após {timeout:.3f}s "
+                    f"(alvo={status.target_position}, "
+                    f"posição={status.current_position}, "
+                    f"erro={status.position_error} counts)"
+                )
+
+            sleep(min(poll_interval, remaining_time))

@@ -1,33 +1,41 @@
 from collections.abc import Sequence
 from math import isfinite
 from time import monotonic, sleep
-from typing import Any
 
 from .Joint import Joint
+from .JointConfig import JointConfig
 from .MovementStatus import MovementStatus
-from .ServoBus import ServoBus
+from .ServoBus import ServoBus, ServoPositionCommand
+
 
 class RobotArm:
-    def __init__(self, servo: ServoBus, robot_joints: Sequence[Joint]) -> None:
-        if not robot_joints:
+    def __init__(
+        self,
+        servo_bus: ServoBus,
+        joints: Sequence[Joint],
+    ) -> None:
+        if servo_bus is None:
+            raise ValueError("servo_bus não pode ser None")
+
+        if not joints:
             raise ValueError("O braço robótico deve conter ao menos uma junta.")
 
-        self._validate_unique_joints(robot_joints)
-        self.robot_joints: tuple[Joint, ...] = tuple(robot_joints)
-        self.joints_by_name: dict[str, Joint] = {
-            joint.name.lower(): joint for joint in self.robot_joints
+        self._validate_unique_joints(joints)
+        self._joints: tuple[Joint, ...] = tuple(joints)
+        self._joints_by_name: dict[str, Joint] = {
+            joint.name.lower(): joint for joint in self._joints
         }
-        self._servo = servo
+        self._servo_bus = servo_bus
 
     @property
     def joints(self) -> tuple[Joint, ...]:
         """Retorna a coleção imutável e ordenada de juntas do robô."""
-        return self.robot_joints
+        return self._joints
 
     @property
     def joint_names(self) -> tuple[str, ...]:
         """Retorna os nomes de todas as juntas na ordem do braço."""
-        return tuple(joint.name for joint in self.robot_joints)
+        return tuple(joint.name for joint in self._joints)
 
     @staticmethod
     def _validate_unique_joints(joints: Sequence[Joint]) -> None:
@@ -53,10 +61,10 @@ class RobotArm:
             raise TypeError("O nome da junta deve ser uma string.")
 
         normalized_name = name.strip().lower()
-        if normalized_name not in self.joints_by_name:
+        if normalized_name not in self._joints_by_name:
             raise KeyError(f"Junta '{name}' não encontrada no braço robótico.")
 
-        return self.joints_by_name[normalized_name]
+        return self._joints_by_name[normalized_name]
 
     def __getitem__(self, name: str) -> Joint:
         """Permite acesso indexado por nome: arm['gripper']."""
@@ -64,38 +72,43 @@ class RobotArm:
 
     def __len__(self) -> int:
         """Retorna o número de juntas do robô."""
-        return len(self.robot_joints)
+        return len(self._joints)
 
     def current_angles(self) -> dict[str, float]:
         """Lê e retorna os ângulos físicos atuais de todas as juntas em graus."""
-        return {joint.name: joint.current_angle() for joint in self.robot_joints}
+        return {joint.name: joint.current_angle() for joint in self._joints}
 
     def current_positions(self) -> dict[str, int]:
         """Lê e retorna as posições brutas em counts de todas as juntas."""
-        return {joint.name: joint.current_position() for joint in self.robot_joints}
+        return {joint.name: joint.current_position() for joint in self._joints}
 
     def enable_torque(self) -> None:
         """Habilita o torque de todas as juntas de forma segura."""
-        for joint in self.robot_joints:
+        for joint in self._joints:
             joint.enable_torque()
 
     def disable_torque(self) -> None:
         """Desabilita o torque de todas as juntas."""
-        for joint in self.robot_joints:
+        for joint in self._joints:
             joint.disable_torque()
 
     def is_torque_enabled(self) -> bool:
         """Retorna True se todas as juntas estiverem com torque habilitado."""
-        return all(joint.is_torque_enabled() for joint in self.robot_joints)
-    
-    
+        return all(joint.is_torque_enabled() for joint in self._joints)
+
     def validate_pose(self, pose: dict[str, float]) -> None:
         """Valida se uma pose contém exatamente todas as juntas e ângulos dentro dos limites."""
         if not isinstance(pose, dict):
             raise TypeError("A pose deve ser um dicionário {nome_junta: angulo}.")
 
-        pose_names = {name.strip().lower() for name in pose.keys()}
-        expected_names = set(self.joints_by_name.keys())
+        if any(not isinstance(name, str) for name in pose):
+            raise TypeError("Todos os nomes de junta da pose devem ser strings.")
+
+        pose_names = {name.strip().lower() for name in pose}
+        if len(pose_names) != len(pose):
+            raise ValueError("Pose contém nomes de junta duplicados.")
+
+        expected_names = set(self._joints_by_name)
 
         missing = expected_names - pose_names
         if missing:
@@ -106,5 +119,105 @@ class RobotArm:
             raise ValueError(f"Pose contém juntas desconhecidas: {sorted(extra)}")
 
         for name, angle in pose.items():
-            joint = self.joints_by_name[name.strip().lower()]
-            joint._config.angle_to_position(angle)
+            joint = self._joints_by_name[name.strip().lower()]
+            joint.angle_to_position(angle)
+
+    @staticmethod
+    def _validate_wait_parameter(
+        parameter_name: str,
+        value: float,
+    ) -> None:
+        if isinstance(value, bool) or not isinstance(value, (int, float)):
+            raise TypeError(f"{parameter_name} deve ser um número")
+
+        if not isfinite(value):
+            raise ValueError(f"{parameter_name} deve ser finito")
+
+        if value <= 0:
+            raise ValueError(f"{parameter_name} deve ser maior que zero")
+
+    def command_pose(
+        self,
+        pose: dict[str, float],
+        acc: int | None = None,
+        speed: int | None = None,
+    ) -> dict[str, int]:
+        """Envia uma pose sincronizada sem aguardar sua conclusão."""
+        self.validate_pose(pose)
+
+        if speed is not None:
+            JointConfig.validate_speed(speed)
+        if acc is not None:
+            JointConfig.validate_acceleration(acc)
+
+        normalized_pose = {
+            name.strip().lower(): angle for name, angle in pose.items()
+        }
+        target_positions: dict[str, int] = {}
+        commands: list[ServoPositionCommand] = []
+
+        for joint in self._joints:
+            angle = normalized_pose[joint.name.lower()]
+            target_position = joint.angle_to_position(angle)
+            target_positions[joint.name] = target_position
+            commands.append(
+                ServoPositionCommand(
+                    servo_id=joint.servo_id,
+                    position=target_position,
+                    speed=joint.speed if speed is None else speed,
+                    acceleration=joint.acc if acc is None else acc,
+                )
+            )
+
+        self._servo_bus.command_positions_sync(commands)
+        return target_positions
+
+    def move_pose(
+        self,
+        pose: dict[str, float],
+        timeout: float = 8.0,
+        poll_interval: float = 0.05,
+    ) -> dict[str, MovementStatus]:
+        """Envia uma pose e aguarda todas as juntas alcançarem seus alvos."""
+        self._validate_wait_parameter("timeout", timeout)
+        self._validate_wait_parameter("poll_interval", poll_interval)
+
+        target_positions = self.command_pose(pose)
+        deadline = monotonic() + timeout
+
+        while True:
+            statuses = {
+                joint.name: joint.movement_status(
+                    target_positions[joint.name]
+                )
+                for joint in self._joints
+            }
+
+            if all(status.within_tolerance for status in statuses.values()):
+                return statuses
+
+            for joint in self._joints:
+                status = statuses[joint.name]
+                if not status.within_tolerance and not status.moving:
+                    raise RuntimeError(
+                        f"Pose falhou: junta '{joint.name}' parou fora do alvo "
+                        f"(alvo={status.target_position}, "
+                        f"posição={status.current_position}, "
+                        f"erro={status.position_error} counts, "
+                        f"tolerância="
+                        f"{joint.tolerance_counts} counts)"
+                    )
+
+            remaining_time = deadline - monotonic()
+            if remaining_time <= 0:
+                unreached = [
+                    f"{name} (erro={status.position_error} counts)"
+                    for name, status in statuses.items()
+                    if not status.within_tolerance
+                ]
+                raise TimeoutError(
+                    f"Timeout após {timeout:.3f}s aguardando pose. "
+                    f"Juntas que não alcançaram o alvo: {unreached}"
+                )
+
+            sleep(min(poll_interval, remaining_time))

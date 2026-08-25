@@ -31,9 +31,9 @@ class JointConfig:
     min_angle: float
     max_angle: float
 
-    speed: int = 1000
-    acc: int = 100
-    tolerance_deg: float = 1.0
+    speed: int = DEFAULT_SPEED
+    acc: int = DEFAULT_ACC
+    tolerance_deg: float = DEFAULT_TOLERANCE_DEG
 
     def __post_init__(self) -> None:
         self._validate_name()

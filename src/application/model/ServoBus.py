@@ -24,7 +24,6 @@ class ServoBus(Protocol):
         """Informa se o servo está executando um movimento."""
         ...
 
-
     def command_position(
         self,
         servo_id: int,
