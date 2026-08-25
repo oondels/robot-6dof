@@ -2,7 +2,7 @@ from collections.abc import Sequence
 
 from scservo_sdk import COMM_SUCCESS, sms_sts
 
-from src.application.model.ServoBus import ServoBus, ServoPositionCommand
+from src.application.ports.servo_bus import ServoBus, ServoPositionCommand
 
 ADDR_TORQUE_ENABLE = 40
 TORQUE_DISABLED = 0

@@ -1,7 +1,7 @@
 import unittest
 from dataclasses import FrozenInstanceError
 
-from src.models.joint_config import JointConfig
+from src.application import JointConfig
 
 
 class JointConfigTestCase(unittest.TestCase):

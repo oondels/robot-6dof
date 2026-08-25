@@ -2,10 +2,10 @@ from collections.abc import Sequence
 from math import isfinite
 from time import monotonic, sleep
 
-from .Joint import Joint
-from .JointConfig import JointConfig
-from .MovementStatus import MovementStatus
-from .ServoBus import ServoBus, ServoPositionCommand
+from .joint import Joint
+from .joint_config import JointConfig
+from .movement_status import MovementStatus
+from .ports.servo_bus import ServoBus, ServoPositionCommand
 
 
 class RobotArm:

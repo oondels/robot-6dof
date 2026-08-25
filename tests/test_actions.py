@@ -2,15 +2,15 @@ import unittest
 
 from src.actions.router import execute_action
 import main
-from src.models.joint_config import JointConfig
-from src.models.Joint import Joint
-from src.models.RobotArm import RobotArm
+from src.application import Joint, JointConfig, RobotArm
+from src.infrastructure.scservo_bus import ScServoBus
 from tests.fake_servo import FakeServo
 
 
 class ActionsTestCase(unittest.TestCase):
     def setUp(self) -> None:
         self.servo = FakeServo(position=2048)
+        self.servo_bus = ScServoBus(self.servo)
         self.config1 = JointConfig(
             name="base_yaw",
             servo_id=1,
@@ -28,10 +28,10 @@ class ActionsTestCase(unittest.TestCase):
             max_angle=45.0,
         )
         self.joints = [
-            Joint(servo=self.servo, config=self.config1),
-            Joint(servo=self.servo, config=self.config2),
+            Joint(config=self.config1, servo_bus=self.servo_bus),
+            Joint(config=self.config2, servo_bus=self.servo_bus),
         ]
-        self.arm = RobotArm(self.joints)
+        self.arm = RobotArm(self.servo_bus, self.joints)
 
     def test_execute_action_rejects_non_string(self) -> None:
         with self.assertRaises(TypeError):
@@ -83,7 +83,7 @@ class ActionsTestCase(unittest.TestCase):
             sys.argv = old_argv
 
     def test_main_create_arm(self) -> None:
-        arm = main.create_arm(self.servo)
+        arm = main.create_arm(self.servo_bus)
         self.assertIsInstance(arm, RobotArm)
         self.assertEqual(len(arm), len(main.JOINT_CONFIGS))
 

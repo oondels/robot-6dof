@@ -5,12 +5,8 @@ from typing import Any
 from pathlib import Path
 import json
 
-from scservo_sdk import PortHandler, sms_sts
-
 from src.actions.recorded_actions import save_named_action
-from src.models.Joint import Joint
-from src.models.RobotArm import RobotArm
-from robot_config import JOINT_CONFIGS
+from src.application import RobotArm
 from src.utils.trajectory import generate_smooth_trajectory
 
 DEFAULT_PORT = "/dev/ttyUSB0"

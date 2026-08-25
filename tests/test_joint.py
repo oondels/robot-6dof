@@ -1,14 +1,15 @@
 import unittest
 from unittest.mock import patch
 
-from src.models.Joint import ADDR_TORQUE_ENABLE, Joint, MovementStatus
-from src.models.joint_config import JointConfig
+from src.application import Joint, JointConfig, MovementStatus
+from src.infrastructure.scservo_bus import ADDR_TORQUE_ENABLE, ScServoBus
 from tests.fake_servo import FakeServo
 
 
 class JointTestCase(unittest.TestCase):
     def setUp(self) -> None:
         self.servo = FakeServo(position=2048)
+        self.servo_bus = ScServoBus(self.servo)
 
         self.config = JointConfig(
             name="Joint 1",
@@ -23,22 +24,22 @@ class JointTestCase(unittest.TestCase):
         )
 
         self.joint = Joint(
-            servo=self.servo,
             config=self.config,
+            servo_bus=self.servo_bus,
         )
 
     def test_rejects_none_servo(self) -> None:
         with self.assertRaises(ValueError):
             Joint(
-                servo=None,
                 config=self.config,
+                servo_bus=None,
             )
 
     def test_rejects_invalid_config(self) -> None:
         with self.assertRaises(TypeError):
             Joint(
-                servo=self.servo,
                 config=object(),
+                servo_bus=self.servo_bus,
             )
 
     def test_exposes_configuration_properties(self) -> None:
@@ -83,8 +84,8 @@ class JointTestCase(unittest.TestCase):
         )
 
         joint = Joint(
-            servo=self.servo,
             config=inverted_config,
+            servo_bus=self.servo_bus,
         )
 
         self.assertEqual(
@@ -254,7 +255,7 @@ class JointTestCase(unittest.TestCase):
         self.assertFalse(status.within_tolerance)
         self.assertEqual(status.position_error, 12)
 
-    @patch("models.Joint.sleep")
+    @patch("src.application.joint.sleep")
     def test_move_waits_until_target_is_reached(
         self,
         mocked_sleep,
@@ -298,9 +299,9 @@ class JointTestCase(unittest.TestCase):
                 poll_interval=0.01,
             )
 
-    @patch("models.Joint.sleep")
+    @patch("src.application.joint.sleep")
     @patch(
-        "models.Joint.monotonic",
+        "src.application.joint.monotonic",
         side_effect=[10.0, 11.0],
     )
     def test_move_raises_timeout(

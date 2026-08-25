@@ -1,11 +1,10 @@
 import argparse
-from typing import Any
 
 from scservo_sdk import PortHandler, sms_sts
 
 from src.actions.router import execute_action
-from src.models.Joint import Joint
-from src.models.RobotArm import RobotArm
+from src.application import Joint, RobotArm, ServoBus
+from src.infrastructure.scservo_bus import ScServoBus
 from robot_config import JOINT_CONFIGS
 
 DEFAULT_PORT = "/dev/ttyUSB0"
@@ -24,16 +23,16 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def create_arm(servo: Any) -> RobotArm:
-    #* Compartilhamento de mesmo servo para todas as juntas, pois o barramento é único e o driver é o mesmo
+def create_arm(servo_bus: ServoBus) -> RobotArm:
+    """Compõe o braço usando um único barramento compartilhado."""
     joints = [
         Joint(
-            servo=servo,
+            servo_bus=servo_bus,
             config=config,
         )
         for config in JOINT_CONFIGS
     ]
-    return RobotArm(joints)
+    return RobotArm(servo_bus=servo_bus, joints=joints)
 
 
 def print_arm_status(arm: RobotArm) -> None:
@@ -69,7 +68,8 @@ def main() -> None:
         )
 
     port = PortHandler(args.port)
-    servo = sms_sts(port)
+    sdk_servo = sms_sts(port)
+    servo_bus = ScServoBus(sdk_servo)
 
     try:
         if not port.openPort():
@@ -79,7 +79,7 @@ def main() -> None:
             raise RuntimeError(f"Erro configurando baudrate {args.baudrate}")
         
         # Cria objeto RobotArm com as juntas configuradas
-        arm = create_arm(servo)
+        arm = create_arm(servo_bus)
 
         if args.action == "status":
             print_arm_status(arm)

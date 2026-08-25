@@ -14,7 +14,7 @@ class ServoPositionCommand:
 
 
 class ServoBus(Protocol):
-    """Porta de comunicação exigida pelo núcleo de controle do robô."""
+    """Porta de saída exigida pelo núcleo de controle do robô."""
 
     def read_position(self, servo_id: int) -> int:
         """Retorna a posição atual do servo em counts."""

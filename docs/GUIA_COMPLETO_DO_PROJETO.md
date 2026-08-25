@@ -10,8 +10,8 @@ O projeto é um framework de controle robótico em Python desenvolvido para oper
 
 ### Objetivos Centrais de Engenharia
 1. **Segurança Física Máxima:** Nenhuma operação de hardware ou habilitação de torque pode ser executada sem validação rigorosa de limites angulares, verificação de alvos prévios e consentimento explícito do operador.
-2. **Separação Rígida de Responsabilidades (SRP):** Configuração física imutável (`JointConfig`), adaptação de hardware (`Joint`), agregação orquestrada (`RobotArm`) e ponto de entrada (`main.py`).
-3. **Isolamento e Testabilidade Total:** 100% da lógica de negócio, conversão matemática, timeouts e controle sincronizado de poses é validada através de simulação (`FakeServo`) sem abrir a porta serial real nem depender do hardware físico conectado.
+2. **Separação Rígida de Responsabilidades (SRP):** configuração física imutável (`JointConfig`), controle por porta (`Joint`), agregação (`RobotArm`), adaptação do SDK (`ScServoBus`) e composition root (`main.py`).
+3. **Isolamento e Testabilidade Total:** a lógica do núcleo é validada com `FakeServoBus`, enquanto o adaptador é validado com `FakeServo`, sem abrir a porta serial real.
 4. **Movimentação Sincronizada Atômica:** Uso da tecnologia `SyncWrite` em barramento compartilhado *daisy-chain* para garantir que todas as juntas iniciem e executem suas trajetórias simultaneamente.
 
 ---
@@ -29,7 +29,7 @@ O projeto é um framework de controle robótico em Python desenvolvido para oper
                                  ▼
 +-------------------------------------------------------------------+
 |                      Camada de Orquestração                       |
-|                   RobotArm (models/RobotArm.py)                   |
+|              RobotArm (application/robot_arm.py)                 |
 |        - Validação de poses completas (6 juntas)                  |
 |        - Despacho em lote atômico via SyncWrite                   |
 |        - Monitoramento conjunto e timeout de convergência         |
@@ -38,7 +38,7 @@ O projeto é um framework de controle robótico em Python desenvolvido para oper
                                  ▼
 +-------------------------------------------------------------------+
 |                   Camada de Domínio / Unidade                     |
-|                      Joint (models/Joint.py)                      |
+|                  Joint (application/joint.py)                    |
 |        - Telemetria de posição, ângulo e estado 'moving'          |
 |        - Controle seguro de Torque (endereço 40)                  |
 |        - Movimento individual monitorado (move/command)           |
@@ -46,10 +46,10 @@ O projeto é um framework de controle robótico em Python desenvolvido para oper
             │                                           │
             ▼                                           ▼
 +-----------------------+                   +-----------------------+
-|  Configuração Pura    |                   |  Validação & SDK      |
-|  JointConfig          |                   |  utils/validation.py  |
-|  (models/joint_config)|                   |  scservo_sdk          |
-|  - Matemática pura    |                   |  (ou tests/fake_servo)|
+|  Configuração Pura    |                   |  Porta / Adaptador    |
+|  JointConfig          |                   |  ServoBus             |
+|  application/         |                   |  ScServoBus           |
+|  - Matemática pura    |                   |  scservo_sdk          |
 |  - Imutabilidade      |                   +-----------------------+
 +-----------------------+
 ```
@@ -58,8 +58,8 @@ O projeto é um framework de controle robótico em Python desenvolvido para oper
 - **Dataclasses com `frozen=True` e `slots=True`:** As classes de configuração (`JointConfig`) e de telemetria (`MovementStatus`) são estritamente imutáveis após a construção. `slots=True` otimiza o uso de memória e impede a criação de atributos arbitrários em tempo de execução.
 - **Validações Pré-Construção (`__post_init__`):** O objeto nunca assume um estado inválido. Qualquer parâmetro inconsistente (ex.: velocidade negativa, limite mínimo maior que o máximo, ID inválido) lança exceções imediatas antes que o objeto seja utilizado.
 
-### 2.3 Duck Typing e Test Doubles
-A classe `Joint` e a classe `RobotArm` não herdam diretamente do SDK proprietário, mas esperam uma interface que contenha métodos fundamentais (`ReadPosSpeed`, `ReadMoving`, `WritePosEx`, `write1ByteTxRx`, `read1ByteTxRx`, `groupSyncWrite`). Isso permite que os testes unitários injetem um mock de alta fidelidade (`FakeServo`) com total determinismo e sem efeitos colaterais.
+### 2.3 Porta, adaptador e test doubles
+`Joint` e `RobotArm` dependem do `Protocol ServoBus`, expresso na linguagem do sistema. `ScServoBus` traduz essa porta para os métodos proprietários. Os testes do núcleo usam `FakeServoBus`; `FakeServo` fica reservado para validar o adaptador e fluxos integrados.
 
 ### 2.4 Habilitação Defensiva de Torque
 Em servomotores digitais industriais, se o registrador de torque for habilitado enquanto o alvo interno estiver em uma posição diferente da atual, o servo aplicará força máxima instantânea para alcançar o alvo antigo, causando tranco mecânico violento ou colisão.
@@ -80,11 +80,15 @@ robotics/
 ├── robot_config.py                     # Fonte da verdade das 6 juntas calibradas
 ├── requirements.txt                    # Dependências do projeto
 │
-├── models/                             # Camada de domínio e modelos
-│   ├── __init__.py
-│   ├── joint_config.py                 # JointConfig (metadados e conversão matemática)
-│   ├── Joint.py                        # Joint (operações no hardware) e MovementStatus
-│   └── RobotArm.py                     # RobotArm (coordenação e SyncWrite de 6 juntas)
+├── src/application/                    # Núcleo independente do SDK
+│   ├── joint.py                        # Controle de uma junta pela porta
+│   ├── joint_config.py                 # Configuração e conversão matemática
+│   ├── movement_status.py              # Fotografia imutável de movimento
+│   ├── robot_arm.py                    # Coordenação e poses sincronizadas
+│   └── ports/servo_bus.py              # Porta exigida pelo núcleo
+│
+├── src/infrastructure/
+│   └── scservo_bus.py                  # Adaptador para scservo_sdk
 │
 ├── calibration/                        # Ferramentas de calibração e teste em bancada
 │   ├── __init__.py
@@ -97,7 +101,7 @@ robotics/
 │   ├── __init__.py
 │   └── validation.py                   # Validação de códigos de status/erro do SDK
 │
-├── tests/                              # Suíte completa de testes automatizados (82 testes)
+├── tests/                              # Suíte completa de testes automatizados (112 testes)
 │   ├── __init__.py
 │   ├── fake_servo.py                   # Simulador de hardware e memória de registradores
 │   ├── test_joint_config.py            # Testes de limites, erros e conversão de ângulos
@@ -122,7 +126,7 @@ robotics/
 
 ## 4. Detalhamento Técnico das Classes e Módulos
 
-### 4.1 `models/joint_config.py` — `JointConfig`
+### 4.1 `application/joint_config.py` — `JointConfig`
 
 Representa a configuração física e geométrica imutável de uma junta. Não possui nenhum conhecimento de barramento serial ou hardware.
 
@@ -145,7 +149,7 @@ Representa a configuração física e geométrica imutável de uma junta. Não p
 
 ---
 
-### 4.2 `models/Joint.py` — `MovementStatus` e `Joint`
+### 4.2 `application/joint.py` e `movement_status.py`
 
 #### `MovementStatus`
 Dataclass imutável que captura uma fotografia pontual do estado de movimento:
@@ -156,24 +160,24 @@ Dataclass imutável que captura uma fotografia pontual do estado de movimento:
 - `within_tolerance: bool`: Booleano que indica se $\text{position\_error} \le \text{tolerance\_counts}$.
 
 #### `Joint`
-Adaptador responsável pela comunicação e controle de um servo específico.
+Objeto operacional responsável por aplicar regras de uma junta usando `ServoBus`.
 
 - **Leitura de Estado:**
-  - `current_position() -> int`: Executa `ReadPosSpeed` e retorna os counts brutos.
+  - `current_position() -> int`: Solicita `read_position` à porta e retorna counts.
   - `current_angle() -> float`: Lê a posição e converte para graus usando `config.position_to_angle`.
-  - `is_moving() -> bool`: Executa `ReadMoving` no registrador do servo.
+  - `is_moving() -> bool`: Consulta o estado pela porta.
   - `movement_status(target_position: int) -> MovementStatus`: Gera uma fotografia consolidada do estado.
 - **Gerenciamento de Torque:**
   - `enable_torque()`: Escreve a posição atual no alvo antes de habilitar o registrador 40.
   - `disable_torque()`: Escreve 0 no registrador 40 e confirma o desligamento.
-  - `is_torque_enabled() -> bool`: Consulta o registrador 40 via `read1ByteTxRx`.
+  - `is_torque_enabled() -> bool`: Consulta o estado de torque pela porta.
 - **Movimentação:**
-  - `command(angle, speed, acc) -> int`: Valida limites, envia `WritePosEx` e retorna o alvo em counts imediatamente (não bloqueante).
+  - `command(angle, speed, acc) -> int`: Valida limites, envia `command_position` e retorna o alvo em counts imediatamente.
   - `move(angle, speed, acc, timeout, poll_interval) -> MovementStatus`: Envia o comando e executa um loop de espera até que a junta alcance a tolerância desejada. Lança `RuntimeError` caso o motor pare prematuramente fora da tolerância ou `TimeoutError` caso exceda o tempo estipulado.
 
 ---
 
-### 4.3 `models/RobotArm.py` — `RobotArm`
+### 4.3 `application/robot_arm.py` — `RobotArm`
 
 Classe agregadora que orquestra o conjunto completo de juntas do robô.
 
@@ -193,18 +197,18 @@ Classe agregadora que orquestra o conjunto completo de juntas do robô.
 - **Validação de Poses:**
   - `validate_pose(pose: dict[str, float])`: Garante que a pose contém exatamente todas as juntas configuradas e que todos os ângulos respeitam os limites operacionais de cada articulação.
 - **Movimentação Sincronizada com `SyncWrite`:**
-  - `command_pose(pose: dict[str, float]) -> dict[str, int]`: Limpa a fila `groupSyncWrite`, empacota os dados de todas as juntas com `SyncWritePosEx` e despacha um único pacote broadcast na rede serial via `groupSyncWrite.txPacket()`.
+  - `command_pose(pose: dict[str, float]) -> dict[str, int]`: Cria comandos tipados e solicita uma transmissão sincronizada à porta.
   - `move_pose(pose, timeout, poll_interval) -> dict[str, MovementStatus]`: Dispara a pose sincronizada e monitora todas as juntas em paralelo até que todas alcancem a posição desejada dentro da tolerância, tratando falhas de parada precoce e timeouts coletivos.
 
 ---
 
-### 4.4 `utils/validation.py` — `validate_result`
+### 4.4 `infrastructure/scservo_bus.py` — `ScServoBus`
 
 O SDK `scservo_sdk` comunica status através de dois parâmetros inteiros:
 1. `result`: Código de sucesso ou erro de transporte físico/serial (ex.: `COMM_SUCCESS`, `COMM_TX_FAIL`, `COMM_RX_TIMEOUT`).
 2. `error`: Código de status retornado no cabeçalho do pacote pelo microcontrolador do servo (ex.: sobreaquecimento, sobretensão, sobrecarga).
 
-A função `validate_result(servo, result, error, operation)` intercepta esses códigos e lança exceções Python `RuntimeError` detalhadas e formatadas, evitando que erros silenciosos passem despercebidos.
+O adaptador intercepta esses códigos e lança exceções Python `RuntimeError`, evitando que detalhes ou erros silenciosos do SDK atravessem a fronteira.
 
 ---
 
@@ -310,7 +314,7 @@ Oferece menu interativo:
 
 ## 9. Engenharia de Testes e Simulação de Hardware (`tests/fake_servo.py`)
 
-A robustez da base de código é sustentada por **82 testes automatizados** que executam em frações de segundo sem necessidade de hardware físico:
+A robustez da base de código é sustentada por **112 testes automatizados** que executam em frações de segundo sem necessidade de hardware físico:
 
 ```bash
 python -m unittest discover -s tests -v

@@ -22,6 +22,8 @@ STEPS_PER_REVOLUTION = 4096
 
 @dataclass(frozen=True, slots=True)
 class JointConfig:
+    """Configuração física e operacional imutável de uma junta."""
+
     name: str
     servo_id: int
 

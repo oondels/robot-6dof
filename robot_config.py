@@ -1,4 +1,4 @@
-from src.models.joint_config import JointConfig
+from src.application import JointConfig
 
 # Configurações calibradas e validadas fisicamente
 # para o braço robótico de 6 graus de liberdade (6-DOF).

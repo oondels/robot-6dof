@@ -3,15 +3,15 @@ from unittest.mock import Mock, patch
 
 from src.calibration import test_arm_poses as pose_module
 from src.calibration.test_arm_poses import run_pose_tester
-from src.models.Joint import Joint
-from src.models.joint_config import JointConfig
-from src.models.RobotArm import RobotArm
+from src.application import Joint, JointConfig, RobotArm
+from src.infrastructure.scservo_bus import ScServoBus
 from tests.fake_servo import FakeServo
 
 
 class TestArmPosesTestCase(unittest.TestCase):
     def setUp(self) -> None:
         self.servo = FakeServo(position=2048)
+        self.servo_bus = ScServoBus(self.servo)
         self.config1 = JointConfig(
             name="base_yaw",
             servo_id=1,
@@ -34,9 +34,9 @@ class TestArmPosesTestCase(unittest.TestCase):
             acc=30,
             tolerance_deg=1.0,
         )
-        self.joint1 = Joint(servo=self.servo, config=self.config1)
-        self.joint2 = Joint(servo=self.servo, config=self.config2)
-        self.arm = RobotArm([self.joint1, self.joint2])
+        self.joint1 = Joint(config=self.config1, servo_bus=self.servo_bus)
+        self.joint2 = Joint(config=self.config2, servo_bus=self.servo_bus)
+        self.arm = RobotArm(self.servo_bus, [self.joint1, self.joint2])
 
     def test_run_pose_tester_cancels_if_declined(self) -> None:
         messages: list[str] = []

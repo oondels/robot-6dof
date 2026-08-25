@@ -6,14 +6,16 @@ import re
 import time
 from typing import Any
 
-from src.models.RobotArm import RobotArm
+from src.application import RobotArm
 from src.utils.trajectory import (
     calculate_trajectory_duration,
     generate_smooth_trajectory,
 )
 
-# Diretório padrão para armazenamento das ações gravadas na raiz do projeto
-DEFAULT_RECORDED_ACTIONS_DIR = Path(__file__).resolve().parent.parent / "recorded_actions"
+# Diretório padrão para armazenamento das ações gravadas na raiz do projeto.
+DEFAULT_RECORDED_ACTIONS_DIR = (
+    Path(__file__).resolve().parents[2] / "recorded_actions"
+)
 
 
 def sanitize_action_name(name: str) -> str:

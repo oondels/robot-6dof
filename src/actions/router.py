@@ -9,7 +9,7 @@ from src.actions.recorded_actions import (
     sanitize_action_name,
 )
 from src.calibration.test_arm_poses import run_pose_tester
-from src.models.RobotArm import RobotArm
+from src.application import RobotArm
 from src.calibration.calibration import run_calibration
 
 

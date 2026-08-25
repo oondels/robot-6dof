@@ -26,7 +26,7 @@ O projeto prioriza **segurança física**, **separação estrita de responsabili
 | **Movimento Simultâneo Atômico (`SyncWrite`)** | ✅ Concluído | Despacho de pacote broadcast único via `SyncWritePosEx` para início simultâneo de todas as juntas com monitoramento conjunto de convergência. |
 | **Roteamento de Ações e CLI (`actions/` e `main.py`)** | ✅ Concluído | CLI com suporte a flags (`--action`, `--port`, `--baudrate`), despachando para status, testador interativo de poses ou módulo mirror. |
 | **Ferramentas de Calibração e Bancada (`calibration/`)** | ✅ Concluído | Leitor de counts sob demanda, leitor contínuo por movimento, testador de junta individual e testador de poses sincronizadas. |
-| **Suíte de Testes Automatizados (`tests/`)** | ✅ Concluído | **103 testes unitários** passando com `unittest` e simulador de alta fidelidade (`FakeServo`), com 0% de dependência de hardware conectado. |
+| **Suíte de Testes Automatizados (`tests/`)** | ✅ Concluído | **112 testes unitários** passando com `unittest`, `FakeServoBus` e `FakeServo`, sem hardware conectado. |
 | **Cinemática Direta / Inversa e Trajetórias Cartesianas** | ⏳ Futuro | Planejado para versões posteriores após consolidação da camada de controle angular. |
 
 ---
@@ -59,11 +59,12 @@ O projeto é estruturado em camadas desacopladas com fluxo unidirecional:
                               │                           │
                               ▼                           ▼
                ┌─────────────────────────────┐ ┌─────────────────────────┐
-               │ Configuração (JointConfig)  │ │   SDK / Comunicação     │
-               │ - zero_position, direção    │ │   - scservo_sdk         │
-               │ - limites [min, max]        │ │   - FakeServo (testes)  │
-               │ - tolerância, vel, acc      │ │   - validate_result()   │
-               └─────────────────────────────┘ └─────────────────────────┘
+               │ Configuração (JointConfig)  │ │ Porta ServoBus          │
+               │ - zero_position, direção    │ │          ▲              │
+               │ - limites [min, max]        │ │ ScServoBus / FakeBus    │
+               │ - tolerância, vel, acc      │ │          ↓              │
+               └─────────────────────────────┘ │     scservo_sdk          │
+                                               └─────────────────────────┘
 ```
 
 ### Juntas Calibradas em `robot_config.py`
@@ -157,7 +158,7 @@ python -m calibration.test_arm_poses --port /dev/ttyUSB0 --baudrate 1000000
 A suíte completa roda em memória usando `FakeServo`, sem tocar na porta serial:
 
 ```bash
-# Executa todos os 89 testes unitários
+# Executa todos os 112 testes unitários
 python -m unittest discover -s tests -v
 
 # Executar suítes específicas
@@ -179,29 +180,34 @@ robotics/
 ├── robot_config.py                     # Fonte da verdade: 6 juntas calibradas e validadas
 ├── requirements.txt                    # Dependências do projeto
 │
-├── actions/                            # Camada de ações e roteamento da CLI
-│   ├── __init__.py
-│   ├── router.py                       # Roteador de ações (status, test, mirror)
-│   └── mirror_action.py                # Ação de espelhamento e gravação de movimentos
+├── src/
+│   ├── actions/                        # Camada de ações e roteamento da CLI
+│   │   ├── __init__.py
+│   │   ├── router.py                   # Roteador de ações (status, test, mirror)
+│   │   └── mirror_action.py            # Ação de espelhamento e gravação de movimentos
 │
-├── models/                             # Camada de domínio e modelos matemáticos
-│   ├── __init__.py
-│   ├── joint_config.py                 # JointConfig (metadados imutáveis e conversão)
-│   ├── Joint.py                        # Joint (operações no hardware) e MovementStatus
-│   └── RobotArm.py                     # RobotArm (coordenação e SyncWrite de 6 juntas)
+│   ├── application/                    # Núcleo independente do SDK
+│   │   ├── joint.py                    # Controle de uma junta pela porta ServoBus
+│   │   ├── joint_config.py             # Configuração e conversões imutáveis
+│   │   ├── movement_status.py          # Estado imutável de movimento
+│   │   ├── robot_arm.py                # Coordenação de juntas e poses
+│   │   └── ports/servo_bus.py          # Porta de comunicação exigida pelo núcleo
 │
-├── calibration/                        # Ferramentas interativas de calibração e bancada
-│   ├── __init__.py
-│   ├── read_joint_position.py          # Leitor passivo sob demanda (Enter)
-│   ├── read_joint_position_continuous.py # Leitor contínuo com detecção de movimento
-│   ├── test_joint_motion.py            # Teste supervisionado de junta individual
-│   └── test_arm_poses.py               # Teste interativo de poses completas (SyncWrite)
+│   ├── infrastructure/
+│   │   └── scservo_bus.py              # Adaptador do ServoBus para scservo_sdk
 │
-├── utils/                              # Utilitários de comunicação e validação
-│   ├── __init__.py
-│   └── validation.py                   # Validação rigorosa dos códigos de erro do SDK
+│   ├── calibration/                    # Ferramentas interativas de calibração e bancada
+│   │   ├── __init__.py
+│   │   ├── read_joint_position.py      # Leitor passivo sob demanda (Enter)
+│   │   ├── read_joint_position_continuous.py
+│   │   ├── test_joint_motion.py        # Teste supervisionado de junta individual
+│   │   └── test_arm_poses.py           # Teste interativo de poses completas (SyncWrite)
 │
-├── tests/                              # Suíte completa de 89 testes automatizados
+│   └── utils/                          # Utilitários compartilhados
+│       ├── __init__.py
+│       └── validation.py               # Validação dos leitores brutos de calibração
+│
+├── tests/                              # Suíte completa de 112 testes automatizados
 │   ├── __init__.py
 │   ├── fake_servo.py                   # Simulador de hardware e memória de registradores
 │   ├── test_actions.py                 # Testes do roteador de ações e flags da CLI

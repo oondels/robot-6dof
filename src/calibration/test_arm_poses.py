@@ -1,11 +1,9 @@
 import argparse
 from collections.abc import Callable
-from typing import Any
-
 from scservo_sdk import PortHandler, sms_sts
 
-from src.models.Joint import Joint
-from src.models.RobotArm import RobotArm
+from src.application import Joint, RobotArm
+from src.infrastructure.scservo_bus import ScServoBus
 from robot_config import JOINT_CONFIGS
 
 DEFAULT_PORT = "/dev/ttyUSB0"
@@ -142,8 +140,9 @@ def main() -> None:
         if not port.setBaudRate(args.baudrate):
             raise RuntimeError(f"Erro configurando baudrate {args.baudrate}")
 
-        joints = [Joint(servo=servo, config=cfg) for cfg in JOINT_CONFIGS]
-        arm = RobotArm(joints)
+        servo_bus = ScServoBus(servo)
+        joints = [Joint(config=cfg, servo_bus=servo_bus) for cfg in JOINT_CONFIGS]
+        arm = RobotArm(servo_bus=servo_bus, joints=joints)
 
         run_pose_tester(arm)
 

@@ -1,14 +1,14 @@
 import unittest
 
-from src.models.Joint import Joint
-from src.models.joint_config import JointConfig
-from src.models.RobotArm import RobotArm
+from src.application import Joint, JointConfig, RobotArm
+from src.infrastructure.scservo_bus import ScServoBus
 from tests.fake_servo import FakeServo
 
 
 class RobotArmTestCase(unittest.TestCase):
     def setUp(self) -> None:
         self.servo = FakeServo(position=2048)
+        self.servo_bus = ScServoBus(self.servo)
 
         self.config1 = JointConfig(
             name="base_yaw",
@@ -44,11 +44,14 @@ class RobotArmTestCase(unittest.TestCase):
             tolerance_deg=1.0,
         )
 
-        self.joint1 = Joint(servo=self.servo, config=self.config1)
-        self.joint2 = Joint(servo=self.servo, config=self.config2)
-        self.joint3 = Joint(servo=self.servo, config=self.config3)
+        self.joint1 = Joint(config=self.config1, servo_bus=self.servo_bus)
+        self.joint2 = Joint(config=self.config2, servo_bus=self.servo_bus)
+        self.joint3 = Joint(config=self.config3, servo_bus=self.servo_bus)
 
-        self.arm = RobotArm([self.joint1, self.joint2, self.joint3])
+        self.arm = RobotArm(
+            servo_bus=self.servo_bus,
+            joints=[self.joint1, self.joint2, self.joint3],
+        )
 
     def test_creates_robot_arm_successfully(self) -> None:
         self.assertEqual(len(self.arm), 3)
@@ -66,14 +69,17 @@ class RobotArmTestCase(unittest.TestCase):
             ValueError,
             "ao menos uma junta",
         ):
-            RobotArm([])
+            RobotArm(self.servo_bus, [])
 
     def test_rejects_non_joint_elements(self) -> None:
         with self.assertRaisesRegex(
             TypeError,
             "instâncias de Joint",
         ):
-            RobotArm([self.joint1, "não é uma junta"])  # type: ignore
+            RobotArm(
+                self.servo_bus,
+                [self.joint1, "não é uma junta"],  # type: ignore[list-item]
+            )
 
     def test_rejects_duplicate_joint_names(self) -> None:
         duplicate_config = JointConfig(
@@ -84,13 +90,16 @@ class RobotArmTestCase(unittest.TestCase):
             min_angle=-90.0,
             max_angle=90.0,
         )
-        duplicate_joint = Joint(servo=self.servo, config=duplicate_config)
+        duplicate_joint = Joint(
+            config=duplicate_config,
+            servo_bus=self.servo_bus,
+        )
 
         with self.assertRaisesRegex(
             ValueError,
             "Nome de junta duplicado",
         ):
-            RobotArm([self.joint1, duplicate_joint])
+            RobotArm(self.servo_bus, [self.joint1, duplicate_joint])
 
     def test_rejects_duplicate_servo_ids(self) -> None:
         duplicate_id_config = JointConfig(
@@ -101,13 +110,16 @@ class RobotArmTestCase(unittest.TestCase):
             min_angle=-90.0,
             max_angle=90.0,
         )
-        duplicate_id_joint = Joint(servo=self.servo, config=duplicate_id_config)
+        duplicate_id_joint = Joint(
+            config=duplicate_id_config,
+            servo_bus=self.servo_bus,
+        )
 
         with self.assertRaisesRegex(
             ValueError,
             "ID de servo duplicado",
         ):
-            RobotArm([self.joint1, duplicate_id_joint])
+            RobotArm(self.servo_bus, [self.joint1, duplicate_id_joint])
 
     def test_joint_lookup_by_name_and_item_access(self) -> None:
         self.assertIs(self.arm.joint("base_yaw"), self.joint1)

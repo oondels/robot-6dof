@@ -4,7 +4,7 @@ from typing import Any
 
 from scservo_sdk import PortHandler, sms_sts
 
-from src.models.joint_config import MAX_SERVO_ID, MIN_SERVO_ID
+from src.application.joint_config import MAX_SERVO_ID, MIN_SERVO_ID
 from src.utils.validation import validate_result
 
 DEFAULT_PORT = "/dev/ttyUSB0"
@@ -44,6 +44,7 @@ def run_reader(
     output_fn: Callable[[str], None] = print,
 ) -> int | None:
     validate_servo_id(servo_id)
+    last_position: int | None = None
 
     output_fn(
         "Leitura de calibração iniciada. "
@@ -56,15 +57,14 @@ def run_reader(
         )
 
         if command.strip().lower() == "q":
-            return None
+            return last_position
 
         if command.strip():
             output_fn("Comando inválido. Use apenas Enter ou q.")
             continue
 
-        position = read_position(servo, servo_id)
-        output_fn(f"servo {servo_id}: posição={position} counts")
-        return position
+        last_position = read_position(servo, servo_id)
+        output_fn(f"servo {servo_id}: posição={last_position} counts")
 
 
 def parse_args() -> argparse.Namespace:

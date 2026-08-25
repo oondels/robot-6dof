@@ -3,8 +3,8 @@ from unittest.mock import Mock, patch
 
 from src.calibration import test_joint_motion as motion_module
 from src.calibration.test_joint_motion import find_joint_config, run_motion_test
-from src.models.Joint import Joint
-from src.models.joint_config import JointConfig
+from src.application import Joint, JointConfig
+from src.infrastructure.scservo_bus import ScServoBus
 from tests.fake_servo import FakeServo
 
 
@@ -34,7 +34,7 @@ class TestJointMotionTestCase(unittest.TestCase):
 
     def test_run_motion_test_cancels_if_operator_declines(self) -> None:
         servo = FakeServo(position=2041)
-        joint = Joint(servo=servo, config=self.config)
+        joint = Joint(config=self.config, servo_bus=ScServoBus(servo))
         messages: list[str] = []
 
         run_motion_test(
@@ -48,7 +48,7 @@ class TestJointMotionTestCase(unittest.TestCase):
 
     def test_run_motion_test_executes_moves_and_disables_torque(self) -> None:
         servo = FakeServo(position=2041)
-        joint = Joint(servo=servo, config=self.config)
+        joint = Joint(config=self.config, servo_bus=ScServoBus(servo))
 
         # Simula resposta do servo para o movimento de 20.0 graus (2041 + 228 = 2269 counts)
         servo.queue_motion(

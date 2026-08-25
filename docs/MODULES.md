@@ -39,7 +39,7 @@ Símbolos principais:
 
 - `PORT`: porta serial, atualmente `/dev/ttyUSB0`;
 - `BAUDRATE`: comunicação a `1_000_000` baud;
-- `create_joints(servo)`: cria uma `Joint` para cada item de `JOINT_CONFIGS`;
+- `create_arm(servo_bus)`: cria juntas e `RobotArm` sobre um barramento comum;
 - `main()`: verifica calibração, abre a porta, cria juntas, lê estados e fecha a
   porta em `finally`.
 
@@ -56,12 +56,12 @@ API:
 JOINT_CONFIGS: tuple[JointConfig, ...]
 ```
 
-Atualmente a tupla está vazia. Isso é uma trava de segurança, não uma falta de
-valor padrão. Uma configuração só deve ser adicionada após calibração física.
+As configurações presentes representam juntas já calibradas. Uma configuração
+só deve ser alterada após calibração física controlada.
 
 ## Modelo e controle
 
-### `models/joint_config.py`
+### `application/joint_config.py`
 
 Contém constantes do servo e a dataclass imutável `JointConfig`.
 
@@ -95,10 +95,10 @@ Métodos públicos:
 `frozen=True` impede alteração após construção. `slots=True` impede atributos
 acidentais e reduz o estado do objeto ao contrato declarado.
 
-### `models/Joint.py`
+### `application/joint.py`
 
-Contém `Joint`, o adaptador operacional de uma junta, e `MovementStatus`, o
-registro imutável de uma observação do movimento.
+Contém `Joint`, o objeto operacional de uma junta. `MovementStatus` fica em
+`application/movement_status.py`.
 
 `MovementStatus` possui os campos `target_position`, `current_position`,
 `position_error`, `moving` e `within_tolerance`. Como usa `frozen=True` e
@@ -108,13 +108,12 @@ acidentais depois da criação.
 Construção:
 
 ```python
-Joint(servo=servo, config=config)
+Joint(config=config, servo_bus=servo_bus)
 ```
 
 Propriedades delegadas:
 
 - `name`, `servo_id`, `speed`, `acc` leem diretamente de `config`;
-- `servo` é o objeto real ou falso que implementa os métodos esperados;
 - `config` é a configuração imutável.
 
 Métodos públicos atuais:
@@ -137,26 +136,24 @@ Métodos públicos atuais:
 
 Método interno:
 
-- `_write_torque(value)`: encapsula escrita e validação do registrador 40.
 - `_validate_wait_parameter(name, value)`: rejeita tempo não numérico, não
   finito ou não positivo antes de qualquer comando.
 
-Dependências esperadas do objeto `servo`:
+Dependências exigidas pela porta `ServoBus`:
 
 ```text
-ReadPosSpeed
-ReadMoving
-WritePosEx
-write1ByteTxRx
-read1ByteTxRx
-getTxRxResult
-getRxPacketError
+read_position
+is_moving
+command_position
+is_torque_enabled
+enable_torque
+disable_torque
 ```
 
-`is_moving()` valida os dois canais de erro antes de converter o valor numérico
-de `ReadMoving` em `bool`.
+O núcleo não interpreta códigos do SDK. O adaptador converte falhas em exceções
+antes de retornar.
 
-### `models/RobotArm.py`
+### `application/robot_arm.py`
 
 Contém a classe agregadora `RobotArm`, responsável pelo gerenciamento de múltiplas juntas.
 
@@ -171,12 +168,20 @@ Contém a classe agregadora `RobotArm`, responsável pelo gerenciamento de múlt
 | `disable_torque()` | Desabilita torque em todas as juntas |
 | `is_torque_enabled()` | Verifica se todas as juntas estão energizadas |
 | `validate_pose(pose)` | Valida presença de todas as juntas e limites angulares |
+| `command_pose(pose)` | Envia uma pose pela operação síncrona da porta |
+| `move_pose(pose)` | Monitora convergência, parada e timeout conjunto |
 
 Valida invariantes no construtor: rejeita coleções vazias, nomes duplicados e IDs duplicados.
 
-### `models/__init__.py`
+### `application/ports/servo_bus.py`
 
-Marcador de pacote. Não expõe uma API agregada.
+Define o `Protocol ServoBus` e o valor imutável `ServoPositionCommand`. Não
+importa nenhuma implementação de infraestrutura.
+
+### `infrastructure/scservo_bus.py`
+
+Traduz `ServoBus` para `scservo_sdk` e concentra registradores, `SyncWrite` e
+códigos de erro.
 
 
 ## Utilitários
@@ -280,7 +285,7 @@ manifesto mínimo do projeto.
 ### `regras-operacao.txt`
 
 Anotação curta dos intervalos conhecidos: velocidade `0..3400` e aceleração
-`0..254`. A fonte executável dessas regras é `models/joint_config.py`.
+`0..254`. A fonte executável dessas regras é `application/joint_config.py`.
 
 ### `comandos.txt`
 
@@ -297,7 +302,8 @@ uma mudança comum no controlador.
 ## Ações e Espelhamento (`actions/`)
 
 ### `actions/router.py`
-Roteador central de comandos da CLI. Encapsula o despacho de ações para o [`RobotArm`](../models/RobotArm.py), eliminando duplicação de inicialização de hardware.
+Roteador central de comandos da CLI. Encapsula o despacho de ações para o
+`RobotArm`, eliminando duplicação de inicialização de hardware.
 
 ### `actions/mirror_action.py`
 Implementa o sistema completo de **Teach and Repeat / Espelhamento de Movimentos**:

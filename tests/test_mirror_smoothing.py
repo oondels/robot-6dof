@@ -6,15 +6,15 @@ from src.actions.mirror_action import (
     replay_smooth_trajectory,
     select_and_run_replay,
 )
-from src.models.Joint import Joint
-from src.models.joint_config import JointConfig
-from src.models.RobotArm import RobotArm
+from src.application import Joint, JointConfig, RobotArm
+from src.infrastructure.scservo_bus import ScServoBus
 from tests.fake_servo import FakeServo
 
 
 class MirrorSmoothingTestCase(unittest.TestCase):
     def setUp(self) -> None:
         self.servo = FakeServo(position=2048)
+        self.servo_bus = ScServoBus(self.servo)
         self.config1 = JointConfig(
             name="base_yaw",
             servo_id=1,
@@ -32,10 +32,10 @@ class MirrorSmoothingTestCase(unittest.TestCase):
             max_angle=45.0,
         )
         self.joints = [
-            Joint(servo=self.servo, config=self.config1),
-            Joint(servo=self.servo, config=self.config2),
+            Joint(config=self.config1, servo_bus=self.servo_bus),
+            Joint(config=self.config2, servo_bus=self.servo_bus),
         ]
-        self.arm = RobotArm(self.joints)
+        self.arm = RobotArm(self.servo_bus, self.joints)
 
         self.sample_raw_trajectory = [
             {
@@ -90,7 +90,10 @@ class MirrorSmoothingTestCase(unittest.TestCase):
         outputs: list[str] = []
         inputs = ["2", "n"]  # Escolhe Modo 2, e recusa home para sair
 
-        with patch("actions.mirror_action.load_mirror_result", return_value=self.sample_raw_trajectory):
+        with patch(
+            "src.actions.mirror_action.load_mirror_result",
+            return_value=self.sample_raw_trajectory,
+        ):
             select_and_run_replay(
                 self.arm,
                 input_fn=lambda _: inputs.pop(0),

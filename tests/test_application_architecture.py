@@ -1,10 +1,7 @@
 import unittest
 from collections.abc import Sequence
 
-from src.application.model.Joint import Joint
-from src.application.model.JointConfig import JointConfig
-from src.application.model.RobotArm import RobotArm
-from src.application.model.ServoBus import ServoPositionCommand
+from src.application import Joint, JointConfig, RobotArm, ServoPositionCommand
 from src.infrastructure.scservo_bus import ADDR_TORQUE_ENABLE, ScServoBus
 from tests.fake_servo import FakeServo
 
