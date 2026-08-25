@@ -17,7 +17,7 @@ class RobotArm:
         self._joints_by_name: dict[str, Joint] = {
             joint.name.lower(): joint for joint in self._joints
         }
-        self._servo = self._joints[0].servo
+        self._servo = self._joints[0].servo # Driver do protocolo de comunicação de todas as juntas -> Feeteck mesmo barramento
 
     @property
     def joints(self) -> tuple[Joint, ...]:

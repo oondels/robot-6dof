@@ -25,6 +25,7 @@ def parse_args() -> argparse.Namespace:
 
 
 def create_arm(servo: Any) -> RobotArm:
+    #* Compartilhamento de mesmo servo para todas as juntas, pois o barramento é único e o driver é o mesmo
     joints = [
         Joint(
             servo=servo,
