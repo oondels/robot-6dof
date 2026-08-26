@@ -1,59 +1,23 @@
 {
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "name": "Python: main.py (Status)",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "${workspaceFolder}/main.py",
-            "args": [
-                "--action", "status"
-            ],
-            "console": "integratedTerminal",
-            "justMyCode": false
-        },
-        {
-            "name": "Mirror",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "${workspaceFolder}/main.py",
-            "args": [
-                "--action", "mirror"
-            ],
-            "console": "integratedTerminal",
-            "justMyCode": false
-        },
-        {
-            "name": "Python: main.py --action test",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "${workspaceFolder}/main.py",
-            "args": [
-                "--action", "test"
-            ],
-            "console": "integratedTerminal",
-            "justMyCode": false
-        },
-        {
-            "name": "Python: Arquivo Atual",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "${file}",
-            "console": "integratedTerminal",
-            "justMyCode": false
-        },
-        {
-            "name": "Python: Executar Todos os Testes",
-            "type": "debugpy",
-            "request": "launch",
-            "module": "unittest",
-            "args": [
-                "discover",
-                "-s", "tests",
-                "-v"
-            ],
-            "console": "integratedTerminal",
-            "justMyCode": false
-        }
-    ]
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "PS5: monitorar entradas",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/test-controller.py",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": true
+    },
+    {
+      "name": "PS5: teleoperação (hardware real)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/actions/tele_control/ps5_controller.py",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": true
+    }
+  ]
 }
