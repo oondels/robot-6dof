@@ -1,4 +1,5 @@
 import argparse
+from collections.abc import Sequence
 
 from scservo_sdk import PortHandler, sms_sts
 
@@ -9,29 +10,36 @@ from robot_config import JOINT_CONFIGS
 
 DEFAULT_PORT = "/dev/ttyUSB0"
 DEFAULT_BAUDRATE = 1_000_000
+HARDWARE_FREE_ACTIONS = frozenset({"list"})
+STATUS_ACTION = "status"
 
 
-def parse_args() -> argparse.Namespace:
+def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
+    """Lê os parâmetros da interface de linha de comando."""
     parser = argparse.ArgumentParser(description="Controlador do Braço Robótico 6-DOF.")
     parser.add_argument(
         "--action",
         default="status",
-        help="Ação a ser executada: status, test, mirror, list ou <nome_da_acao_gravada> (padrão: 'status')",
+        help=(
+            "Ação a ser executada: status, list, test, mirror, calibrate "
+            "ou <nome_da_acao_gravada> (padrão: 'status')"
+        ),
     )
-    parser.add_argument("--port", default=DEFAULT_PORT, help="Porta serial de comunicação")
-    parser.add_argument("--baudrate", type=int, default=DEFAULT_BAUDRATE, help="Taxa de transmissão em baud")
-    return parser.parse_args()
+    parser.add_argument(
+        "--port", default=DEFAULT_PORT, help="Porta serial de comunicação"
+    )
+    parser.add_argument(
+        "--baudrate",
+        type=int,
+        default=DEFAULT_BAUDRATE,
+        help="Taxa de transmissão em baud",
+    )
+    return parser.parse_args(argv)
 
 
 def create_arm(servo_bus: ServoBus) -> RobotArm:
     """Compõe o braço usando um único barramento compartilhado."""
-    joints = [
-        Joint(
-            servo_bus=servo_bus,
-            config=config,
-        )
-        for config in JOINT_CONFIGS
-    ]
+    joints = [Joint(servo_bus=servo_bus, config=config) for config in JOINT_CONFIGS]
     return RobotArm(servo_bus=servo_bus, joints=joints)
 
 
@@ -45,21 +53,13 @@ def print_arm_status(arm: RobotArm) -> None:
         )
 
 
-def main() -> None:
-    args = parse_args()
+def normalize_action(action: str) -> str:
+    """Normaliza a ação recebida pela CLI antes do despacho."""
+    return action.strip().lower()
 
-    # Ação de listagem não requer abertura de hardware
-    if args.action == "list":
-        execute_action("list")
-        return
 
-    # ! TODO: Mover para apos a criacao da instancia do RobotArm, pois a calibracao precisa de hardware
-    # *: Fazer correta configuracao da acao calibrate para recener como instancia nos args RobotArm
-    if args.action == "calibrate":
-        execute_action("calibrate")
-        return
-
-    # Demais ações requerem configuração de juntas e hardware
+def validate_robot_configuration() -> None:
+    """Garante que há juntas calibradas antes de usar o hardware."""
     if not JOINT_CONFIGS:
         raise RuntimeError(
             "Nenhuma junta calibrada. "
@@ -67,27 +67,57 @@ def main() -> None:
             "da calibração física."
         )
 
-    port = PortHandler(args.port)
-    sdk_servo = sms_sts(port)
-    servo_bus = ScServoBus(sdk_servo)
+
+def connect_servo_bus(port_name: str, baudrate: int) -> tuple[PortHandler, ServoBus]:
+    """Abre e configura a conexão serial usada pelo braço.
+
+    O chamador é responsável por sempre fechar a porta retornada.
+    """
+    port = PortHandler(port_name)
+
+    if not port.openPort():
+        port.closePort()
+        raise RuntimeError(f"Erro abrindo a porta {port_name}")
+
+    if not port.setBaudRate(baudrate):
+        port.closePort()
+        raise RuntimeError(f"Erro configurando baudrate {baudrate}")
+
+    return port, ScServoBus(sms_sts(port))
+
+
+def dispatch_robot_action(action: str, arm: RobotArm) -> None:
+    """Executa ações que dependem de uma instância já inicializada do braço."""
+    if action == STATUS_ACTION:
+        print_arm_status(arm)
+        return
+
+    execute_action(action, arm)
+
+
+def run_hardware_action(action: str, port_name: str, baudrate: int) -> None:
+    """Executa uma ação mantendo o ciclo de vida da serial em um só lugar."""
+    validate_robot_configuration()
+    port, servo_bus = connect_servo_bus(port_name, baudrate)
 
     try:
-        if not port.openPort():
-            raise RuntimeError(f"Erro abrindo a porta {args.port}")
-
-        if not port.setBaudRate(args.baudrate):
-            raise RuntimeError(f"Erro configurando baudrate {args.baudrate}")
-        
-        # Cria objeto RobotArm com as juntas configuradas
         arm = create_arm(servo_bus)
-
-        if args.action == "status":
-            print_arm_status(arm)
-        else:
-            execute_action(args.action, arm)
-
+        dispatch_robot_action(action, arm)
     finally:
         port.closePort()
+
+
+def main() -> None:
+    """Ponto de entrada da aplicação: CLI, boot e despacho de ações."""
+    args = parse_args()
+    action = normalize_action(args.action)
+
+    # Ações que não dependem de hardware podem ser executadas sem inicializar o braço
+    if action in HARDWARE_FREE_ACTIONS:
+        execute_action(action)
+        return
+
+    run_hardware_action(action, args.port, args.baudrate)
 
 
 if __name__ == "__main__":
