@@ -3,7 +3,6 @@ from collections.abc import Callable
 from src.actions.mirror_action import run_mirror_action
 from src.actions.recorded_actions import (
     DEFAULT_RECORDED_ACTIONS_DIR,
-    list_named_actions,
     play_named_action,
     print_named_actions,
     sanitize_action_name,
@@ -11,6 +10,7 @@ from src.actions.recorded_actions import (
 from src.calibration.test_arm_poses import run_pose_tester
 from src.application import RobotArm
 from src.calibration.calibration import run_calibration
+from src.actions.tele_control.keyboard_control import keyboard_control
 
 
 def execute_action(
@@ -51,6 +51,8 @@ def execute_action(
         run_pose_tester(arm, input_fn=input_fn, output_fn=output_fn)
     elif normalized == "mirror":
         run_mirror_action(arm, input_fn=input_fn, output_fn=output_fn)
+    elif normalized == "keyboard":
+        keyboard_control()
     else:
         # 3. Verifica se corresponde a uma ação gravada em recorded_actions/
         try:
