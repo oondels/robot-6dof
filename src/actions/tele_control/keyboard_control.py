@@ -13,6 +13,8 @@ from src.application.joint_config import JointConfig
 from src.application.joint import Joint
 from src.application.robot_arm import RobotArm
 
+from src.actions.home_pose import move_arm_to_home
+
 KEYBOARD_BINDINGS = (
     KeyBinding(
         name="move_forward",
@@ -183,7 +185,7 @@ def run_control_loop(arm: RobotArm, keyboard: KeyBoardInput):
                 joint.command(clamped_angle)
 
 
-def main():
+def keyboard_control():
     keyboard = KeyBoardInput(KEYBOARD_BINDINGS)
     keyboard.open()
 
@@ -204,12 +206,14 @@ def main():
     except KeyboardInterrupt:
         print("\n[AUDIT] Encerrando monitor...")
     finally:
-        if arm.is_torque_enabled():
-            print("\n\n[AUDIT] Desabilitando torque")
-            arm.disable_torque()
+        # Colocar braço em pose home
+        move_arm_to_home(arm, output_fn=print)
+        
         keyboard.close()
         port.closePort()
+        
+        
 
 
 if __name__ == "__main__":
-    main()
+    keyboard_control()
