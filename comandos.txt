@@ -1,5 +1,0 @@
- position, speed, result, error = servo.ReadPosSpeed(
-        SERVO_ID
-    )
-
-    
