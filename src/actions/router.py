@@ -11,6 +11,7 @@ from src.calibration.test_arm_poses import run_pose_tester
 from src.application import RobotArm
 from src.calibration.calibration import run_calibration
 from src.actions.tele_control.keyboard_control import keyboard_control
+from src.actions.tele_control.ps5_controller import controller_control
 
 
 def execute_action(
@@ -53,6 +54,8 @@ def execute_action(
         run_mirror_action(arm, input_fn=input_fn, output_fn=output_fn)
     elif normalized == "keyboard":
         keyboard_control()
+    elif normalized == "ps5" or normalized == "controller":
+        controller_control()
     else:
         # 3. Verifica se corresponde a uma ação gravada em recorded_actions/
         try:

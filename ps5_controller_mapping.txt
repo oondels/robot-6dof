@@ -1,0 +1,118 @@
+controller_mapping = {
+    "botoes": {
+        "cross": {
+            "botao": 304,
+            "valor": [0, 1],
+        },
+        "circle": {
+            "botao": 305,
+            "valor": [0, 1],
+        },
+        "triangle": {
+            "botao": 307,
+            "valor": [0, 1],
+        },
+        "square": {
+            "botao": 308,
+            "valor": [0, 1],
+        },
+    },
+
+    "shoulders": {
+        "l1": {
+            "botao": 310,
+            "valor": [0, 1],
+        },
+        "r1": {
+            "botao": 311,
+            "valor": [0, 1],
+        },
+    },
+
+    "triggers": {
+        "l2": {
+            "botao": 312,
+            "valor": [0, 1],
+            "eixo": {
+                "nome": "ABS_Z",
+                "valor": [0, 255],
+            },
+        },
+        "r2": {
+            "botao": 313,
+            "valor": [0, 1],
+            "eixo": {
+                "nome": "ABS_RZ",
+                "valor": [0, 255],
+            },
+        },
+    },
+
+    "dpad": {
+        "esquerda": {
+            "eixo": "ABS_HAT0X",
+            "valor": -1,
+        },
+        "direita": {
+            "eixo": "ABS_HAT0X",
+            "valor": 1,
+        },
+        "cima": {
+            "eixo": "ABS_HAT0Y",
+            "valor": -1,
+        },
+        "baixo": {
+            "eixo": "ABS_HAT0Y",
+            "valor": 1,
+        },
+    },
+
+    "analogicos": {
+        "esquerdo": {
+            "botao": 317,  # L3
+            "eixos": {
+                "x": {
+                    "nome": "ABS_X",
+                    "valor": [0, 255],
+                    "centro": 128,
+                },
+                "y": {
+                    "nome": "ABS_Y",
+                    "valor": [0, 255],
+                    "centro": 128,
+                },
+            },
+        },
+
+        "direito": {
+            "botao": 318,  # R3
+            "eixos": {
+                "x": {
+                    "nome": "ABS_RX",
+                    "valor": [0, 255],
+                    "centro": 128,
+                },
+                "y": {
+                    "nome": "ABS_RY",
+                    "valor": [0, 255],
+                    "centro": 128,
+                },
+            },
+        },
+    },
+
+    "menu": {
+        "share": {
+            "botao": 314,
+            "valor": [0, 1],
+        },
+        "options": {
+            "botao": 315,
+            "valor": [0, 1],
+        },
+        "ps": {
+            "botao": 316,
+            "valor": [0, 1],
+        },
+    },
+}
