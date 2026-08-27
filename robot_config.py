@@ -61,12 +61,12 @@ JOINT_CONFIGS: tuple[JointConfig, ...] = (
     JointConfig(
         name="gripper",
         servo_id=6,
-        zero_position=2041,
+        zero_position=2070,
         direction=1,
-        min_angle=-1.0,
-        max_angle=110.0,
-        speed=400,
-        acc=30,
+        min_angle=0.0,
+        max_angle=120.0,
+        speed=700,
+        acc=40,
         tolerance_deg=2,
     ),
 )
