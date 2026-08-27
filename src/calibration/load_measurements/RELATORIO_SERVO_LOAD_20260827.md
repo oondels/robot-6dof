@@ -146,15 +146,16 @@ Todas as medições válidas pertencem à junta `gripper`, servo ID `6`, usando
 
 ### Limitações
 
-- não existe ainda um ensaio equivalente com objeto para cada configuração;
+- existe um primeiro ensaio com objeto para `speed=700`, `acc=30` e `L2`, mas
+  ainda não há repetição nem pares com objeto para as demais configurações;
 - não existem amostras com `R2` para comparar o sentido oposto;
 - a pressão do trigger não foi mantida em patamares controlados durante cada
   sessão;
 - os percursos e quantidades de amostras diferem entre os ensaios;
 - a tensão permaneceu praticamente constante;
 - a temperatura permaneceu praticamente constante;
-- a corrente registrada é incompativelmente baixa para o esforço observado e
-  precisa ser validada antes de uso operacional;
+- a corrente apresentou comportamento coerente no ensaio com objeto, mas sua
+  escala ainda deve ser confirmada antes de uso como limite de segurança;
 - os nomes dos arquivos não refletem todas as configurações internas.
 
 Por essas limitações, os dados permitem caracterizar a carga dinâmica normal,
@@ -173,9 +174,86 @@ corrente:    0..0,026 A registrados
 Não houve variação suficiente de tensão ou temperatura para calcular seus
 efeitos sobre o load.
 
-A corrente máxima de `0,026 A` não é coerente com um servo em movimento sob
-load elevado. Antes de relacionar corrente e load, deve-se confirmar o
-registrador, a escala e o comportamento específico do firmware do servo.
+No ensaio sem objeto, a corrente ficou entre `0` e `0,026 A`. No novo ensaio
+com objeto, ela subiu para `0,104..0,546 A` durante o contato e permaneceu em
+`0,468..0,572 A` com o servo bloqueado pelo objeto. Esse comportamento é
+internamente coerente com o aumento do esforço. A escala ainda deve ser
+confirmada antes de transformar a corrente em limite operacional de segurança.
+
+## Ensaio com objeto macio — speed 700 / acc 30 / L2
+
+Arquivo analisado:
+`servo_load_gripper_speed700_acc30_l2_20260827_122838.csv`.
+
+O ensaio possui `70` amostras e duração de `2,559 s`. A garra começou livre,
+fechou sobre o objeto macio e continuou recebendo comando até o servo emitir o
+erro de overload.
+
+### Separação do ensaio em fases
+
+| Fase | Intervalo | Amostras | Load | Corrente | Velocidade medida | Interpretação |
+| --- | ---: | ---: | ---: | ---: | ---: | --- |
+| Movimento livre | `0..0,575 s` | 17 | média `137`, pico `248` | média `0,013 A`, pico `0,026 A` | até `49,28°/s` | O load cresce por causa do movimento rápido |
+| Contato e desaceleração | `0,611..0,826 s` | 7 | média `425`, faixa `296..500` | `0,104..0,546 A` | cai de aproximadamente `34°/s` para `2°/s` | O objeto começa a impedir o fechamento |
+| Servo bloqueado no objeto | `0,862..2,559 s` | 46 | média `472`, faixa `464..476` | média `0,528 A` | próxima de `0°/s` | Esforço sustentado até o overload |
+
+Durante o bloqueio, o alvo permaneceu em `0°`, mas a posição real ficou entre
+aproximadamente `9,9°` e `10,2°`. O erro estável de cerca de `10°`, junto da
+velocidade próxima de zero, confirma que o servo não estava apenas em
+movimento: ele estava impedido mecanicamente pelo objeto.
+
+### Quando os limites fixos foram cruzados
+
+Os limites de `90` e `120` foram cruzados ainda no movimento livre:
+
+| Limite | Tempo | Trigger | Velocidade | Erro angular | Situação |
+| ---: | ---: | ---: | ---: | ---: | --- |
+| `load > 90` | `0,180 s` | `0,53` | `7,3°/s` | `3,67°` | Garra ainda livre |
+| `load >= 120` | `0,252 s` | `0,70` | `19,6°/s` | `5,26°` | Garra ainda livre |
+| `load >= 240` | `0,575 s` | `1,00` | `49,3°/s` | `12,14°` | Garra ainda em movimento rápido |
+
+Portanto, esta medição confirma que `90`, `120` e até `240` não distinguem
+contato quando usados isoladamente.
+
+### Sinais que distinguiram o contato
+
+Aplicando o modelo provisório do movimento livre:
+
+```text
+load_normal_estimado = 36,31 + 4,10 * abs(velocidade_em_graus_por_segundo)
+```
+
+o load excedente permaneceu baixo durante a maior parte do fechamento livre.
+Quando o alvo chegou a `0°` e o objeto passou a bloquear a garra, o excedente
+saltou para aproximadamente `120` counts e, na amostra seguinte, para mais de
+`220` counts. Durante o bloqueio, permaneceu acima de `400` counts.
+
+O contato ficou caracterizado pela combinação simultânea de:
+
+```text
+load acima do esperado para a velocidade
++ velocidade caindo para zero
++ erro de posição persistente
++ corrente aumentando
+```
+
+A tensão também caiu de `9,3 V` no movimento livre para `9,0 V` no bloqueio.
+A temperatura permaneceu em `33 °C`, pois o ensaio foi curto.
+
+### Relação com o erro de overload
+
+O maior load instantâneo foi `500`, durante a transição de contato. Depois
+disso, o servo permaneceu por aproximadamente `1,7 s` com load perto de `470`
+e corrente perto de `0,53 A`, antes do encerramento associado ao erro.
+
+Isso indica que o overload não deve ser interpretado apenas como um único
+valor instantâneo acima de `240`. Neste ensaio, o estado perigoso foi o esforço
+alto e sustentado com velocidade praticamente zero.
+
+Este resultado ainda não define sozinho os limites finais de contato, fixação
+e segurança. Ele fornece uma primeira separação clara entre carga dinâmica e
+bloqueio, mas precisa ser repetido para verificar a variação entre execuções e
+entre tipos de objeto.
 
 ## Resultado por configuração
 
@@ -315,10 +393,14 @@ sem objeto vs com objeto
 5. Os limites fixos `90/120` gerariam falsos positivos em movimento livre.
 6. A tensão e a temperatura permaneceram estáveis; seus efeitos não foram
    medidos.
-7. A leitura de corrente precisa ser validada antes de entrar em qualquer
-   cálculo.
-8. O próximo detector deve considerar load excedente, erro de posição e
+7. A leitura de corrente respondeu de forma coerente ao contato e ao bloqueio,
+   mas sua escala precisa ser validada antes de virar limite de segurança.
+8. O ensaio com objeto confirmou que o detector deve considerar load
+   excedente, erro de posição e
    velocidade, não apenas load absoluto.
+9. No ensaio com objeto, o estado anterior ao overload apresentou load
+   sustentado próximo de `470`, corrente próxima de `0,53 A` e velocidade
+   próxima de zero por aproximadamente `1,7 s`.
 
 ## Ensaios necessários para fechar o modelo operacional
 
@@ -336,7 +418,8 @@ sem objeto vs com objeto
 
 ## Estado da decisão
 
-A calibração dinâmica sem objeto está caracterizada, mas o limite final de
-contato/fixação ainda não está fechado. A próxima etapa deve produzir ensaios
-pareados com objeto para calcular a margem entre load dinâmico esperado e load
-de contato.
+A calibração dinâmica sem objeto está caracterizada e o primeiro ensaio com
+objeto confirmou que o load excedente separa melhor o contato do que um limite
+absoluto. O limite final de contato/fixação ainda não está fechado porque há
+somente uma execução com objeto. A próxima etapa deve repetir o mesmo ensaio e
+produzir pares controlados com e sem objeto.
