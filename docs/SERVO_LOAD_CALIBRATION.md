@@ -5,6 +5,25 @@ servos Feetech/SCServo do robô. O procedimento é definido por servo e por
 aplicação mecânica. Um valor obtido em uma junta não deve ser copiado para
 outra junta sem uma nova medição.
 
+## Servo Feetech STS3215 usado no robô
+
+O robô utiliza servos Feetech `STS3215`. Os resultados deste documento são
+medições do conjunto real formado por servo, alimentação, montagem mecânica e
+software de controle. Eles não são uma especificação universal de todos os
+STS3215.
+
+O ensaio mais recente da garra utilizou:
+
+```text
+modelo:       Feetech STS3215
+servo ID:     6
+speed:        700
+aceleração:   30
+controle:     gatilho L2
+tensão livre: 9,3 V
+objeto:       macio
+```
+
 ## O que o load representa
 
 Nos servos SMS/STS, o load atual é lido no registrador `PRESENT_LOAD`, endereço
@@ -217,46 +236,95 @@ O valor imediatamente anterior ao erro não deve ser adotado como limite de
 operação. A proteção pode depender tanto da magnitude quanto do tempo de
 permanência.
 
-## Estudo de caso: servo ID 6
+## Estudo de caso: Feetech STS3215, servo ID 6
 
-Este estudo registra uma sessão específica do servo ID `6`. Os números abaixo
+Este estudo registra sessões específicas do servo ID `6`. Os números abaixo
 não são limites globais do robô.
+
+### Efeito da calibração mecânica
 
 Antes da correção do zero mecânico, o servo sem objeto terminou o fechamento
 com load médio de `136`, pico de `140` e erro angular de aproximadamente
 `2,76°`. O servo estava aplicando esforço contra o próprio mecanismo.
 
-Após atualizar a referência e manter o limite antes do batente, o ensaio sem
-objeto apresentou:
+Após atualizar a referência e manter o limite antes do batente, um ensaio
+lento sem objeto apresentou load médio final de `57,2`, pico final de `72`,
+pico geral de `84` e erro angular final de `0,97°`.
 
-| Resultado | Valor |
+### Efeito do trigger e da velocidade
+
+Nos ensaios dinâmicos sem objeto, o load aumentou junto com a pressão no `L2`:
+
+| Faixa do L2 | Load médio sem objeto |
 | --- | ---: |
-| load médio no fechamento final | `57,2` |
-| pico no fechamento final | `72` |
-| maior pico de todo o ensaio | `84` |
-| erro angular final | `0,97°` |
+| `0..25%` | `61` |
+| `50..75%` | `149` |
+| `75..100%` | `253` |
 
-No ensaio com objeto macio, a progressão sustentada foi:
+Com `speed=700`, `acc=30` e L2 pressionado rapidamente, o load chegou a `248`
+enquanto a garra ainda estava livre. Portanto, os antigos valores absolutos
+`90` para contato e `120` para fixação geram falsos positivos e não devem ser
+usados isoladamente.
 
-| Load aproximado | Interpretação observada |
-| ---: | --- |
-| `41..65` | movimento livre |
-| `92..108` | início de contato |
-| `120` | objeto agarrado com esforço estável |
-| `148..220` | compressão crescente |
-| `236..260` | região próxima à sobrecarga |
-
-O próximo comando após a região `236..260` recebeu `Overload error`. Para essa
-montagem e essa sessão, foram adotados no controle PS5:
+Nas amostras livres, a velocidade medida explicou melhor o load do que um
+limite fixo. O modelo empírico provisório foi:
 
 ```text
-load > 90   -> aviso de contato
-load >= 120 -> objeto considerado fixado
+load esperado pelo movimento = 36,31 + 4,10 * abs(velocidade em graus/s)
+load excedente = load medido - load esperado pelo movimento
 ```
 
-Esses valores dependem da calibração mecânica atual, do objeto, da velocidade,
-da aceleração e do servo ID `6`. Qualquer mudança relevante exige repetir o
-procedimento.
+Esse modelo descreve a montagem e as sessões medidas. Ele não converte load
+em força ou torque e deve ser recalibrado quando houver mudança relevante.
+
+### Ensaio com objeto macio até o overload
+
+O arquivo
+`servo_load_gripper_speed700_acc30_l2_20260827_122838.csv` registrou `70`
+amostras durante `2,559 s`:
+
+| Fase | Load | Corrente | Velocidade medida |
+| --- | ---: | ---: | ---: |
+| movimento livre | média `137`, pico `248` | média `0,013 A` | até `49,28°/s` |
+| contato e desaceleração | `296..500` | `0,104..0,546 A` | caiu em direção a zero |
+| bloqueio no objeto | média `472` | média `0,528 A` | próxima de `0°/s` |
+
+No bloqueio, o alvo permaneceu em `0°`, a posição real ficou próxima de `10°`
+e a tensão caiu de `9,3 V` para `9,0 V`. O servo permaneceu aproximadamente
+`1,7 s` com load perto de `470`, corrente perto de `0,53 A` e velocidade quase
+zero antes do encerramento associado ao `Overload error`.
+
+O estado perigoso observado foi esforço alto e sustentado com o servo
+bloqueado. Não foi apenas um pico instantâneo acima de `240`.
+
+### Critério provisório implementado
+
+A função `validate_load`, em `src/utils/validate_load.py`, considera contato ou
+bloqueio somente quando todos estes sinais aparecem na mesma amostra:
+
+```text
+load excedente >= 100
+velocidade absoluta <= 5 graus/s
+erro angular absoluto >= 5 graus
+corrente absoluta >= 0,10 A
+```
+
+Exemplo de uso:
+
+```python
+from src.utils.validate_load import validate_load
+
+contact_detected = validate_load(
+    raw_load=joint.current_load(),
+    measured_velocity_deg_s=measured_velocity,
+    angle_error_deg=target_angle - current_angle,
+    current_a=joint.current_current(),
+)
+```
+
+A função avalia apenas uma amostra. Para uso no controle real, a decisão deve
+exigir leituras consecutivas e possuir uma ação segura definida. Os limites
+ainda são provisórios porque existe somente uma execução dinâmica com objeto.
 
 ## Ferramenta existente
 
@@ -288,4 +356,3 @@ A calibração de load de um servo está concluída quando:
 - os dados brutos e a justificativa da decisão foram preservados;
 - a estratégia de falha foi validada primeiro sem hardware real, depois com
   teste controlado.
-
