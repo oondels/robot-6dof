@@ -64,6 +64,15 @@ class RobotArmTestCase(unittest.TestCase):
             (self.joint1, self.joint2, self.joint3),
         )
 
+    def test_tracks_whether_the_gripper_is_holding_an_object(self) -> None:
+        self.assertFalse(self.arm.atuator_object)
+
+        self.arm.atuator_object = True
+        self.assertTrue(self.arm.atuator_object)
+
+        with self.assertRaisesRegex(TypeError, "atuator_object deve ser booleano"):
+            self.arm.atuator_object = 1  # type: ignore[assignment]
+
     def test_rejects_empty_joints_sequence(self) -> None:
         with self.assertRaisesRegex(
             ValueError,

@@ -17,6 +17,14 @@ class ScServoBus(ServoBus):
         position, _, result, error = self._servo.ReadPosSpeed(servo_id)
         self._validate_result(result, error, "leitura de posição")
         return position
+    
+    def read_load(self, servo_id: int) -> int:
+      load, result, error = self._servo.read2ByteTxRx(
+          servo_id,
+          60, # endereço do registrador de memória do servo onde esta o load
+      )
+      self._validate_result(result, error, "leitura de carga")
+      return load
 
     def is_moving(self, servo_id: int) -> bool:
         moving, result, error = self._servo.ReadMoving(servo_id)
