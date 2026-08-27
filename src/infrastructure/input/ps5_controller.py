@@ -84,6 +84,10 @@ def find_ps5_controller_device(
 
 def _is_ps5_controller_name(name: str) -> bool:
     normalized_name = name.strip().casefold()
+    auxiliary_interfaces = ("touchpad", "motion sensors")
+    if any(interface in normalized_name for interface in auxiliary_interfaces):
+        return False
+
     return "dualsense" in normalized_name or normalized_name == "wireless controller"
 
 

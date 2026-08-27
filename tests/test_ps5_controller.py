@@ -87,6 +87,28 @@ class Ps5ControllerInputTestCase(unittest.TestCase):
         self.assertTrue(keyboard.closed)
         self.assertTrue(controller.closed)
 
+    def test_ignores_dualsense_auxiliary_interfaces(self) -> None:
+        controller = FakeDeviceProbe("DualSense Wireless Controller")
+        motion_sensors = FakeDeviceProbe(
+            "DualSense Wireless Controller Motion Sensors"
+        )
+        touchpad = FakeDeviceProbe("DualSense Wireless Controller Touchpad")
+        devices = {
+            "/dev/input/event6": controller,
+            "/dev/input/event7": motion_sensors,
+            "/dev/input/event8": touchpad,
+        }
+
+        path = find_ps5_controller_device(
+            device_lister=lambda: list(devices),
+            device_factory=devices.__getitem__,
+        )
+
+        self.assertEqual(path, "/dev/input/event6")
+        self.assertTrue(controller.closed)
+        self.assertTrue(motion_sensors.closed)
+        self.assertTrue(touchpad.closed)
+
     def test_discovery_reports_when_no_ps5_controller_is_found(self) -> None:
         keyboard = FakeDeviceProbe("AT Translated Set 2 keyboard")
 

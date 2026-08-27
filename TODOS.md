@@ -1,0 +1,2 @@
+-> Quando robo ir para posicao home, verificar se garra eta com carga e se ajustar conforme
+-> Organizar ps5_controller.py, colocar as responsabilidades em cada local

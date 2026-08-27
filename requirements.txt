@@ -5,6 +5,7 @@ certifi==2026.7.22
 charset-normalizer==3.4.9
 click==8.3.3
 colorama==0.4.6
+dualsense-controller==0.3.1
 ftservo-python-sdk==2.0.0
 h11==0.16.0
 idna==3.18

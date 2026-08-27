@@ -9,6 +9,7 @@ from src.infrastructure.input.ps5_controller import (
 from src.application.robot_arm import RobotArm
 from src.actions.home_pose import move_arm_to_home
 from src.application.ports.control_input import ControlState
+from src.utils.adaptive_trigger import apply_load_to_adaptive_trigger
 from src.utils.validate_load import validate_load
 
 
@@ -131,6 +132,7 @@ def run_control_loop(arm: RobotArm, controller: Ps5ControllerInput) -> None:
 
         if state.emergency_stop:
             print("[ALERTA] Parada de emergência acionada!")
+            apply_load_to_adaptive_trigger(0, 0.0, 0.0, shutdown=True)
             arm.disable_torque()
             break
 
@@ -150,6 +152,7 @@ def run_control_loop(arm: RobotArm, controller: Ps5ControllerInput) -> None:
             gripper_load_alert_active = False
             previous_gripper_angle = target_angles["gripper"]
             consecutive_gripper_load_validations = 0
+            apply_load_to_adaptive_trigger(0, 0.0, 0.0)
             home_shortcut_active = True
             continue
 
@@ -208,6 +211,9 @@ def run_control_loop(arm: RobotArm, controller: Ps5ControllerInput) -> None:
 
         # Gatilhos -> Garra: R2 abre; L2 fecha.
         l2 = axes.get("l2", 0.0)
+        if not state.movement_enabled or l2 == 0.0:
+            apply_load_to_adaptive_trigger(0, 0.0, 0.0)
+
         if state.movement_enabled and r2 != 0.0 and not home_shortcut_active:
             target_angles["gripper"] += JOG_SPEED_DEG_S * delta_time * r2
             arm.atuator_object = False
@@ -242,12 +248,17 @@ def run_control_loop(arm: RobotArm, controller: Ps5ControllerInput) -> None:
                     current_gripper_angle = joint.current_angle()
                     measured_gripper_velocity = 0.0
 
-                    print(f"[GARRA] Load atual: {gripper_load_magnitude}")
-                    
                     if delta_time > 0.0:
                         measured_gripper_velocity = (
                             current_gripper_angle - previous_gripper_angle
                         ) / delta_time
+
+                    if l2 != 0.0:
+                        apply_load_to_adaptive_trigger(
+                            raw_load=gripper_load,
+                            measured_velocity_deg_s=measured_gripper_velocity,
+                            trigger_value=l2,
+                        )
                         
                     gripper_angle_error = clamped_angle - current_gripper_angle
                     gripper_current = joint.current_current()
@@ -268,6 +279,7 @@ def run_control_loop(arm: RobotArm, controller: Ps5ControllerInput) -> None:
                             )
 
                     if l2 != 0.0 and not arm.atuator_object:
+                        # TODO: Essa verficiação deve ser feita dentro da classe do braço -> robot_arm
                         gripper_load_is_valid = validate_load(
                             raw_load=gripper_load,
                             measured_velocity_deg_s=measured_gripper_velocity,
@@ -304,6 +316,7 @@ def run_control_loop(arm: RobotArm, controller: Ps5ControllerInput) -> None:
 
 def controller_control(arm: RobotArm) -> None:
     controller = Ps5ControllerInput(find_ps5_controller_device())
+    apply_load_to_adaptive_trigger(0, 0.0, 0.0, initialize=True)
     controller.open()
 
     try:
@@ -311,5 +324,6 @@ def controller_control(arm: RobotArm) -> None:
     except KeyboardInterrupt:
         print("\n[AUDIT] Encerrando monitor...")
     finally:
+        apply_load_to_adaptive_trigger(0, 0.0, 0.0, shutdown=True)
         move_arm_to_home(arm, output_fn=print)
         controller.close()
