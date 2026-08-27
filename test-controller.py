@@ -1,5 +1,8 @@
 from src.application.ports.control_input import ControlState
-from src.infrastructure.input.ps5_controller import Ps5ControllerInput
+from src.infrastructure.input.ps5_controller import (
+    Ps5ControllerInput,
+    find_ps5_controller_device,
+)
 
 
 def observable_state(state: ControlState) -> dict[str, object]:
@@ -19,7 +22,7 @@ def changed_fields(
 ) -> dict[str, object]:
     return {name: value for name, value in current.items() if value != previous[name]}
 
-controller = Ps5ControllerInput(device_path="/dev/input/event18")
+controller = Ps5ControllerInput(device_path=find_ps5_controller_device())
 controller.open()
 
 previous_state = observable_state(controller.read())

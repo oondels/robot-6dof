@@ -3,7 +3,7 @@ import math
 from time import monotonic
 from typing import Protocol
 
-from evdev import InputDevice, ecodes
+from evdev import InputDevice, ecodes, list_devices
 from src.application.ports.control_input import ControlInput, ControlState
 
 
@@ -24,7 +24,89 @@ class ControllerDevice(Protocol):
 
 
 DeviceFactory = Callable[[str], ControllerDevice]
+DeviceLister = Callable[[], list[str]]
 Clock = Callable[[], float]
+
+
+def find_ps5_controller_device(
+    device_lister: DeviceLister = list_devices,
+    device_factory: DeviceFactory = InputDevice,
+) -> str:
+    """Encontra o único DualSense disponível nos dispositivos evdev.
+
+    Os caminhos ``/dev/input/eventN`` são atribuídos dinamicamente pelo Linux;
+    portanto, eles não devem ser tratados como uma configuração estável.
+    """
+    candidates: list[tuple[str, str]] = []
+    inspected_devices: list[tuple[str, str]] = []
+    inaccessible_paths: list[str] = []
+    unavailable_paths: list[str] = []
+
+    for path in device_lister():
+        device: ControllerDevice | None = None
+        try:
+            device = device_factory(path)
+            name = str(getattr(device, "name", "desconhecido"))
+            inspected_devices.append((path, name))
+            if _is_ps5_controller_name(name):
+                candidates.append((path, name))
+        except PermissionError:
+            inaccessible_paths.append(path)
+        except OSError:
+            unavailable_paths.append(path)
+        finally:
+            if device is not None:
+                try:
+                    device.close()
+                except OSError:
+                    pass
+
+    if len(candidates) == 1:
+        return candidates[0][0]
+
+    if len(candidates) > 1:
+        formatted_candidates = _format_devices(candidates)
+        raise ConnectionError(
+            "Mais de um controle PS5/DualSense foi encontrado: "
+            f"{formatted_candidates}. Desconecte os controles extras e tente novamente."
+        )
+
+    details = _format_discovery_details(
+        inspected_devices,
+        inaccessible_paths,
+        unavailable_paths,
+    )
+    raise ConnectionError(
+        "Nenhum controle PS5/DualSense foi encontrado automaticamente. "
+        f"{details}"
+    )
+
+
+def _is_ps5_controller_name(name: str) -> bool:
+    normalized_name = name.strip().casefold()
+    return "dualsense" in normalized_name or normalized_name == "wireless controller"
+
+
+def _format_discovery_details(
+    inspected_devices: list[tuple[str, str]],
+    inaccessible_paths: list[str],
+    unavailable_paths: list[str],
+) -> str:
+    details: list[str] = []
+    if inspected_devices:
+        details.append(f"Dispositivos lidos: {_format_devices(inspected_devices)}.")
+    if inaccessible_paths:
+        details.append(
+            "Sem permissão para ler: "
+            f"{', '.join(inaccessible_paths)}. Verifique o grupo 'input' ou as regras udev."
+        )
+    if unavailable_paths:
+        details.append(f"Indisponíveis durante a leitura: {", ".join(unavailable_paths)}.")
+    return " ".join(details) or "Nenhum dispositivo evdev foi listado pelo Linux."
+
+
+def _format_devices(devices: list[tuple[str, str]]) -> str:
+    return ", ".join(f"{path} ({name})" for path, name in devices)
 
 BUTTON_NAMES = {
     ecodes.BTN_SOUTH: "cross",
