@@ -3,7 +3,8 @@ from typing import Callable
 from src.application.robot_arm import RobotArm
 
 
-def move_arm_to_home(arm: RobotArm, output_fn: Callable[[str], None] = print) -> None:
+
+def move_arm_to_home(arm: RobotArm, output_fn: Callable[[str], None] = print, service: str = "default") -> None:
     """Move o braço robótico para a pose Home (posição padrão)."""
     try:
         output_fn("\n==================================================")
@@ -18,5 +19,6 @@ def move_arm_to_home(arm: RobotArm, output_fn: Callable[[str], None] = print) ->
     except Exception as e:
         output_fn(f"Erro ao mover o braço para a posição Home: {e}")
     finally:
-        if arm.is_torque_enabled():
+        if arm.is_torque_enabled() and service == "default":
+            print(f"[DEBUG] Desabilitando torque do braço após serviço '{service}'")
             arm.disable_torque()
