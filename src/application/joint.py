@@ -19,6 +19,7 @@ class JointStatus:
     current: float
     temperature: float
     load: int
+    load_direction: str = "positiva"
     timestamp: float = field(default_factory=monotonic)
 
 
@@ -63,9 +64,14 @@ class Joint:
 
     def get_status(self) -> JointStatus:
         """Coleta, armazena e retorna o status atual da junta."""
+        raw_load = self.current_load()
+        load_magnitude = raw_load & 0x3FF
+        load_direction = "negativa" if raw_load & (1 << 10) else "positiva"
+
         self._status = JointStatus(
             position=self.current_position(),
-            load=self.current_load(),
+            load=load_magnitude,
+            load_direction=load_direction,
             speed=self.speed,
             acceleration=self.acc,
             voltage=self.current_voltage(),

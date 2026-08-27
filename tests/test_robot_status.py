@@ -54,6 +54,10 @@ class RobotStatusTestCase(unittest.TestCase):
         self.assertEqual(robot_status.joints["base_yaw"].load, 40)
         self.assertEqual(robot_status.joints["gripper"].position, 2200)
         self.assertEqual(robot_status.joints["gripper"].load, 472)
+        self.assertEqual(
+            robot_status.joints["gripper"].load_direction,
+            "positiva",
+        )
 
     def test_status_property_does_not_collect_again(self) -> None:
         self.arm.get_status()

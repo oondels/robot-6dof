@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Robot Arm Telemetry</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg: #0b1120;
+      --panel: #111827;
+      --panel-light: #1f2937;
+
+      --border: #263247;
+
+      --text: #f3f4f6;
+      --text-muted: #94a3b8;
+
+      --primary: #3b82f6;
+      --green: #22c55e;
+      --yellow: #eab308;
+      --red: #ef4444;
+
+      --radius: 12px;
+    }
+
+    body {
+      font-family:
+        Inter,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+
+      background: var(--bg);
+      color: var(--text);
+
+      min-height: 100vh;
+    }
+
+    header {
+      height: 70px;
+
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      padding: 0 32px;
+
+      border-bottom: 1px solid var(--border);
+
+      background: rgba(11, 17, 32, 0.95);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-icon {
+      width: 38px;
+      height: 38px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      border-radius: 10px;
+
+      background: var(--primary);
+
+      font-size: 20px;
+    }
+
+    .brand h1 {
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .brand small {
+      display: block;
+
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .connection {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      padding: 7px 12px;
+
+      border-radius: 20px;
+
+      font-size: 13px;
+
+      background: rgba(34, 197, 94, 0.1);
+      color: var(--green);
+    }
+
+    .connection-dot {
+      width: 8px;
+      height: 8px;
+
+      border-radius: 50%;
+
+      background: var(--green);
+
+      box-shadow: 0 0 8px var(--green);
+    }
+
+    main {
+      max-width: 1600px;
+
+      margin: auto;
+
+      padding: 28px 32px;
+    }
+
+    .page-header {
+      margin-bottom: 25px;
+    }
+
+    .page-header h2 {
+      font-size: 24px;
+      margin-bottom: 5px;
+    }
+
+    .page-header p {
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    /* SUMMARY */
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+
+      gap: 16px;
+
+      margin-bottom: 25px;
+    }
+
+    .summary-card {
+      background: var(--panel);
+
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+
+      padding: 18px;
+    }
+
+    .summary-card label {
+      display: block;
+
+      font-size: 12px;
+      color: var(--text-muted);
+
+      margin-bottom: 8px;
+    }
+
+    .summary-value {
+      font-size: 25px;
+      font-weight: 600;
+    }
+
+    .summary-unit {
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    /* MAIN CONTENT */
+
+    .content-grid {
+      display: grid;
+
+      grid-template-columns: 320px 1fr;
+
+      gap: 18px;
+
+      margin-bottom: 25px;
+    }
+
+    .panel {
+      background: var(--panel);
+
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+
+      padding: 20px;
+    }
+
+    .panel-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      margin-bottom: 18px;
+    }
+
+    .panel-title h3 {
+      font-size: 15px;
+    }
+
+    select {
+      background: var(--panel-light);
+      color: var(--text);
+
+      border: 1px solid var(--border);
+
+      border-radius: 8px;
+
+      padding: 8px 10px;
+
+      outline: none;
+    }
+
+    /* TELEMETRY */
+
+    .telemetry-list {
+      display: flex;
+      flex-direction: column;
+
+      gap: 10px;
+    }
+
+    .telemetry-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      padding: 11px 12px;
+
+      background: var(--panel-light);
+
+      border-radius: 8px;
+    }
+
+    .telemetry-label {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .telemetry-value {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    /* CHART */
+
+    .chart-wrapper {
+      position: relative;
+
+      height: 330px;
+      width: 100%;
+    }
+
+    canvas {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* TABLE */
+
+    .table-container {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+
+      border-collapse: collapse;
+
+      min-width: 950px;
+    }
+
+    th {
+      text-align: left;
+
+      padding: 12px;
+
+      color: var(--text-muted);
+
+      font-size: 11px;
+      font-weight: 500;
+
+      border-bottom: 1px solid var(--border);
+    }
+
+    td {
+      padding: 14px 12px;
+
+      font-size: 13px;
+
+      border-bottom: 1px solid var(--border);
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tbody tr:hover {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .joint-name {
+      font-weight: 600;
+    }
+
+    .joint-status {
+      display: inline-flex;
+
+      width: 7px;
+      height: 7px;
+
+      margin-right: 7px;
+
+      border-radius: 50%;
+
+      background: var(--green);
+    }
+
+    .warning {
+      color: var(--yellow);
+    }
+
+    .danger {
+      color: var(--red);
+    }
+
+    footer {
+      margin-top: 25px;
+
+      text-align: center;
+
+      color: var(--text-muted);
+
+      font-size: 12px;
+    }
+
+    @media (max-width: 1000px) {
+      .summary-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .content-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 600px) {
+      header {
+        padding: 0 15px;
+      }
+
+      main {
+        padding: 20px 15px;
+      }
+
+      .summary-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+
+    <div class="brand">
+
+      <div class="brand-icon">⚙</div>
+
+      <div>
+        <h1>Robot Arm Telemetry</h1>
+        <small>6DOF Monitoring System</small>
+      </div>
+
+    </div>
+
+    <div id="connectionStatus" class="connection">
+      <span class="connection-dot"></span>
+      Sem robô conectado...
+    </div>
+
+  </header>
+
+  <main>
+
+    <div class="page-header">
+      <h2>Telemetry Dashboard</h2>
+      <p>Monitoramento em tempo real do braço robótico</p>
+    </div>
+
+    <!-- SUMMARY -->
+
+    <section class="summary-grid">
+
+      <div class="summary-card">
+        <label>JUNTAS ATIVAS</label>
+
+        <div>
+          <span id="activeJoints" class="summary-value">0</span>
+          <span class="summary-unit"> juntas</span>
+        </div>
+      </div>
+
+      <div class="summary-card">
+        <label>TEMPERATURA MÁXIMA</label>
+
+        <div>
+          <span id="maxTemperature" class="summary-value">--</span>
+          <span class="summary-unit">°C</span>
+        </div>
+      </div>
+
+      <div class="summary-card">
+        <label>CORRENTE TOTAL</label>
+
+        <div>
+          <span id="totalCurrent" class="summary-value">--</span>
+          <span class="summary-unit">A</span>
+        </div>
+      </div>
+
+      <div class="summary-card">
+        <label>AMOSTRAS</label>
+
+        <div>
+          <span id="sampleCount" class="summary-value">0</span>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- DETAILS -->
+
+    <section class="content-grid">
+
+      <div class="panel">
+
+        <div class="panel-title">
+
+          <h3>Telemetria da Junta</h3>
+
+          <select id="jointSelector"></select>
+
+        </div>
+
+        <div class="telemetry-list">
+
+          <div class="telemetry-item">
+            <span class="telemetry-label">Temperatura</span>
+            <span id="temperature" class="telemetry-value">-- °C</span>
+          </div>
+
+          <div class="telemetry-item">
+            <span class="telemetry-label">Corrente</span>
+            <span id="current" class="telemetry-value">-- A</span>
+          </div>
+
+          <div class="telemetry-item">
+            <span class="telemetry-label">Load</span>
+            <span id="load" class="telemetry-value">--</span>
+          </div>
+
+          <div class="telemetry-item">
+            <span class="telemetry-label">Velocidade</span>
+            <span id="speed" class="telemetry-value">-- counts/s</span>
+          </div>
+
+          <div class="telemetry-item">
+            <span class="telemetry-label">Aceleração</span>
+            <span id="acceleration" class="telemetry-value">--</span>
+          </div>
+
+          <div class="telemetry-item">
+            <span class="telemetry-label">Posição</span>
+            <span id="position" class="telemetry-value">-- counts</span>
+          </div>
+
+          <div class="telemetry-item">
+            <span class="telemetry-label">Última coleta</span>
+            <span id="collectionTime" class="telemetry-value">--</span>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- CHART -->
+
+      <div class="panel">
+
+        <div class="panel-title">
+
+          <h3>Histórico de Temperatura</h3>
+
+          <select id="chartMetric">
+            <option value="temperature">Temperatura</option>
+            <option value="current">Corrente</option>
+            <option value="load">Load</option>
+            <option value="speed">Velocidade</option>
+            <option value="acceleration">Aceleração</option>
+            <option value="position">Posição</option>
+          </select>
+
+        </div>
+
+        <div class="chart-wrapper">
+          <canvas id="chart"></canvas>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- ALL JOINTS -->
+
+    <section class="panel">
+
+      <div class="panel-title">
+        <h3>Juntas</h3>
+      </div>
+
+      <div class="table-container">
+
+        <table>
+
+          <thead>
+
+            <tr>
+              <th>JUNTA</th>
+              <th>TEMP.</th>
+              <th>CORRENTE</th>
+              <th>LOAD</th>
+              <th>VELOCIDADE</th>
+              <th>ACELERAÇÃO</th>
+              <th>POSIÇÃO</th>
+              <th>COLETA</th>
+            </tr>
+
+          </thead>
+
+          <tbody id="jointTable"></tbody>
+
+        </table>
+
+      </div>
+
+    </section>
+
+    <footer>
+      Robot Arm Telemetry • MVP
+    </footer>
+
+  </main>
+
+  <script>
+
+    let joints = [];
+
+    let selectedJoint = 0;
+    let selectedMetric = "temperature";
+    let sampleCount = 0;
+    let metricsTimeout = null;
+    let metricsWebSocket = null;
+
+    const selector = document.getElementById("jointSelector");
+    const chartMetric = document.getElementById("chartMetric");
+
+    selector.addEventListener("change", event => {
+
+      selectedJoint = Number(event.target.value);
+
+      renderJoint();
+      drawChart();
+
+    });
+
+    chartMetric.addEventListener("change", event => {
+
+      selectedMetric = event.target.value;
+
+      drawChart();
+
+    });
+
+
+    function connectMetricsWebSocket() {
+      const protocol = window.location.protocol === "https:" ? "wss" : "ws";
+      metricsWebSocket = new WebSocket(
+        `${protocol}://${window.location.host}/metrics`
+      );
+
+      metricsWebSocket.addEventListener("message", event => {
+        const metrics = JSON.parse(event.data);
+        updateMetrics(metrics);
+      });
+
+      metricsWebSocket.addEventListener("close", () => {
+        showDisconnected();
+        window.setTimeout(connectMetricsWebSocket, 1000);
+      });
+
+      metricsWebSocket.addEventListener("error", () => {
+        metricsWebSocket.close();
+      });
+    }
+
+
+    function updateMetrics(metrics) {
+      const previousJoints = new Map(
+        joints.map(joint => [joint.id, joint])
+      );
+      const collectionTime = new Date(metrics.timestamp);
+
+      joints = metrics.joints.map(receivedJoint => {
+        const previousJoint = previousJoints.get(receivedJoint.id);
+        const joint = {
+          ...receivedJoint,
+          collectionTime,
+          history: previousJoint?.history ?? {
+            temperature: [],
+            current: [],
+            load: [],
+            speed: [],
+            acceleration: [],
+            position: []
+          }
+        };
+
+        pushHistory(joint);
+        return joint;
+      });
+
+      selectedJoint = Math.min(selectedJoint, joints.length - 1);
+      sampleCount++;
+      renderJointSelector();
+      showConnected();
+      render();
+
+      window.clearTimeout(metricsTimeout);
+      metricsTimeout = window.setTimeout(showDisconnected, 1500);
+    }
+
+
+    function renderJointSelector() {
+      selector.innerHTML = joints.map((joint, index) => `
+        <option value="${index}">Joint ${joint.id}</option>
+      `).join("");
+      selector.value = selectedJoint;
+    }
+
+
+    function showConnected() {
+      document.getElementById("connectionStatus").lastChild.textContent =
+        " Robô conectado";
+    }
+
+
+    function showDisconnected() {
+      document.getElementById("connectionStatus").lastChild.textContent =
+        " Sem robô conectado...";
+    }
+
+
+    function pushHistory(joint) {
+
+      const MAX_HISTORY = 60;
+
+      Object.keys(joint.history).forEach(metric => {
+
+        joint.history[metric].push(joint[metric]);
+
+        if (joint.history[metric].length > MAX_HISTORY) {
+          joint.history[metric].shift();
+        }
+
+      });
+
+    }
+
+
+    /* ============================================================
+       RENDER
+    ============================================================ */
+
+    function render() {
+
+      renderSummary();
+
+      renderJoint();
+
+      renderTable();
+
+      drawChart();
+
+    }
+
+
+    function renderSummary() {
+
+      const maxTemperature =
+        Math.max(...joints.map(j => j.temperature));
+
+      const totalCurrent =
+        joints.reduce((sum, j) => sum + j.current, 0);
+
+
+      document.getElementById("maxTemperature").textContent =
+        maxTemperature.toFixed(1);
+
+      document.getElementById("totalCurrent").textContent =
+        totalCurrent.toFixed(2);
+
+      document.getElementById("sampleCount").textContent =
+        sampleCount;
+
+      document.getElementById("activeJoints").textContent =
+        joints.length;
+
+    }
+
+
+    function renderJoint() {
+
+      const joint = joints[selectedJoint];
+
+      if (!joint) {
+        return;
+      }
+
+      document.getElementById("temperature").textContent =
+        `${joint.temperature.toFixed(1)} °C`;
+
+      document.getElementById("current").textContent =
+        `${joint.current.toFixed(2)} A`;
+
+      document.getElementById("load").textContent =
+        `${joint.load} (${joint.load_direction})`;
+
+      document.getElementById("speed").textContent =
+        `${joint.speed} counts/s`;
+
+      document.getElementById("acceleration").textContent =
+        joint.acceleration;
+
+      document.getElementById("position").textContent =
+        `${joint.position} counts`;
+
+      document.getElementById("collectionTime").textContent =
+        formatTime(joint.collectionTime);
+
+    }
+
+
+    function renderTable() {
+
+      const table =
+        document.getElementById("jointTable");
+
+      table.innerHTML = joints.map(joint => {
+
+        const temperatureClass =
+          joint.temperature > 60
+            ? "danger"
+            : joint.temperature > 50
+              ? "warning"
+              : "";
+
+        return `
+        <tr>
+
+          <td class="joint-name">
+            <span class="joint-status"></span>
+            Joint ${joint.id}
+          </td>
+
+          <td class="${temperatureClass}">
+            ${joint.temperature.toFixed(1)} °C
+          </td>
+
+          <td>
+            ${joint.current.toFixed(2)} A
+          </td>
+
+          <td>
+            ${joint.load} (${joint.load_direction})
+          </td>
+
+          <td>
+            ${joint.speed}
+          </td>
+
+          <td>
+            ${joint.acceleration}
+          </td>
+
+          <td>
+            ${joint.position}
+          </td>
+
+          <td>
+            ${formatTime(joint.collectionTime)}
+          </td>
+
+        </tr>
+      `;
+
+      }).join("");
+
+    }
+
+
+    /* ============================================================
+       SIMPLE CANVAS CHART
+    ============================================================ */
+
+    function drawChart() {
+
+      if (!joints[selectedJoint]) {
+        return;
+      }
+
+      const canvas =
+        document.getElementById("chart");
+
+      const wrapper =
+        canvas.parentElement;
+
+      const dpr =
+        window.devicePixelRatio || 1;
+
+      canvas.width =
+        wrapper.clientWidth * dpr;
+
+      canvas.height =
+        wrapper.clientHeight * dpr;
+
+      const ctx =
+        canvas.getContext("2d");
+
+      ctx.scale(dpr, dpr);
+
+
+      const width =
+        wrapper.clientWidth;
+
+      const height =
+        wrapper.clientHeight;
+
+
+      ctx.clearRect(
+        0,
+        0,
+        width,
+        height
+      );
+
+
+      const values =
+        joints[selectedJoint].history[selectedMetric];
+
+
+      if (values.length < 2) {
+        return;
+      }
+
+
+      const padding = 30;
+
+      const chartWidth =
+        width - padding * 2;
+
+      const chartHeight =
+        height - padding * 2;
+
+
+      const max =
+        Math.max(...values);
+
+      const min =
+        Math.min(...values);
+
+      const range =
+        max - min || 1;
+
+
+      /* GRID */
+
+      ctx.strokeStyle =
+        "#263247";
+
+      ctx.lineWidth = 1;
+
+
+      for (let i = 0; i <= 5; i++) {
+
+        const y =
+          padding + (chartHeight / 5) * i;
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+          padding,
+          y
+        );
+
+        ctx.lineTo(
+          width - padding,
+          y
+        );
+
+        ctx.stroke();
+
+      }
+
+
+      /* LINE */
+
+      ctx.beginPath();
+
+      ctx.strokeStyle =
+        "#3b82f6";
+
+      ctx.lineWidth = 2;
+
+
+      values.forEach((value, index) => {
+
+        const x =
+          padding +
+          (index / (values.length - 1)) *
+          chartWidth;
+
+        const normalized =
+          (value - min) / range;
+
+        const y =
+          padding +
+          chartHeight -
+          normalized * chartHeight;
+
+
+        if (index === 0) {
+
+          ctx.moveTo(x, y);
+
+        } else {
+
+          ctx.lineTo(x, y);
+
+        }
+
+      });
+
+
+      ctx.stroke();
+
+    }
+
+
+    /* ============================================================
+       UTILS
+    ============================================================ */
+
+    function formatTime(date) {
+
+      return date.toLocaleTimeString(
+        "pt-BR",
+        {
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit"
+        }
+      );
+
+    }
+
+
+    window.addEventListener(
+      "resize",
+      drawChart
+    );
+
+
+    connectMetricsWebSocket();
+
+  </script>
+
+</body>
+
+</html>

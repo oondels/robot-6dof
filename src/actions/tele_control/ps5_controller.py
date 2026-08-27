@@ -1,3 +1,4 @@
+import json
 import time
 from typing import Mapping
 
@@ -51,6 +52,54 @@ def print_input_changes(
 JOG_SPEED_DEG_S = 60.0  # Velocidade de movimento em graus por segundo
 INVERSE_MODE = True # Inververte o sentido do eixo x, por motivos de vizualização, para que o movimento do joystick seja intuitivo para o usuário.
 
+def handle_command(arm: RobotArm, command: str) -> None:
+    pass
+
+def collect_metrics(arm: RobotArm) -> None:
+    robot_metrics = arm.get_status()
+    joint_metrics = []
+    for joint in arm.joints:
+        joint_status = robot_metrics.joints[joint.name]
+        joint_metrics.append(
+            {
+                "id": joint.servo_id,
+                "temperature": joint_status.temperature,
+                "current": joint_status.current,
+                "load": joint_status.load,
+                "load_direction": joint_status.load_direction,
+                "speed": joint_status.speed,
+                "acceleration": joint_status.acceleration,
+                "position": joint_status.position,
+            }
+        )
+
+    metrics_payload = json.dumps(
+        {
+            "timestamp": int(time.time() * 1000),
+            "joints": joint_metrics,
+        }
+    )
+
+    try:
+        from websocket import WebSocketException, create_connection
+    except ModuleNotFoundError as error:
+        raise RuntimeError(
+            "Instale as dependências do projeto para enviar métricas via WebSocket"
+        ) from error
+
+    websocket = None
+    try:
+        websocket = create_connection(
+            "ws://localhost:2399/metrics",
+            timeout=1,
+        )
+        websocket.send(metrics_payload)
+    except (OSError, WebSocketException) as error:
+        print(f"[MÉTRICAS] Falha ao enviar dados: {error}")
+    finally:
+        if websocket is not None:
+            websocket.close()
+
 def run_control_loop(arm: RobotArm, controller: Ps5ControllerInput) -> None:
     target_angles = arm.current_angles()
     previous_axes: Mapping[str, float] | None = None
@@ -60,8 +109,14 @@ def run_control_loop(arm: RobotArm, controller: Ps5ControllerInput) -> None:
     gripper_load_alert_active = False
     previous_gripper_angle = target_angles["gripper"]
     consecutive_gripper_load_validations = 0
+    last_metrics_collection = 0.0
 
     while True:
+        current_time = time.monotonic()
+        if current_time - last_metrics_collection >= 0.5:
+            collect_metrics(arm)
+            last_metrics_collection = current_time
+
         state = controller.read()
         delta_time = state.delta_time if state.delta_time is not None else 0.0
         print_input_changes(
@@ -186,6 +241,8 @@ def run_control_loop(arm: RobotArm, controller: Ps5ControllerInput) -> None:
                     gripper_load_magnitude = gripper_load & 0x3FF
                     current_gripper_angle = joint.current_angle()
                     measured_gripper_velocity = 0.0
+
+                    print(f"[GARRA] Load atual: {gripper_load_magnitude}")
                     
                     if delta_time > 0.0:
                         measured_gripper_velocity = (
@@ -197,8 +254,6 @@ def run_control_loop(arm: RobotArm, controller: Ps5ControllerInput) -> None:
                     previous_gripper_angle = current_gripper_angle
 
                     if l2 != 0.0:
-                        print(f"[GARRA] Config Atual: Vcc: {joint_speed}, Acc: {joint_acc}, Angulo: {clamped_angle}, Load: {gripper_load_magnitude}")
-                        print(f"[GARRA] Load atual: {gripper_load_magnitude}")
                         with open(
                             "/home/oendel/code/robotics/src/calibration/load_measurements/calibracoes_triggerps5_load.txt",
                             "a",

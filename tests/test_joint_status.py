@@ -36,6 +36,7 @@ class JointStatusTestCase(unittest.TestCase):
         self.assertIs(collected_status, joint.status)
         self.assertEqual(collected_status.position, 2048)
         self.assertEqual(collected_status.load, 472)
+        self.assertEqual(collected_status.load_direction, "positiva")
         self.assertEqual(collected_status.voltage, 9.0)
         self.assertEqual(collected_status.current, 0.53)
         self.assertEqual(collected_status.temperature, 33.0)
@@ -50,6 +51,15 @@ class JointStatusTestCase(unittest.TestCase):
         self.assertIsNotNone(latest_status)
         self.servo_bus.read_position.assert_not_called()
         self.servo_bus.read_load.assert_not_called()
+
+    def test_get_status_separates_load_magnitude_and_direction(self) -> None:
+        self.servo_bus.read_load.return_value = (1 << 10) | 200
+        joint = Joint(self.config, self.servo_bus)
+
+        collected_status = joint.get_status()
+
+        self.assertEqual(collected_status.load, 200)
+        self.assertEqual(collected_status.load_direction, "negativa")
 
 
 if __name__ == "__main__":
