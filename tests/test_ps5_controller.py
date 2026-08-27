@@ -5,7 +5,10 @@ import unittest
 
 from evdev import ecodes
 
-from src.infrastructure.input.ps5_controller import Ps5ControllerInput
+from src.infrastructure.input.ps5_controller import (
+    Ps5ControllerInput,
+    find_ps5_controller_device,
+)
 
 
 @dataclass(frozen=True)
@@ -25,6 +28,15 @@ class FakeController:
         if self.disconnect_on_read:
             raise OSError("disconnected")
         return self.events.popleft() if self.events else None
+
+    def close(self) -> None:
+        self.closed = True
+
+
+class FakeDeviceProbe:
+    def __init__(self, name: str) -> None:
+        self.name = name
+        self.closed = False
 
     def close(self) -> None:
         self.closed = True
@@ -57,6 +69,64 @@ class Ps5ControllerInputTestCase(unittest.TestCase):
         self.input.close()
         self.assertTrue(self.controller.closed)
         self.assertFalse(self.input.is_available())
+
+    def test_discovers_the_only_dualsense_device(self) -> None:
+        keyboard = FakeDeviceProbe("AT Translated Set 2 keyboard")
+        controller = FakeDeviceProbe("Sony Interactive Entertainment DualSense Wireless Controller")
+        devices = {
+            "/dev/input/event2": keyboard,
+            "/dev/input/event7": controller,
+        }
+
+        path = find_ps5_controller_device(
+            device_lister=lambda: list(devices),
+            device_factory=devices.__getitem__,
+        )
+
+        self.assertEqual(path, "/dev/input/event7")
+        self.assertTrue(keyboard.closed)
+        self.assertTrue(controller.closed)
+
+    def test_discovery_reports_when_no_ps5_controller_is_found(self) -> None:
+        keyboard = FakeDeviceProbe("AT Translated Set 2 keyboard")
+
+        with self.assertRaisesRegex(ConnectionError, "Nenhum controle PS5/DualSense") as error:
+            find_ps5_controller_device(
+                device_lister=lambda: ["/dev/input/event2"],
+                device_factory=lambda _: keyboard,
+            )
+
+        self.assertIn("/dev/input/event2", str(error.exception))
+        self.assertIn("AT Translated Set 2 keyboard", str(error.exception))
+
+    def test_discovery_fails_safely_when_two_ps5_controllers_are_found(self) -> None:
+        devices = {
+            "/dev/input/event7": FakeDeviceProbe("DualSense Wireless Controller"),
+            "/dev/input/event8": FakeDeviceProbe("Wireless Controller"),
+        }
+
+        with self.assertRaisesRegex(ConnectionError, "Mais de um controle") as error:
+            find_ps5_controller_device(
+                device_lister=lambda: list(devices),
+                device_factory=devices.__getitem__,
+            )
+
+        self.assertIn("/dev/input/event7", str(error.exception))
+        self.assertIn("/dev/input/event8", str(error.exception))
+
+    def test_discovery_reports_devices_without_permission(self) -> None:
+        denied_path = "/dev/input/event7"
+
+        def denied_device_factory(_: str) -> FakeDeviceProbe:
+            raise PermissionError("permission denied")
+
+        with self.assertRaisesRegex(ConnectionError, "Sem permissão") as error:
+            find_ps5_controller_device(
+                device_lister=lambda: [denied_path],
+                device_factory=denied_device_factory,
+            )
+
+        self.assertIn(denied_path, str(error.exception))
 
     def test_read_requires_open_device(self) -> None:
         with self.assertRaises(RuntimeError):

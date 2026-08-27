@@ -13,6 +13,7 @@ class RobotArm:
         self,
         servo_bus: ServoBus,
         joints: Sequence[Joint],
+        atuator_object: bool = False,
     ) -> None:
         if servo_bus is None:
             raise ValueError("servo_bus não pode ser None")
@@ -20,12 +21,27 @@ class RobotArm:
         if not joints:
             raise ValueError("O braço robótico deve conter ao menos uma junta.")
 
+        if not isinstance(atuator_object, bool):
+            raise TypeError("atuator_object deve ser booleano")
+
         self._validate_unique_joints(joints)
         self._joints: tuple[Joint, ...] = tuple(joints)
         self._joints_by_name: dict[str, Joint] = {
             joint.name.lower(): joint for joint in self._joints
         }
         self._servo_bus = servo_bus
+        self._atuator_object = atuator_object
+
+    @property
+    def atuator_object(self) -> bool:
+        """Indica se a garra está segurando um objeto por limite de carga."""
+        return self._atuator_object
+
+    @atuator_object.setter
+    def atuator_object(self, value: bool) -> None:
+        if not isinstance(value, bool):
+            raise TypeError("atuator_object deve ser booleano")
+        self._atuator_object = value
 
     @property
     def joints(self) -> tuple[Joint, ...]:

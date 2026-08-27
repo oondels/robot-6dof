@@ -46,6 +46,10 @@ class Joint:
     def current_position(self) -> int:
         """Lê a posição atual da junta em counts."""
         return self._servo_bus.read_position(self.servo_id)
+    
+    def current_load(self) -> int:
+        """Lê a carga atual da junta em counts."""
+        return self._servo_bus.read_load(self.servo_id)
 
     def current_angle(self) -> float:
         """Converte a posição atual da junta em ângulo."""

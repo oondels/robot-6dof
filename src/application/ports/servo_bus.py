@@ -23,6 +23,10 @@ class ServoBus(Protocol):
     def is_moving(self, servo_id: int) -> bool:
         """Informa se o servo está executando um movimento."""
         ...
+        
+    def read_load(self, servo_id: int) -> int:
+        """Retorna a carga atual do servo em counts."""
+        ...
 
     def command_position(
         self,
