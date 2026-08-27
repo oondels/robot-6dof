@@ -12,6 +12,7 @@ from src.application import RobotArm
 from src.calibration.calibration import run_calibration
 from src.actions.tele_control.keyboard_control import keyboard_control
 from src.actions.tele_control.ps5_controller import controller_control
+from src.actions.home_pose import move_arm_to_home
 
 
 def execute_action(
@@ -56,6 +57,8 @@ def execute_action(
         keyboard_control()
     elif normalized == "ps5" or normalized == "controller":
         controller_control(arm)
+    elif normalized == "home":
+        move_arm_to_home(arm)
     else:
         # 3. Verifica se corresponde a uma ação gravada em recorded_actions/
         try:
