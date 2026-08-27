@@ -1,0 +1,508 @@
+[GARRA] Config Atual: Vcc: 700, Acc: 40, Angulo: 37.323059976275545, Load: 124
+[GARRA] Load atual: 124
+[GARRA] Config Atual: Vcc: 700, Acc: 40, Angulo: 35.132721396163106, Load: 60
+[GARRA] Load atual: 60
+[GARRA] Config Atual: Vcc: 700, Acc: 40, Angulo: 32.97102891615941, Load: 20
+[GARRA] Load atual: 20
+[GARRA] Config Atual: Vcc: 700, Acc: 40, Angulo: 30.783687696326524, Load: 68
+[GARRA] Load atual: 68
+[GARRA] Config Atual: Vcc: 700, Acc: 40, Angulo: 28.59688911610283, Load: 144
+[GARRA] Load atual: 144
+[GARRA] Config Atual: Vcc: 700, Acc: 40, Angulo: 26.4240980760369, Load: 180
+[GARRA] Load atual: 180
+[GARRA] Config Atual: Vcc: 700, Acc: 40, Angulo: 24.24221199611202, Load: 204
+[GARRA] Load atual: 204
+[GARRA] Config Atual: Vcc: 700, Acc: 40, Angulo: 22.07672685640864, Load: 220
+[GARRA] Load atual: 220
+[GARRA] Config Atual: Vcc: 700, Acc: 40, Angulo: 19.8871473960171, Load: 248
+[GARRA] Load atual: 248
+[GARRA] Config Atual: Vcc: 700, Acc: 40, Angulo: 17.69118321602582, Load: 252
+[GARRA] Load atual: 252
+[GARRA] Config Atual: Vcc: 700, Acc: 40, Angulo: 16.92372979493709, Load: 268
+[GARRA] Load atual: 268
+[GARRA] Config Atual: Vcc: 700, Acc: 40, Angulo: 15.759883740762767, Load: 48
+[GARRA] Load atual: 48
+[GARRA] Config Atual: Vcc: 700, Acc: 40, Angulo: 13.939621642546946, Load: 72
+[GARRA] Load atual: 72
+[GARRA] Config Atual: Vcc: 700, Acc: 40, Angulo: 11.758781902661532, Load: 100
+[GARRA] Load atual: 100
+[GARRA] Config Atual: Vcc: 700, Acc: 40, Angulo: 9.566729842825545, Load: 140
+[GARRA] Load atual: 140
+[GARRA] Config Atual: Vcc: 700, Acc: 40, Angulo: 7.393427182740517, Load: 180
+[GARRA] Load atual: 180
+[GARRA] Config Atual: Vcc: 700, Acc: 40, Angulo: 5.451452840682844, Load: 200
+[GARRA] Load atual: 200
+[GARRA] Config Atual: Vcc: 700, Acc: 40, Angulo: 4.845964055417639, Load: 216
+[GARRA] Load atual: 216
+[GARRA] Config Atual: Vcc: 700, Acc: 40, Angulo: 26.84260333591202, Load: 172
+[GARRA] Load atual: 172
+[GARRA] Config Atual: Vcc: 700, Acc: 40, Angulo: 24.93445057842387, Load: 132
+[GARRA] Load atual: 132
+[GARRA] Config Atual: Vcc: 700, Acc: 40, Angulo: 22.771898778285554, Load: 72
+[GARRA] Load atual: 72
+[GARRA] Config Atual: Vcc: 700, Acc: 40, Angulo: 20.567455518305955, Load: 20
+[GARRA] Load atual: 20
+[GARRA] Config Atual: Vcc: 700, Acc: 40, Angulo: 18.409188798526024, Load: 72
+[GARRA] Load atual: 72
+[GARRA] Config Atual: Vcc: 700, Acc: 40, Angulo: 16.22555371838012, Load: 160
+[GARRA] Load atual: 160
+[GARRA] Config Atual: Vcc: 700, Acc: 40, Angulo: 14.009302398611048, Load: 204
+[GARRA] Load atual: 204
+[GARRA] Config Atual: Vcc: 700, Acc: 40, Angulo: 11.804280078343304, Load: 224
+[GARRA] Load atual: 224
+[GARRA] Config Atual: Vcc: 700, Acc: 40, Angulo: 9.827041845758414, Load: 248
+[GARRA] Load atual: 248
+[GARRA] Config Atual: Vcc: 700, Acc: 40, Angulo: 7.9238027418220565, Load: 260
+[GARRA] Load atual: 260
+[GARRA] Config Atual: Vcc: 700, Acc: 40, Angulo: 6.094473926816131, Load: 268
+[GARRA] Load atual: 268
+[GARRA] Config Atual: Vcc: 700, Acc: 40, Angulo: 5.178151354900735, Load: 272
+[GARRA] Load atual: 272
+[GARRA] Config Atual: Vcc: 700, Acc: 40, Angulo: 18.809558396479318, Load: 88
+[GARRA] Load atual: 88
+[GARRA] Config Atual: Vcc: 700, Acc: 40, Angulo: 17.38319410705555, Load: 36
+[GARRA] Load atual: 36
+[GARRA] Config Atual: Vcc: 700, Acc: 40, Angulo: 15.329337906742959, Load: 28
+[GARRA] Load atual: 28
+[GARRA] Config Atual: Vcc: 700, Acc: 40, Angulo: 13.201435083064577, Load: 84
+[GARRA] Load atual: 84
+[GARRA] Config Atual: Vcc: 700, Acc: 40, Angulo: 11.020320535478222, Load: 144
+[GARRA] Load atual: 144
+[GARRA] Config Atual: Vcc: 700, Acc: 40, Angulo: 8.851256455397506, Load: 172
+[GARRA] Load atual: 172
+[GARRA] Config Atual: Vcc: 700, Acc: 40, Angulo: 6.777968677157973, Load: 196
+[GARRA] Load atual: 196
+[GARRA] Config Atual: Vcc: 700, Acc: 40, Angulo: 5.57108556655208, Load: 212
+[GARRA] Load atual: 212
+[GARRA] Config Atual: Vcc: 700, Acc: 40, Angulo: 5.4500346060890195, Load: 216
+[GARRA] Load atual: 216
+[GARRA] Config Atual: Vcc: 700, Acc: 40, Angulo: 13.62184311519548, Load: 164
+[GARRA] Load atual: 164
+[GARRA] Config Atual: Vcc: 700, Acc: 40, Angulo: 12.193492716957252, Load: 148
+[GARRA] Load atual: 148
+[GARRA] Config Atual: Vcc: 700, Acc: 40, Angulo: 10.450893423336844, Load: 116
+[GARRA] Load atual: 116
+[GARRA] Config Atual: Vcc: 700, Acc: 40, Angulo: 8.365441998995852, Load: 52
+[GARRA] Load atual: 52
+[GARRA] Config Atual: Vcc: 700, Acc: 40, Angulo: 6.268851200514128, Load: 20
+[GARRA] Load atual: 20
+[GARRA] Config Atual: Vcc: 700, Acc: 40, Angulo: 4.2293653376143645, Load: 68
+[GARRA] Load atual: 68
+[GARRA] Config Atual: Vcc: 700, Acc: 40, Angulo: 2.750841638335257, Load: 148
+[GARRA] Load atual: 148
+[GARRA] Config Atual: Vcc: 700, Acc: 40, Angulo: 1.9818838830328493, Load: 196
+[GARRA] Load atual: 196
+[GARRA] Config Atual: Vcc: 700, Acc: 40, Angulo: 1.656317175319758, Load: 212
+[GARRA] Load atual: 212
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 28.157318682284846, Load: 24
+[GARRA] Load atual: 24
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 26.513936218442666, Load: 24
+[GARRA] Load atual: 24
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 24.275015469359722, Load: 52
+[GARRA] Load atual: 52
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 22.724063220564, Load: 96
+[GARRA] Load atual: 96
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 21.356979115652123, Load: 136
+[GARRA] Load atual: 136
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 19.979449718837927, Load: 156
+[GARRA] Load atual: 156
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 19.785750148508026, Load: 40
+[GARRA] Load atual: 40
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 18.714956096748423, Load: 52
+[GARRA] Load atual: 52
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 17.057514196444945, Load: 76
+[GARRA] Load atual: 76
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 14.850719071659327, Load: 96
+[GARRA] Load atual: 96
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 12.398768791867255, Load: 124
+[GARRA] Load atual: 124
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 9.961375891547718, Load: 160
+[GARRA] Load atual: 160
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 7.504307131861637, Load: 192
+[GARRA] Load atual: 192
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 5.05313361176762, Load: 212
+[GARRA] Load atual: 212
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 2.576669251688358, Load: 224
+[GARRA] Load atual: 224
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 0.11635455154122099, Load: 248
+[GARRA] Load atual: 248
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 0.0, Load: 268
+[GARRA] Load atual: 268
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 0.0, Load: 244
+[GARRA] Load atual: 244
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 0.0, Load: 216
+[GARRA] Load atual: 216
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 0.0, Load: 200
+[GARRA] Load atual: 200
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 0.0, Load: 196
+[GARRA] Load atual: 196
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 0.0, Load: 172
+[GARRA] Load atual: 172
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 0.0, Load: 180
+[GARRA] Load atual: 180
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 0.0, Load: 180
+[GARRA] Load atual: 180
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 0.0, Load: 148
+[GARRA] Load atual: 148
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 0.0, Load: 140
+[GARRA] Load atual: 140
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 29.137241986883218, Load: 44
+[GARRA] Load atual: 44
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 27.326185233892726, Load: 24
+[GARRA] Load atual: 24
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 25.288519280621962, Load: 24
+[GARRA] Load atual: 24
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 23.060647840979716, Load: 72
+[GARRA] Load atual: 72
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 20.642849200889675, Load: 124
+[GARRA] Load atual: 124
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 18.20766262092066, Load: 160
+[GARRA] Load atual: 160
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 15.750292840898243, Load: 200
+[GARRA] Load atual: 200
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 13.302296561091413, Load: 216
+[GARRA] Load atual: 216
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 10.865054561222411, Load: 236
+[GARRA] Load atual: 236
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 8.425488101133585, Load: 252
+[GARRA] Load atual: 252
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 5.973087580864291, Load: 256
+[GARRA] Load atual: 256
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 3.515055041138755, Load: 264
+[GARRA] Load atual: 264
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 1.0941184609734655, Load: 280
+[GARRA] Load atual: 280
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 0.0, Load: 320
+[GARRA] Load atual: 320
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 0.0, Load: 368
+[GARRA] Load atual: 368
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 0.0, Load: 408
+[GARRA] Load atual: 408
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 0.0, Load: 428
+[GARRA] Load atual: 428
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 0.0, Load: 432
+[GARRA] Load atual: 432
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 0.0, Load: 436
+[GARRA] Load atual: 436
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 0.0, Load: 432
+[GARRA] Load atual: 432
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 0.0, Load: 432
+[GARRA] Load atual: 432
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 0.0, Load: 424
+[GARRA] Load atual: 424
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 38.121179212381215, Load: 32
+[GARRA] Load atual: 32
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 36.1348192685229, Load: 20
+[GARRA] Load atual: 20
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 33.754825209332495, Load: 32
+[GARRA] Load atual: 32
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 31.318307589688203, Load: 92
+[GARRA] Load atual: 92
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 28.887634149439265, Load: 136
+[GARRA] Load atual: 136
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 26.429234589311392, Load: 168
+[GARRA] Load atual: 168
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 24.00567180957981, Load: 204
+[GARRA] Load atual: 204
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 21.847130542773385, Load: 228
+[GARRA] Load atual: 228
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 20.63992863397888, Load: 44
+[GARRA] Load atual: 44
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 18.93588112446014, Load: 68
+[GARRA] Load atual: 68
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 18.43263975784922, Load: 36
+[GARRA] Load atual: 36
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 16.547948745158088, Load: 60
+[GARRA] Load atual: 60
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 14.088092865151872, Load: 88
+[GARRA] Load atual: 88
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 11.639808525089926, Load: 100
+[GARRA] Load atual: 100
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 9.177238064896834, Load: 140
+[GARRA] Load atual: 140
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 7.17134146633051, Load: 176
+[GARRA] Load atual: 176
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 30.0721593836634, Load: 48
+[GARRA] Load atual: 48
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 27.900495498223737, Load: 24
+[GARRA] Load atual: 24
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 25.45311445840429, Load: 48
+[GARRA] Load atual: 48
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 22.994425338446437, Load: 124
+[GARRA] Load atual: 124
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 20.57323099816944, Load: 148
+[GARRA] Load atual: 148
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 18.13424359836876, Load: 184
+[GARRA] Load atual: 184
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 15.6876142982664, Load: 204
+[GARRA] Load atual: 204
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 13.239721158214653, Load: 236
+[GARRA] Load atual: 236
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 10.792395258221351, Load: 236
+[GARRA] Load atual: 236
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 8.337151578497416, Load: 244
+[GARRA] Load atual: 244
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 5.880293478302466, Load: 252
+[GARRA] Load atual: 252
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 3.399891678171972, Load: 264
+[GARRA] Load atual: 264
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 0.9627638581595797, Load: 264
+[GARRA] Load atual: 264
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 0.0, Load: 272
+[GARRA] Load atual: 272
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 0.0, Load: 268
+[GARRA] Load atual: 268
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 0.0, Load: 240
+[GARRA] Load atual: 240
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 21.13039444948663, Load: 44
+[GARRA] Load atual: 44
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 18.641102569294162, Load: 20
+[GARRA] Load atual: 20
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 16.216642189450795, Load: 36
+[GARRA] Load atual: 36
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 14.753856205390013, Load: 96
+[GARRA] Load atual: 96
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 14.010732194722069, Load: 40
+[GARRA] Load atual: 40
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 12.414440573023645, Load: 64
+[GARRA] Load atual: 64
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 9.939880913128624, Load: 100
+[GARRA] Load atual: 100
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 8.01635546439245, Load: 120
+[GARRA] Load atual: 120
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 13.197717713368439, Load: 0
+[GARRA] Load atual: 0
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 10.736713913387467, Load: 0
+[GARRA] Load atual: 0
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 8.282688173525349, Load: 36
+[GARRA] Load atual: 36
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 7.265516263780333, Load: 184
+[GARRA] Load atual: 184
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 5.65729226769626, Load: 212
+[GARRA] Load atual: 212
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 3.670934100090936, Load: 240
+[GARRA] Load atual: 240
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 1.1914080001674034, Load: 284
+[GARRA] Load atual: 284
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 0.615105247227748, Load: 336
+[GARRA] Load atual: 336
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 32.33970016307499, Load: 48
+[GARRA] Load atual: 48
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 30.22304475757033, Load: 24
+[GARRA] Load atual: 24
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 27.78158235769575, Load: 44
+[GARRA] Load atual: 44
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 25.305037237542873, Load: 124
+[GARRA] Load atual: 124
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 22.856020957390736, Load: 156
+[GARRA] Load atual: 156
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 20.40845853755223, Load: 180
+[GARRA] Load atual: 180
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 17.96147709754501, Load: 212
+[GARRA] Load atual: 212
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 15.51694005755331, Load: 224
+[GARRA] Load atual: 224
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 13.059303397297352, Load: 240
+[GARRA] Load atual: 240
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 11.844482775709098, Load: 244
+[GARRA] Load atual: 244
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 11.521938314291592, Load: 92
+[GARRA] Load atual: 92
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 9.35752236096339, Load: 108
+[GARRA] Load atual: 108
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 6.901433760952546, Load: 124
+[GARRA] Load atual: 124
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 4.44634590080857, Load: 164
+[GARRA] Load atual: 164
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 2.0082717608722085, Load: 216
+[GARRA] Load atual: 216
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 1.8533978559357547, Load: 288
+[GARRA] Load atual: 288
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 1.6018724549965764, Load: 372
+[GARRA] Load atual: 372
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 0.0, Load: 388
+[GARRA] Load atual: 388
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 0.0, Load: 404
+[GARRA] Load atual: 404
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 9.580078125, Load: 436
+[GARRA] Load atual: 436
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 9.580078125, Load: 408
+[GARRA] Load atual: 408
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 9.580078125, Load: 372
+[GARRA] Load atual: 372
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 9.580078125, Load: 312
+[GARRA] Load atual: 312
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 9.580078125, Load: 228
+[GARRA] Load atual: 228
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 9.580078125, Load: 136
+[GARRA] Load atual: 136
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 9.580078125, Load: 72
+[GARRA] Load atual: 72
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 9.580078125, Load: 32
+[GARRA] Load atual: 32
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 9.580078125, Load: 20
+[GARRA] Load atual: 20
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 27.847697101370777, Load: 32
+[GARRA] Load atual: 32
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 26.198181101191203, Load: 24
+[GARRA] Load atual: 24
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 23.959236514622773, Load: 28
+[GARRA] Load atual: 28
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 21.46966935439474, Load: 72
+[GARRA] Load atual: 72
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 18.98662839461673, Load: 140
+[GARRA] Load atual: 140
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 16.531798714552735, Load: 164
+[GARRA] Load atual: 164
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 14.049179374545076, Load: 208
+[GARRA] Load atual: 208
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 11.560145314272688, Load: 228
+[GARRA] Load atual: 228
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 9.111271114364229, Load: 244
+[GARRA] Load atual: 244
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 6.652941574559975, Load: 252
+[GARRA] Load atual: 252
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 4.187493274351311, Load: 260
+[GARRA] Load atual: 260
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 1.7294423145204405, Load: 264
+[GARRA] Load atual: 264
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 0.0, Load: 276
+[GARRA] Load atual: 276
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 0.0, Load: 288
+[GARRA] Load atual: 288
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 0.0, Load: 312
+[GARRA] Load atual: 312
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 0.0, Load: 348
+[GARRA] Load atual: 348
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 0.0, Load: 356
+[GARRA] Load atual: 356
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 0.0, Load: 356
+[GARRA] Load atual: 356
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 0.0, Load: 356
+[GARRA] Load atual: 356
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 7.55859375, Load: 336
+[GARRA] Load atual: 336
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 7.55859375, Load: 284
+[GARRA] Load atual: 284
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 7.55859375, Load: 220
+[GARRA] Load atual: 220
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 7.55859375, Load: 136
+[GARRA] Load atual: 136
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 7.55859375, Load: 64
+[GARRA] Load atual: 64
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 7.55859375, Load: 24
+[GARRA] Load atual: 24
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 7.55859375, Load: 24
+[GARRA] Load atual: 24
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 7.55859375, Load: 28
+[GARRA] Load atual: 28
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 7.55859375, Load: 32
+[GARRA] Load atual: 32
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 7.55859375, Load: 32
+[GARRA] Load atual: 32
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 7.55859375, Load: 32
+[GARRA] Load atual: 32
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 7.55859375, Load: 32
+[GARRA] Load atual: 32
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 7.55859375, Load: 32
+[GARRA] Load atual: 32
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 7.55859375, Load: 32
+[GARRA] Load atual: 32
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 7.55859375, Load: 32
+[GARRA] Load atual: 32
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 7.55859375, Load: 32
+[GARRA] Load atual: 32
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 32.32444866749916, Load: 36
+[GARRA] Load atual: 36
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 31.35995386758483, Load: 28
+[GARRA] Load atual: 28
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 29.454190422304872, Load: 28
+[GARRA] Load atual: 28
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 27.122413538079634, Load: 72
+[GARRA] Load atual: 72
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 24.705486500539866, Load: 128
+[GARRA] Load atual: 128
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 22.3218572640497, Load: 156
+[GARRA] Load atual: 156
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 19.903105290370355, Load: 184
+[GARRA] Load atual: 184
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 17.458410776559226, Load: 208
+[GARRA] Load atual: 208
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 15.275556488185153, Load: 220
+[GARRA] Load atual: 220
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 14.678347119208937, Load: 236
+[GARRA] Load atual: 236
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 14.581841375675344, Load: 228
+[GARRA] Load atual: 228
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 43.00166754582075, Load: 36
+[GARRA] Load atual: 36
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 41.729618611122376, Load: 20
+[GARRA] Load atual: 20
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 39.7389392576177, Load: 24
+[GARRA] Load atual: 24
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 37.450058985897, Load: 88
+[GARRA] Load atual: 88
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 34.98391108577455, Load: 124
+[GARRA] Load atual: 124
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 32.51957716570435, Load: 160
+[GARRA] Load atual: 160
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 30.069155985593923, Load: 192
+[GARRA] Load atual: 192
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 27.60976192575147, Load: 212
+[GARRA] Load atual: 212
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 25.14089560591931, Load: 228
+[GARRA] Load atual: 228
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 22.683844545582204, Load: 240
+[GARRA] Load atual: 240
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 20.712248990332768, Load: 252
+[GARRA] Load atual: 252
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 20.532285255280684, Load: 52
+[GARRA] Load atual: 52
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 19.163805160671476, Load: 60
+[GARRA] Load atual: 60
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 17.04484360784409, Load: 56
+[GARRA] Load atual: 56
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 14.57901742786635, Load: 92
+[GARRA] Load atual: 92
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 12.119016587646914, Load: 128
+[GARRA] Load atual: 128
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 9.687792707816701, Load: 160
+[GARRA] Load atual: 160
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 7.238320307631515, Load: 196
+[GARRA] Load atual: 196
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 4.820110667904377, Load: 216
+[GARRA] Load atual: 216
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 2.370036587642975, Load: 232
+[GARRA] Load atual: 232
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 2.0216383288155675, Load: 248
+[GARRA] Load atual: 248
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 52.906086933751155, Load: 48
+[GARRA] Load atual: 48
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 51.77343450328815, Load: 44
+[GARRA] Load atual: 44
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 49.977530026727926, Load: 20
+[GARRA] Load atual: 20
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 47.732748104694224, Load: 44
+[GARRA] Load atual: 44
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 45.289094264530036, Load: 124
+[GARRA] Load atual: 124
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 42.84652000476319, Load: 160
+[GARRA] Load atual: 160
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 40.382865044606774, Load: 188
+[GARRA] Load atual: 188
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 37.928172164624016, Load: 212
+[GARRA] Load atual: 212
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 35.45387770465288, Load: 228
+[GARRA] Load atual: 228
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 33.00589636471534, Load: 232
+[GARRA] Load atual: 232
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 30.558671684497426, Load: 244
+[GARRA] Load atual: 244
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 28.12144054443172, Load: 248
+[GARRA] Load atual: 248
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 25.68848026473836, Load: 252
+[GARRA] Load atual: 252
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 23.723889004476785, Load: 260
+[GARRA] Load atual: 260
+[GARRA] Config Atual: Vcc: 700, Acc: 30, Angulo: 23.694866743305127, Load: 264
+[GARRA] Load atual: 264
