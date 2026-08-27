@@ -28,6 +28,18 @@ class ServoBus(Protocol):
         """Retorna a carga atual do servo em counts."""
         ...
 
+    def read_voltage(self, servo_id: int) -> float:
+        """Retorna a tensão atual do servo em volts."""
+        ...
+
+    def read_temperature(self, servo_id: int) -> float:
+        """Retorna a temperatura atual do servo em graus Celsius."""
+        ...
+
+    def read_current(self, servo_id: int) -> float:
+        """Retorna a corrente atual do servo em amperes."""
+        ...
+
     def command_position(
         self,
         servo_id: int,

@@ -1,9 +1,24 @@
+from dataclasses import dataclass
 from math import isfinite
 from time import monotonic, sleep
 
 from .joint_config import JointConfig
 from .movement_status import MovementStatus
 from .ports.servo_bus import ServoBus
+
+
+# TODO: Implementar consulta periodica da junta para coleta de informaceos, geracao de metricas, graficos, controle, etc
+@dataclass(frozen=True, slots=True)
+class JointStatus:
+    """Dados essenciais sobre o estado da junta."""
+
+    position: float
+    angle: float
+    speed: int
+    acceleration: int
+    voltage: float
+    current: float
+    temperature: float
 
 
 class Joint:
@@ -17,6 +32,15 @@ class Joint:
 
         self._config = config
         self._servo_bus = servo_bus
+        self._status = JointStatus(
+            position=self.current_position(),
+            angle=self.current_angle(),
+            speed=self.speed,
+            acceleration=self.acc,
+            voltage=self.current_voltage(),
+            current=self.current_current(),
+            temperature=self.current_temperature(),
+        )
 
     @property
     def name(self) -> str:
@@ -31,6 +55,7 @@ class Joint:
     def servo_id(self) -> int:
         return self._config.servo_id
 
+    # Verificar se a alteracao de velocidade e aceleracao durante uso reflete na classe ou fica presa a arquivo
     @property
     def speed(self) -> int:
         return self._config.speed
@@ -43,13 +68,37 @@ class Joint:
     def tolerance_counts(self) -> int:
         return self._config.tolerance_counts
 
+    def get_status(self) -> JointStatus:
+        """Retorna o status atual da junta."""
+        return JointStatus(
+            position=self.current_position(),
+            angle=self.current_angle(),
+            speed=self.speed,
+            acceleration=self.acc,
+            voltage=self.current_voltage(),
+            current=self.current_current(),
+            temperature=self.current_temperature(),
+        )
+    
     def current_position(self) -> int:
         """Lê a posição atual da junta em counts."""
         return self._servo_bus.read_position(self.servo_id)
-    
+
     def current_load(self) -> int:
         """Lê a carga atual da junta em counts."""
         return self._servo_bus.read_load(self.servo_id)
+
+    def current_voltage(self) -> float:
+        """Lê a tensão atual da junta em volts."""
+        return self._servo_bus.read_voltage(self.servo_id)
+
+    def current_temperature(self) -> float:
+        """Lê a temperatura atual da junta em graus Celsius."""
+        return self._servo_bus.read_temperature(self.servo_id)
+
+    def current_current(self) -> float:
+        """Lê a corrente atual da junta em amperes."""
+        return self._servo_bus.read_current(self.servo_id)
 
     def current_angle(self) -> float:
         """Converte a posição atual da junta em ângulo."""

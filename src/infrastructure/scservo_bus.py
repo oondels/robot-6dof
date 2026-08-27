@@ -26,6 +26,24 @@ class ScServoBus(ServoBus):
       self._validate_result(result, error, "leitura de carga")
       return load
 
+    def read_voltage(self, servo_id: int) -> float:
+        # Retorna tensão em volts
+        voltage_raw, result, error = self._servo.read1ByteTxRx(servo_id, 62)
+        self._validate_result(result, error, "leitura de tensão")
+        return voltage_raw * 0.1
+
+    def read_temperature(self, servo_id: int) -> float:
+        # Retorna temp. em hraus celcius
+        temperature, result, error = self._servo.read1ByteTxRx(servo_id, 63) # °C
+        self._validate_result(result, error, "leitura de temperatura")
+        return float(temperature)
+
+    def read_current(self, servo_id: int) -> float:
+        current_raw, result, error = self._servo.read2ByteTxRx(servo_id, 69)
+        self._validate_result(result, error, "leitura de corrente")
+        current_signed = self._servo.scs_tohost(current_raw, 15)
+        return current_signed * 0.0065
+
     def is_moving(self, servo_id: int) -> bool:
         moving, result, error = self._servo.ReadMoving(servo_id)
         self._validate_result(result, error, "leitura do estado de movimento")
