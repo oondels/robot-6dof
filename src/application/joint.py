@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from math import isfinite
 from time import monotonic, sleep
 
@@ -12,13 +12,14 @@ from .ports.servo_bus import ServoBus
 class JointStatus:
     """Dados essenciais sobre o estado da junta."""
 
-    position: float
-    angle: float
+    position: int
     speed: int
     acceleration: int
     voltage: float
     current: float
     temperature: float
+    load: int
+    timestamp: float = field(default_factory=monotonic)
 
 
 class Joint:
@@ -32,15 +33,7 @@ class Joint:
 
         self._config = config
         self._servo_bus = servo_bus
-        self._status = JointStatus(
-            position=self.current_position(),
-            angle=self.current_angle(),
-            speed=self.speed,
-            acceleration=self.acc,
-            voltage=self.current_voltage(),
-            current=self.current_current(),
-            temperature=self.current_temperature(),
-        )
+        self._status: JointStatus | None = None
 
     @property
     def name(self) -> str:
@@ -69,16 +62,24 @@ class Joint:
         return self._config.tolerance_counts
 
     def get_status(self) -> JointStatus:
-        """Retorna o status atual da junta."""
-        return JointStatus(
+        """Coleta, armazena e retorna o status atual da junta."""
+        self._status = JointStatus(
             position=self.current_position(),
-            angle=self.current_angle(),
+            load=self.current_load(),
             speed=self.speed,
             acceleration=self.acc,
             voltage=self.current_voltage(),
             current=self.current_current(),
             temperature=self.current_temperature(),
+            timestamp=monotonic(),
         )
+
+        return self._status
+
+    @property
+    def status(self) -> JointStatus | None:
+        """Retorna o último status coletado sem consultar o hardware."""
+        return self._status
     
     def current_position(self) -> int:
         """Lê a posição atual da junta em counts."""

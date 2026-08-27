@@ -1,11 +1,20 @@
 from collections.abc import Sequence
+from dataclasses import dataclass, field
 from math import isfinite
 from time import monotonic, sleep
 
-from .joint import Joint
+from .joint import Joint, JointStatus
 from .joint_config import JointConfig
 from .movement_status import MovementStatus
 from .ports.servo_bus import ServoBus, ServoPositionCommand
+
+
+@dataclass(frozen=True, slots=True)
+class RobotStatus:
+    """Fotografia dos status de todas as juntas do robô."""
+
+    joints: dict[str, JointStatus]
+    timestamp: float = field(default_factory=monotonic)
 
 
 class RobotArm:
@@ -31,6 +40,7 @@ class RobotArm:
         }
         self._servo_bus = servo_bus
         self._atuator_object = atuator_object
+        self._status: RobotStatus | None = None
 
     @property
     def atuator_object(self) -> bool:
@@ -97,6 +107,24 @@ class RobotArm:
     def current_positions(self) -> dict[str, int]:
         """Lê e retorna as posições brutas em counts de todas as juntas."""
         return {joint.name: joint.current_position() for joint in self._joints}
+
+    def get_status(self) -> RobotStatus:
+        """Coleta e armazena um pacote com o status de todas as juntas."""
+        joint_statuses = {
+            joint.name: joint.get_status()
+            for joint in self._joints
+        }
+        self._status = RobotStatus(
+            joints=joint_statuses,
+            timestamp=monotonic(),
+        )
+
+        return self._status
+
+    @property
+    def status(self) -> RobotStatus | None:
+        """Retorna o último pacote coletado sem consultar o hardware."""
+        return self._status
 
     def enable_torque(self) -> None:
         """Habilita o torque de todas as juntas de forma segura."""
