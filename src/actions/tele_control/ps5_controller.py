@@ -1,87 +1,14 @@
 import time
-from typing import Mapping, Sequence
+from typing import Mapping
 
-from scservo_sdk import PortHandler, sms_sts
-
-from src.infrastructure.input.ps5_controller import Ps5ControllerInput
-
-from src.infrastructure.scservo_bus import ScServoBus
-
-from src.application.joint_config import JointConfig
-from src.application.joint import Joint
+from src.infrastructure.input.ps5_controller import (
+    Ps5ControllerInput,
+    find_ps5_controller_device,
+)
 from src.application.robot_arm import RobotArm
-
 from src.actions.home_pose import move_arm_to_home
 from src.application.ports.control_input import ControlState
 
-JOINT_CONFIGS: Sequence[JointConfig] = (
-    JointConfig(
-        name="base_yaw",
-        servo_id=1,
-        zero_position=2065,
-        direction=1,
-        min_angle=-105.0,
-        max_angle=100.0,
-        speed=400,
-        acc=30,
-        tolerance_deg=1.3,
-    ),
-    JointConfig(
-        name="shoulder_pitch",
-        servo_id=2,
-        zero_position=2050,
-        direction=1,
-        min_angle=-1.0,
-        max_angle=165.0,
-        speed=400,
-        acc=30,
-        tolerance_deg=1.8,
-    ),
-    JointConfig(
-        name="elbow_pitch",
-        servo_id=3,
-        zero_position=2033,
-        direction=-1,
-        min_angle=-1.0,
-        max_angle=155.0,
-        speed=400,
-        acc=30,
-        tolerance_deg=5,
-    ),
-    JointConfig(
-        name="wrist_pitch",
-        servo_id=4,
-        zero_position=2060,
-        direction=-1,
-        min_angle=-1.0,
-        max_angle=155.0,
-        speed=400,
-        acc=30,
-        tolerance_deg=1.8,
-    ),
-    JointConfig(
-        name="wrist_roll",
-        servo_id=5,
-        zero_position=2164,
-        direction=-1,
-        min_angle=-160.0,
-        max_angle=160.0,
-        speed=400,
-        acc=30,
-        tolerance_deg=1.8,
-    ),
-    JointConfig(
-        name="gripper",
-        servo_id=6,
-        zero_position=2041,
-        direction=1,
-        min_angle=-1.0,
-        max_angle=110.0,
-        speed=400,
-        acc=30,
-        tolerance_deg=2,
-    ),
-)
 
 def print_input_changes(
     state: ControlState,
@@ -128,6 +55,7 @@ def run_control_loop(arm: RobotArm, controller: Ps5ControllerInput) -> None:
     previous_axes: Mapping[str, float] | None = None
     previous_movement_enabled: bool | None = None
     previous_emergency_stop: bool | None = None
+    home_shortcut_active = False
 
     while True:
         state = controller.read()
@@ -151,6 +79,18 @@ def run_control_loop(arm: RobotArm, controller: Ps5ControllerInput) -> None:
 
         axes = state.axes
 
+        # R2 + X -> Posição Home
+        r2 = axes.get("r2", 0.0)
+        if home_shortcut_active and r2 == 0.0:
+            home_shortcut_active = False
+
+        if state.movement_enabled and r2 > 0.0 and "cross" in state.buttons_pressed:
+            move_arm_to_home(arm, output_fn=print, service="r2-x")
+            target_angles = arm.current_angles()
+            arm.atuator_object = False
+            home_shortcut_active = True
+            continue
+
         # Movimento analogico esquerdo eixo x -> Base (base_yaw)
         if INVERSE_MODE:
             left_x = axes.get("left_x", 0.0) # Tranformar em tipo para ficar mais legivel no codgio
@@ -168,6 +108,12 @@ def run_control_loop(arm: RobotArm, controller: Ps5ControllerInput) -> None:
         if state.movement_enabled and left_y != 0.0:
             target_angles["shoulder_pitch"] += JOG_SPEED_DEG_S * delta_time * left_y
             target_angles["elbow_pitch"] += JOG_SPEED_DEG_S * delta_time * left_y
+            target_changed = True
+
+        # Setas para cima/baixo -> Cotovelo (elbow_pitch)
+        dpad_y = axes.get("dpad_y", 0.0)
+        if state.movement_enabled and dpad_y != 0.0:
+            target_angles["elbow_pitch"] += JOG_SPEED_DEG_S * delta_time * dpad_y
             target_changed = True
         
         # Movimento analogico direito eixo y -> Punho (wrist_pitch) -> Cima Baixo
@@ -187,18 +133,15 @@ def run_control_loop(arm: RobotArm, controller: Ps5ControllerInput) -> None:
                 target_angles["wrist_roll"] += JOG_SPEED_DEG_S * delta_time * right_x
                 target_changed = True
 
-        # Gatilho direito -> Garra
-        r2 = axes.get("r2", 0.0)
-        if state.movement_enabled:
-            gripper_joint = arm.joint("gripper")
-            if r2 != 0.0:
-                target_angles["gripper"] += JOG_SPEED_DEG_S * delta_time * r2
-            else:
-                
-                target_angles["gripper"] = max(
-                    gripper_joint.config.min_angle,
-                    target_angles["gripper"] - JOG_SPEED_DEG_S * delta_time,
-                )
+        # Gatilhos -> Garra: R2 abre; L2 fecha.
+        gripper_joint = arm.joint("gripper")
+        l2 = axes.get("l2", 0.0)
+        if state.movement_enabled and r2 != 0.0 and not home_shortcut_active:
+            target_angles["gripper"] += JOG_SPEED_DEG_S * delta_time * r2
+            arm.atuator_object = False
+            target_changed = True
+        elif state.movement_enabled and l2 != 0.0 and not arm.atuator_object:
+            target_angles["gripper"] -= JOG_SPEED_DEG_S * delta_time * l2
             target_changed = True
             
         # Movimento não bloqueante com `command` para cada junta
@@ -213,37 +156,25 @@ def run_control_loop(arm: RobotArm, controller: Ps5ControllerInput) -> None:
                 target_angles[joint_name] = clamped_angle
 
                 # Envio não-bloqueante para o hardware
-                joint.command(clamped_angle)
+                # TODO: Impolementar controle de vcc e acc para determinadas juntas
+                if joint.name == "gripper":
+                    joint.command(clamped_angle, speed=200, acc=30)
+                    gripper_load = joint.current_load()
+                    
+                    # Criar logioca de detecao de load
+                else:
+                    joint.command(clamped_angle)
         time.sleep(0.02)  # Pequena pausa para evitar uso excessivo da CPU
 
 
-def controller_control():
-    controller = Ps5ControllerInput("/dev/input/event18")
+def controller_control(arm: RobotArm) -> None:
+    controller = Ps5ControllerInput(find_ps5_controller_device())
     controller.open()
-
-    port = PortHandler("/dev/ttyUSB0")
-    port.openPort()
-    port.setBaudRate(1_000_000)
-
-    servo = sms_sts(port)
-    servo_bus = ScServoBus(servo)
-
-    joints = [Joint(config, servo_bus) for config in JOINT_CONFIGS]
-
-    arm = RobotArm(servo_bus=servo_bus, joints=joints)
 
     try:
         run_control_loop(arm, controller)
-
     except KeyboardInterrupt:
         print("\n[AUDIT] Encerrando monitor...")
     finally:
-        # Colocar braço em pose home
         move_arm_to_home(arm, output_fn=print)
-
         controller.close()
-        port.closePort()
-
-
-if __name__ == "__main__":
-    controller_control()

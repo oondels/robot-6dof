@@ -55,7 +55,7 @@ def execute_action(
     elif normalized == "keyboard":
         keyboard_control()
     elif normalized == "ps5" or normalized == "controller":
-        controller_control()
+        controller_control(arm)
     else:
         # 3. Verifica se corresponde a uma ação gravada em recorded_actions/
         try:
