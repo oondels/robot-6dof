@@ -3,6 +3,10 @@ import math
 import time
 from typing import Protocol
 
+from src.utils.dualsense_color import (
+    DEFAULT_DUALSENSE_COLOR,
+    DualSenseColorConfig,
+)
 from src.utils.validate_load import (
     BASE_LOAD_AT_REST,
     LOAD_MAGNITUDE_MASK,
@@ -12,6 +16,7 @@ from src.utils.validate_load import (
 DEFAULT_TRIGGER_NAME = "l2"
 TRIGGER_START_POSITION = 0
 MAXIMUM_TRIGGER_FORCE = 200
+OBJECT_HELD_TRIGGER_FORCE = 120
 LOAD_EXCESS_START = 40.0
 LOAD_EXCESS_FULL_FORCE = 400.0
 LOAD_FILTER_ALPHA = 0.25
@@ -33,9 +38,14 @@ class Trigger(Protocol):
     effect: TriggerEffect
 
 
+class Lightbar(Protocol):
+    def set_color(self, red: int, green: int, blue: int) -> None: ...
+
+
 class DualSenseDevice(Protocol):
     left_trigger: Trigger
     right_trigger: Trigger
+    lightbar: Lightbar
 
     def activate(self) -> None: ...
 
@@ -48,6 +58,7 @@ _filtered_load_excess = 0.0
 _last_applied_force = 0
 _last_update_time = 0.0
 _active_trigger_name = DEFAULT_TRIGGER_NAME
+_previous_trigger_value = 0.0
 
 
 def _create_controller() -> DualSenseDevice:
@@ -142,6 +153,11 @@ def _initialize_controller() -> DualSenseDevice | None:
     try:
         controller = _create_controller()
         controller.activate()
+        controller.lightbar.set_color(
+            DEFAULT_DUALSENSE_COLOR.red,
+            DEFAULT_DUALSENSE_COLOR.green,
+            DEFAULT_DUALSENSE_COLOR.blue,
+        )
     except Exception as error:
         if controller is not None:
             try:
@@ -156,10 +172,29 @@ def _initialize_controller() -> DualSenseDevice | None:
     return _controller
 
 
+def set_dualsense_color(color: DualSenseColorConfig) -> bool:
+    """Aplica uma cor RGB usando a conexão HID já existente do DualSense."""
+    if not isinstance(color, DualSenseColorConfig):
+        raise TypeError("color deve ser uma instância de DualSenseColorConfig")
+
+    controller = _initialize_controller()
+    if controller is None:
+        return False
+
+    try:
+        controller.lightbar.set_color(color.red, color.green, color.blue)
+    except Exception as error:
+        print(f"[CONTROLE PS5] Falha ao alterar cor: {error}")
+        return False
+
+    return True
+
+
 def _turn_off_effect(reset_filter: bool) -> None:
     global _filtered_load_excess
     global _last_applied_force
     global _last_update_time
+    global _previous_trigger_value
 
     if _controller is not None and _last_applied_force != 0:
         try:
@@ -171,12 +206,14 @@ def _turn_off_effect(reset_filter: bool) -> None:
     _last_update_time = 0.0
     if reset_filter:
         _filtered_load_excess = 0.0
+        _previous_trigger_value = 0.0
 
 
 def _shutdown_controller() -> None:
     global _controller
     global _controller_initialization_failed
     global _active_trigger_name
+    global _previous_trigger_value
 
     controller = _controller
     _turn_off_effect(reset_filter=True)
@@ -196,6 +233,7 @@ def _shutdown_controller() -> None:
     _controller = None
     _controller_initialization_failed = False
     _active_trigger_name = DEFAULT_TRIGGER_NAME
+    _previous_trigger_value = 0.0
 
 
 def apply_load_to_adaptive_trigger(
@@ -205,18 +243,21 @@ def apply_load_to_adaptive_trigger(
     trigger_name: str = DEFAULT_TRIGGER_NAME,
     shutdown: bool = False,
     initialize: bool = False,
+    hold_force: bool = False,
 ) -> int:
     """Aplica no gatilho uma resistência proporcional ao load excedente.
 
     Esta é a única função pública necessária para operar o feedback. O
     controlador HID é aberto somente quando uma força precisa ser aplicada.
-    Informe ``initialize=True`` na inicialização da feature e
-    ``shutdown=True`` durante emergência ou encerramento do programa.
+    Informe ``hold_force=True`` enquanto o robô estiver segurando um objeto,
+    ``initialize=True`` na inicialização da feature e ``shutdown=True``
+    durante emergência ou encerramento do programa.
     """
     global _active_trigger_name
     global _filtered_load_excess
     global _last_applied_force
     global _last_update_time
+    global _previous_trigger_value
 
     if shutdown:
         _shutdown_controller()
@@ -233,19 +274,31 @@ def apply_load_to_adaptive_trigger(
         trigger_name,
     )
 
-    if trigger_value == 0.0:
+    trigger_pressed_again = (
+        _previous_trigger_value == 0.0
+        and trigger_value > 0.0
+    )
+    _previous_trigger_value = trigger_value
+
+    if trigger_value == 0.0 and not hold_force:
         _turn_off_effect(reset_filter=True)
         return 0
 
-    current_load_excess = _load_excess(
-        raw_load,
-        measured_velocity_deg_s,
-    )
-    _filtered_load_excess = (
-        LOAD_FILTER_ALPHA * current_load_excess
-        + (1.0 - LOAD_FILTER_ALPHA) * _filtered_load_excess
-    )
-    desired_force = _force_from_load_excess(_filtered_load_excess)
+    if hold_force:
+        desired_force = max(
+            _last_applied_force,
+            OBJECT_HELD_TRIGGER_FORCE,
+        )
+    else:
+        current_load_excess = _load_excess(
+            raw_load,
+            measured_velocity_deg_s,
+        )
+        _filtered_load_excess = (
+            LOAD_FILTER_ALPHA * current_load_excess
+            + (1.0 - LOAD_FILTER_ALPHA) * _filtered_load_excess
+        )
+        desired_force = _force_from_load_excess(_filtered_load_excess)
 
     if desired_force == 0:
         _turn_off_effect(reset_filter=False)
@@ -253,7 +306,7 @@ def apply_load_to_adaptive_trigger(
 
     current_time = time.monotonic()
     update_interval = current_time - _last_update_time
-    if (
+    if not trigger_pressed_again and (
         desired_force == _last_applied_force
         or update_interval < MINIMUM_UPDATE_INTERVAL_S
     ):

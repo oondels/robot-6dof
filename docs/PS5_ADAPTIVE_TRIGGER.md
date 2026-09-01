@@ -41,15 +41,24 @@ gatilho:                         L2
 início do load excedente:        40
 load excedente para força total: 400
 força máxima do gatilho:         200 de 255
+força mínima com objeto seguro:  120 de 255
 filtro exponencial:              0,25
 passo de força:                  8
 intervalo mínimo de atualização: 50 ms
 ```
 
-O efeito é removido ao soltar o `L2`, abrir a garra, retornar para home,
-acionar emergência ou encerrar o controle. A segurança do robô não depende do
-feedback do gatilho: se o HID estiver indisponível, o movimento continua e um
-aviso é exibido.
+Depois que o objeto é detectado, o L2 mantém pelo menos `120` de força mesmo
+que o operador solte o gatilho ou o load estabilize. Esse estado informa
+fisicamente que a garra continua segurando um objeto. O efeito é removido ao
+abrir a garra, retornar para home, desabilitar movimento, acionar emergência
+ou encerrar o controle. A segurança do robô não depende do feedback do
+gatilho: se o HID estiver indisponível, o movimento continua e um aviso é
+exibido.
+
+Enquanto o objeto estiver marcado como seguro, uma nova transição do L2 de
+solto para pressionado reenvia o efeito HID, mesmo que a força calculada não
+tenha mudado. Isso evita perder a resistência depois de soltar e apertar o
+gatilho novamente.
 
 A conexão HID é inicializada ao entrar na ação de controle PS5. Isso permite
 detectar problemas de biblioteca, permissão ou conexão antes de iniciar o loop

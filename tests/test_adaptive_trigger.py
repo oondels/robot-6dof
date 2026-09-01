@@ -2,7 +2,11 @@ import unittest
 from unittest.mock import patch
 
 from src.utils import adaptive_trigger
-from src.utils.adaptive_trigger import apply_load_to_adaptive_trigger
+from src.utils.adaptive_trigger import (
+    apply_load_to_adaptive_trigger,
+    set_dualsense_color,
+)
+from src.utils.dualsense_color import DualSenseColorConfig
 
 
 class FakeEffect:
@@ -22,10 +26,19 @@ class FakeTrigger:
         self.effect = FakeEffect()
 
 
+class FakeLightbar:
+    def __init__(self) -> None:
+        self.colors: list[tuple[int, int, int]] = []
+
+    def set_color(self, red: int, green: int, blue: int) -> None:
+        self.colors.append((red, green, blue))
+
+
 class FakeController:
     def __init__(self) -> None:
         self.left_trigger = FakeTrigger()
         self.right_trigger = FakeTrigger()
+        self.lightbar = FakeLightbar()
         self.activated = False
         self.deactivated = False
 
@@ -80,6 +93,22 @@ class AdaptiveTriggerTestCase(unittest.TestCase):
         self.assertTrue(self.controller.activated)
         self.assertEqual(self.controller.left_trigger.effect.resistances, [])
         self.assertEqual(self.controller.right_trigger.effect.resistances, [])
+        self.assertEqual(
+            self.controller.lightbar.colors,
+            [(255, 0, 0)],
+        )
+
+    def test_can_change_lightbar_color_using_existing_controller(self) -> None:
+        color = DualSenseColorConfig(red=255, green=40, blue=0)
+
+        applied = set_dualsense_color(color)
+
+        self.assertTrue(applied)
+        self.assertEqual(
+            self.controller.lightbar.colors[-1],
+            (255, 40, 0),
+        )
+        self.assertIs(adaptive_trigger._controller, self.controller)
 
     def test_applies_progressive_resistance_for_sustained_excess_load(self) -> None:
         forces = [
@@ -122,6 +151,72 @@ class AdaptiveTriggerTestCase(unittest.TestCase):
 
         self.assertEqual(force, 0)
         self.assertGreater(self.controller.left_trigger.effect.off_calls, 0)
+
+    def test_hold_force_keeps_resistance_after_trigger_is_released(self) -> None:
+        apply_load_to_adaptive_trigger(500, 0.0, 1.0)
+
+        force = apply_load_to_adaptive_trigger(
+            raw_load=0,
+            measured_velocity_deg_s=0.0,
+            trigger_value=0.0,
+            hold_force=True,
+        )
+
+        self.assertGreaterEqual(
+            force,
+            adaptive_trigger.OBJECT_HELD_TRIGGER_FORCE,
+        )
+        self.assertEqual(self.controller.left_trigger.effect.off_calls, 0)
+
+    def test_hold_force_can_activate_without_previous_load_force(self) -> None:
+        force = apply_load_to_adaptive_trigger(
+            raw_load=0,
+            measured_velocity_deg_s=0.0,
+            trigger_value=0.0,
+            hold_force=True,
+        )
+
+        self.assertEqual(
+            force,
+            adaptive_trigger.OBJECT_HELD_TRIGGER_FORCE,
+        )
+        self.assertEqual(
+            self.controller.left_trigger.effect.resistances,
+            [(0, adaptive_trigger.OBJECT_HELD_TRIGGER_FORCE)],
+        )
+
+    def test_pressing_again_reapplies_held_object_resistance(self) -> None:
+        apply_load_to_adaptive_trigger(
+            raw_load=0,
+            measured_velocity_deg_s=0.0,
+            trigger_value=1.0,
+            hold_force=True,
+        )
+        apply_load_to_adaptive_trigger(
+            raw_load=0,
+            measured_velocity_deg_s=0.0,
+            trigger_value=0.0,
+            hold_force=True,
+        )
+        resistance_calls_before_press = len(
+            self.controller.left_trigger.effect.resistances
+        )
+
+        force = apply_load_to_adaptive_trigger(
+            raw_load=0,
+            measured_velocity_deg_s=0.0,
+            trigger_value=1.0,
+            hold_force=True,
+        )
+
+        self.assertEqual(
+            force,
+            adaptive_trigger.OBJECT_HELD_TRIGGER_FORCE,
+        )
+        self.assertEqual(
+            len(self.controller.left_trigger.effect.resistances),
+            resistance_calls_before_press + 1,
+        )
 
     def test_shutdown_removes_effect_and_deactivates_controller(self) -> None:
         apply_load_to_adaptive_trigger(500, 0.0, 1.0)
