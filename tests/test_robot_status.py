@@ -69,6 +69,26 @@ class RobotStatusTestCase(unittest.TestCase):
         self.servo_bus.read_position.assert_not_called()
         self.servo_bus.read_load.assert_not_called()
 
+    def test_movement_is_unsafe_when_a_monitored_joint_exceeds_load(self) -> None:
+        base = Joint(
+            JointConfig(
+                name="base_yaw",
+                servo_id=1,
+                zero_position=2048,
+                direction=1,
+                min_angle=-90.0,
+                max_angle=90.0,
+                maximum_safe_load=100,
+            ),
+            self.servo_bus,
+        )
+        arm = RobotArm(self.servo_bus, [base])
+
+        self.servo_bus.read_load.side_effect = None
+        self.servo_bus.read_load.return_value = 101
+
+        self.assertFalse(arm.is_movement_safe)
+
 
 if __name__ == "__main__":
     unittest.main()

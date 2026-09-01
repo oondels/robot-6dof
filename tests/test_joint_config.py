@@ -73,6 +73,20 @@ class JointConfigTestCase(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.create_config(tolerance_deg=0)
 
+    def test_accepts_optional_maximum_safe_load(self) -> None:
+        self.assertIsNone(self.create_config().maximum_safe_load)
+        self.assertEqual(
+            self.create_config(maximum_safe_load=300).maximum_safe_load,
+            300,
+        )
+
+    def test_rejects_invalid_maximum_safe_load(self) -> None:
+        with self.assertRaises(TypeError):
+            self.create_config(maximum_safe_load=100.5)
+
+        with self.assertRaises(ValueError):
+            self.create_config(maximum_safe_load=1024)
+
     def test_rejects_limit_outside_encoder(self) -> None:
         with self.assertRaises(ValueError):
             self.create_config(

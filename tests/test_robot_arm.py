@@ -73,6 +73,15 @@ class RobotArmTestCase(unittest.TestCase):
         with self.assertRaisesRegex(TypeError, "atuator_object deve ser booleano"):
             self.arm.atuator_object = 1  # type: ignore[assignment]
 
+    def test_starts_and_finishes_close_gripper_ability(self) -> None:
+        self.assertFalse(self.arm.close_gripper_ability_active)
+
+        self.arm.start_close_gripper_ability()
+        self.assertTrue(self.arm.close_gripper_ability_active)
+
+        self.arm.finish_close_gripper_ability()
+        self.assertFalse(self.arm.close_gripper_ability_active)
+
     def test_rejects_empty_joints_sequence(self) -> None:
         with self.assertRaisesRegex(
             ValueError,

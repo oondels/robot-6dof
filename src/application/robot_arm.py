@@ -40,6 +40,7 @@ class RobotArm:
         }
         self._servo_bus = servo_bus
         self._atuator_object = atuator_object
+        self._close_gripper_ability_active = False
         self._status: RobotStatus | None = None
 
     @property
@@ -52,6 +53,19 @@ class RobotArm:
         if not isinstance(value, bool):
             raise TypeError("atuator_object deve ser booleano")
         self._atuator_object = value
+
+    @property
+    def close_gripper_ability_active(self) -> bool:
+        """Indica se o fechamento automático da garra está em execução."""
+        return self._close_gripper_ability_active
+
+    def start_close_gripper_ability(self) -> None:
+        """Inicia a habilidade de fechar completamente a garra."""
+        self._close_gripper_ability_active = True
+
+    def finish_close_gripper_ability(self) -> None:
+        """Finaliza a habilidade de fechamento automático da garra."""
+        self._close_gripper_ability_active = False
 
     @property
     def joints(self) -> tuple[Joint, ...]:
@@ -125,6 +139,16 @@ class RobotArm:
     def status(self) -> RobotStatus | None:
         """Retorna o último pacote coletado sem consultar o hardware."""
         return self._status
+
+    @property
+    def is_movement_safe(self) -> bool:
+        """Verifica se todas as juntas estão dentro do load configurado.
+
+        Somente juntas que possuem ``maximum_safe_load`` participam da
+        proteção. A leitura é feita no momento da consulta para que a decisão
+        de segurança não dependa de um pacote de telemetria antigo.
+        """
+        return all(joint.is_load_safe for joint in self._joints)
 
     def enable_torque(self) -> None:
         """Habilita o torque de todas as juntas de forma segura."""

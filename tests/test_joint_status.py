@@ -61,6 +61,30 @@ class JointStatusTestCase(unittest.TestCase):
         self.assertEqual(collected_status.load, 200)
         self.assertEqual(collected_status.load_direction, "negativa")
 
+    def test_load_is_safe_when_no_limit_is_configured(self) -> None:
+        joint = Joint(self.config, self.servo_bus)
+
+        self.assertTrue(joint.is_load_safe)
+        self.servo_bus.read_load.assert_not_called()
+
+    def test_load_safety_uses_magnitude_and_configured_limit(self) -> None:
+        config = JointConfig(
+            name="base_yaw",
+            servo_id=1,
+            zero_position=2048,
+            direction=1,
+            min_angle=-30.0,
+            max_angle=30.0,
+            maximum_safe_load=300,
+        )
+        joint = Joint(config, self.servo_bus)
+
+        self.servo_bus.read_load.return_value = (1 << 10) | 300
+        self.assertTrue(joint.is_load_safe)
+
+        self.servo_bus.read_load.return_value = (1 << 10) | 301
+        self.assertFalse(joint.is_load_safe)
+
 
 if __name__ == "__main__":
     unittest.main()

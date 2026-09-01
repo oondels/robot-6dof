@@ -62,6 +62,22 @@ class Joint:
     def tolerance_counts(self) -> int:
         return self._config.tolerance_counts
 
+    @property
+    def is_load_safe(self) -> bool:
+        """Verifica se o load atual está dentro do limite desta junta.
+
+        O registrador do servo também contém o bit que informa a direção do
+        esforço. Para segurança, a comparação usa somente a magnitude. Quando
+        a junta não possui limite configurado, ela não bloqueia o movimento.
+        """
+        maximum_safe_load = self._config.maximum_safe_load
+        if maximum_safe_load is None:
+            return True
+
+        raw_load = self.current_load()
+        load_magnitude = raw_load & 0x3FF
+        return load_magnitude <= maximum_safe_load
+
     def get_status(self) -> JointStatus:
         """Coleta, armazena e retorna o status atual da junta."""
         raw_load = self.current_load()

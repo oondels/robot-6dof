@@ -16,6 +16,7 @@ MAX_SERVO_ID = 253
 
 MIN_SERVO_POSITION = 0
 MAX_SERVO_POSITION = 4095
+MAX_LOAD_MAGNITUDE = 1023
 
 STEPS_PER_REVOLUTION = 4096
 
@@ -36,6 +37,7 @@ class JointConfig:
     speed: int = DEFAULT_SPEED
     acc: int = DEFAULT_ACC
     tolerance_deg: float = DEFAULT_TOLERANCE_DEG
+    maximum_safe_load: int | None = None
 
     def __post_init__(self) -> None:
         self._validate_name()
@@ -46,6 +48,7 @@ class JointConfig:
         self.validate_speed(self.speed)
         self.validate_acceleration(self.acc)
         self._validate_tolerance()
+        self._validate_maximum_safe_load()
         self._validate_mapped_positions()
 
         object.__setattr__(
@@ -131,6 +134,19 @@ class JointConfig:
 
         if self.tolerance_deg <= 0:
             raise ValueError("tolerance_deg deve ser maior que zero")
+
+    def _validate_maximum_safe_load(self) -> None:
+        if self.maximum_safe_load is None:
+            return
+
+        if type(self.maximum_safe_load) is not int:
+            raise TypeError("maximum_safe_load deve ser inteiro ou None")
+
+        if not 0 <= self.maximum_safe_load <= MAX_LOAD_MAGNITUDE:
+            raise ValueError(
+                "maximum_safe_load deve estar entre 0 e "
+                f"{MAX_LOAD_MAGNITUDE}"
+            )
 
     def _calculate_position(
         self,
