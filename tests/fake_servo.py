@@ -158,6 +158,25 @@ class FakeServo:
             self.packet_error,
         )
 
+    def read2ByteTxRx(
+        self,
+        servo_id: int,
+        address: int,
+    ) -> tuple[int, int, int]:
+        value = self.registers.get(address, 0)
+
+        return (
+            value,
+            self.communication_result,
+            self.packet_error,
+        )
+
+    @staticmethod
+    def scs_tohost(a: int, b: int) -> int:
+        if a & (1 << b):
+            return -(a & ~(1 << b))
+        return a
+
     def getTxRxResult(self, result: int) -> str:
         return f"Erro de comunicação simulado: {result}"
 
