@@ -2,7 +2,6 @@ from collections.abc import Callable, Mapping
 import json
 from time import monotonic, sleep, time
 
-from src.actions.home_pose import move_arm_to_home
 from src.application.ports.control_input import ControlInput, ControlState
 from src.application.robot_arm import RobotArm
 from src.infrastructure.input.ps5_controller import TriggerDoublePressDetector
@@ -204,68 +203,68 @@ class TeleOperation:
             self._home_shortcut_active = True
             return True
 
-        # 4. Movimento Analógico Esquerdo Eixo X -> Base (base_yaw)
-        left_x = axes.get("left_x", 0.0)
-        if state.movement_enabled and left_x != 0.0 and "base_yaw" in self._target_angles:
+        if state.movement_enabled:
             direction_mult = -1.0 if self._inverse_mode else 1.0
-            self._target_angles["base_yaw"] += (
-                direction_mult * self._jog_speed * delta_time * left_x
-            )
-            target_changed = True
 
-        # 5. Movimento Analógico Esquerdo Eixo Y -> Ombro e Cotovelo
-        left_y = axes.get("left_y", 0.0)
-        if state.movement_enabled and left_y != 0.0:
-            if "shoulder_pitch" in self._target_angles:
-                self._target_angles["shoulder_pitch"] += (
-                    self._jog_speed * delta_time * left_y
-                )
-                target_changed = True
-            if "elbow_pitch" in self._target_angles:
-                self._target_angles["elbow_pitch"] += (
-                    self._jog_speed * delta_time * left_y
-                )
-                target_changed = True
-
-        # 6. D-Pad Y -> Cotovelo (elbow_pitch)
-        dpad_y = axes.get("dpad_y", 0.0)
-        if state.movement_enabled and dpad_y != 0.0 and "elbow_pitch" in self._target_angles:
-            self._target_angles["elbow_pitch"] += (
-                self._jog_speed * delta_time * dpad_y
+            # 4. Movimento Analógico Esquerdo Eixo X -> Base (base_yaw)
+            target_changed |= self._apply_axis_jog(
+                joint_name="base_yaw",
+                input_value=axes.get("left_x", 0.0),
+                delta_time=delta_time,
+                direction_multiplier=direction_mult,
             )
-            target_changed = True
 
-        # 7. D-Pad X -> Base (base_yaw)
-        dpad_x = axes.get("dpad_x", 0.0)
-        if state.movement_enabled and dpad_x != 0.0 and "base_yaw" in self._target_angles:
-            direction_mult = -1.0 if self._inverse_mode else 1.0
-            self._target_angles["base_yaw"] += (
-                direction_mult * self._jog_speed * delta_time * dpad_x
+            # 5. Movimento Analógico Esquerdo Eixo Y -> Ombro e Cotovelo
+            left_y = axes.get("left_y", 0.0)
+            target_changed |= self._apply_axis_jog(
+                joint_name="shoulder_pitch",
+                input_value=left_y,
+                delta_time=delta_time,
             )
-            target_changed = True
+            target_changed |= self._apply_axis_jog(
+                joint_name="elbow_pitch",
+                input_value=left_y,
+                delta_time=delta_time,
+            )
 
-        # 8. Analógico Direito Eixo Y -> Punho (wrist_pitch)
-        right_y = axes.get("right_y", 0.0)
-        if state.movement_enabled and right_y != 0.0 and "wrist_pitch" in self._target_angles:
-            self._target_angles["wrist_pitch"] += (
-                self._jog_speed * delta_time * right_y
+            # 6. D-Pad Y -> Cotovelo (elbow_pitch)
+            target_changed |= self._apply_axis_jog(
+                joint_name="elbow_pitch",
+                input_value=axes.get("dpad_y", 0.0),
+                delta_time=delta_time,
             )
-            target_changed = True
 
-        # 9. Analógico Direito Eixo X -> Punho (wrist_roll)
-        right_x = axes.get("right_x", 0.0)
-        if state.movement_enabled and right_x != 0.0 and "wrist_roll" in self._target_angles:
-            direction_mult = -1.0 if self._inverse_mode else 1.0
-            self._target_angles["wrist_roll"] += (
-                direction_mult * self._jog_speed * delta_time * right_x
+            # 7. D-Pad X -> Base (base_yaw)
+            target_changed |= self._apply_axis_jog(
+                joint_name="base_yaw",
+                input_value=axes.get("dpad_x", 0.0),
+                delta_time=delta_time,
+                direction_multiplier=direction_mult,
             )
-            target_changed = True
+
+            # 8. Analógico Direito Eixo Y -> Punho (wrist_pitch)
+            target_changed |= self._apply_axis_jog(
+                joint_name="wrist_pitch",
+                input_value=axes.get("right_y", 0.0),
+                delta_time=delta_time,
+            )
+
+            # 9. Analógico Direito Eixo X -> Punho (wrist_roll)
+            target_changed |= self._apply_axis_jog(
+                joint_name="wrist_roll",
+                input_value=axes.get("right_x", 0.0),
+                delta_time=delta_time,
+                direction_multiplier=direction_mult,
+            )
 
         # 10. Gatilhos -> Garra: R2 abre; L2 fecha
         l2 = axes.get("l2", 0.0)
+
+        # Se o movimento geral for desativado, encerra qualquer automação da garra
         if not state.movement_enabled:
             self._arm.finish_close_gripper_ability()
 
+        # Duplo clique rápido no L2: inicia o fechamento automático da garra até encontrar carga/limite
         if (
             state.movement_enabled
             and self._l2_double_press_detector.update(l2, current_time)
@@ -274,9 +273,11 @@ class TeleOperation:
             self._consecutive_gripper_load_releases = 0
             self._output_fn("[HABILIDADE] Fechamento automático da garra iniciado.")
 
+        # Zera resistência do gatilho adaptativo se o movimento estiver desativado ou L2 em repouso
         if not state.movement_enabled or (l2 == 0.0 and not self._arm.atuator_object):
             apply_load_to_adaptive_trigger(0, 0.0, 0.0)
 
+        # Se um objeto já foi detectado, mantém resistência de retenção no gatilho do controle
         if state.movement_enabled and self._arm.atuator_object:
             apply_load_to_adaptive_trigger(
                 raw_load=0,
@@ -286,6 +287,8 @@ class TeleOperation:
             )
 
         if "gripper" in self._target_angles:
+            # Abertura manual da garra (R2):
+            # Aumenta o ângulo, cancela automação de fechamento e reseta estado de objeto detectado
             if state.movement_enabled and r2 != 0.0 and not self._home_shortcut_active:
                 self._target_angles["gripper"] += self._jog_speed * delta_time * r2
                 self._arm.atuator_object = False
@@ -293,6 +296,9 @@ class TeleOperation:
                 self._consecutive_gripper_load_validations = 0
                 self._consecutive_gripper_load_releases = 0
                 target_changed = True
+
+            # Fechamento da garra (manual via L2 ou automático via habilidade):
+            # Reduz o ângulo apenas se nenhum objeto foi detectado ainda
             elif (
                 state.movement_enabled
                 and not self._arm.atuator_object
@@ -305,6 +311,9 @@ class TeleOperation:
                     self._jog_speed * delta_time * close_intensity
                 )
                 target_changed = True
+
+            # Garra parada segurando objeto durante fechamento automático:
+            # Mantém target_changed ativo para continuar processando a remoção de obstrução no loop
             elif (
                 state.movement_enabled
                 and self._arm.atuator_object
@@ -316,6 +325,35 @@ class TeleOperation:
         if target_changed:
             self._apply_joint_targets(l2, delta_time)
 
+        return True
+
+    def _apply_axis_jog(
+        self,
+        joint_name: str,
+        input_value: float,
+        delta_time: float,
+        direction_multiplier: float = 1.0,
+    ) -> bool:
+        """Atualiza incrementalmente o ângulo alvo de uma junta a partir de um valor de entrada normalizado.
+
+        Retorna True se o alvo foi alterado e False caso contrário (ex.: valor zerado,
+        delta_time inválido ou junta não inicializada).
+        """
+        if (
+            input_value == 0.0
+            or delta_time <= 0.0
+            or direction_multiplier == 0.0
+            or joint_name not in self._target_angles
+        ):
+            return False
+
+        angular_delta = (
+            input_value
+            * self._jog_speed
+            * delta_time
+            * direction_multiplier
+        )
+        self._target_angles[joint_name] += angular_delta
         return True
 
     def _apply_joint_targets(self, l2: float, delta_time: float) -> None:
@@ -475,5 +513,8 @@ class TeleOperation:
                 break
 
             sleep(period)
+
+
+from src.actions.home_pose import move_arm_to_home  # noqa: E402
 
 

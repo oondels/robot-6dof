@@ -263,6 +263,94 @@ class TeleOperationTestCase(unittest.TestCase):
         self.assertTrue(self.arm.close_gripper_ability_active)
         self.assertTrue(any("Fechamento automático" in log for log in self.output_logs))
 
+    def test_apply_axis_jog_updates_target_angle_and_returns_true(self) -> None:
+        self.teleop.start()
+        self.teleop._target_angles["base_yaw"] = 0.0
+
+        changed = self.teleop._apply_axis_jog(
+            joint_name="base_yaw",
+            input_value=0.5,
+            delta_time=0.1,
+            direction_multiplier=1.0,
+        )
+
+        self.assertTrue(changed)
+        # delta = 0.5 * 60.0 deg/s * 0.1 s * 1.0 = 3.0 deg
+        self.assertAlmostEqual(self.teleop._target_angles["base_yaw"], 3.0)
+
+    def test_apply_axis_jog_respects_direction_multiplier(self) -> None:
+        self.teleop.start()
+        self.teleop._target_angles["base_yaw"] = 10.0
+
+        changed = self.teleop._apply_axis_jog(
+            joint_name="base_yaw",
+            input_value=0.5,
+            delta_time=0.1,
+            direction_multiplier=-1.0,
+        )
+
+        self.assertTrue(changed)
+        # delta = 0.5 * 60.0 * 0.1 * (-1.0) = -3.0 deg -> 10.0 - 3.0 = 7.0 deg
+        self.assertAlmostEqual(self.teleop._target_angles["base_yaw"], 7.0)
+
+    def test_apply_axis_jog_returns_false_when_input_is_zero(self) -> None:
+        self.teleop.start()
+        self.teleop._target_angles["base_yaw"] = 0.0
+
+        changed = self.teleop._apply_axis_jog(
+            joint_name="base_yaw",
+            input_value=0.0,
+            delta_time=0.1,
+        )
+
+        self.assertFalse(changed)
+        self.assertAlmostEqual(self.teleop._target_angles["base_yaw"], 0.0)
+
+    def test_apply_axis_jog_returns_false_when_delta_time_is_non_positive(self) -> None:
+        self.teleop.start()
+        self.teleop._target_angles["base_yaw"] = 5.0
+
+        changed_zero_dt = self.teleop._apply_axis_jog(
+            joint_name="base_yaw",
+            input_value=1.0,
+            delta_time=0.0,
+        )
+        changed_neg_dt = self.teleop._apply_axis_jog(
+            joint_name="base_yaw",
+            input_value=1.0,
+            delta_time=-0.02,
+        )
+
+        self.assertFalse(changed_zero_dt)
+        self.assertFalse(changed_neg_dt)
+        self.assertAlmostEqual(self.teleop._target_angles["base_yaw"], 5.0)
+
+    def test_apply_axis_jog_returns_false_when_joint_not_in_targets(self) -> None:
+        self.teleop.start()
+
+        changed = self.teleop._apply_axis_jog(
+            joint_name="non_existent_joint",
+            input_value=1.0,
+            delta_time=0.02,
+        )
+
+        self.assertFalse(changed)
+        self.assertNotIn("non_existent_joint", self.teleop._target_angles)
+
+    def test_apply_axis_jog_returns_false_when_direction_multiplier_zero(self) -> None:
+        self.teleop.start()
+        self.teleop._target_angles["base_yaw"] = 0.0
+
+        changed = self.teleop._apply_axis_jog(
+            joint_name="base_yaw",
+            input_value=1.0,
+            delta_time=0.02,
+            direction_multiplier=0.0,
+        )
+
+        self.assertFalse(changed)
+        self.assertAlmostEqual(self.teleop._target_angles["base_yaw"], 0.0)
+
 
 if __name__ == "__main__":
     unittest.main()
