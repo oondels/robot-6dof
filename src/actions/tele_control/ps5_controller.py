@@ -4,12 +4,17 @@ from typing import Mapping
 
 from src.infrastructure.input.ps5_controller import (
     Ps5ControllerInput,
+    TriggerDoublePressDetector,
     find_ps5_controller_device,
 )
 from src.application.robot_arm import RobotArm
 from src.actions.home_pose import move_arm_to_home
 from src.application.ports.control_input import ControlState
-from src.utils.adaptive_trigger import apply_load_to_adaptive_trigger
+from src.utils.adaptive_trigger import (
+    apply_load_to_adaptive_trigger,
+    set_dualsense_color,
+)
+from src.utils.dualsense_color import color_for_controller_state
 from src.utils.validate_load import validate_load
 
 
@@ -52,6 +57,9 @@ def print_input_changes(
 
 JOG_SPEED_DEG_S = 60.0  # Velocidade de movimento em graus por segundo
 INVERSE_MODE = True # Inververte o sentido do eixo x, por motivos de vizualização, para que o movimento do joystick seja intuitivo para o usuário.
+GRIPPER_ABILITY_RELEASE_VALIDATIONS = 3
+GRIPPER_ABILITY_ANGLE_TOLERANCE_DEG = 1.0
+CONTROLLER_IDLE_TIMEOUT_S = 10.0
 
 def handle_command(arm: RobotArm, command: str) -> None:
     pass
@@ -96,7 +104,8 @@ def collect_metrics(arm: RobotArm) -> None:
         )
         websocket.send(metrics_payload)
     except (OSError, WebSocketException) as error:
-        print(f"[MÉTRICAS] Falha ao enviar dados: {error}")
+        # print(f"[MÉTRICAS] Falha ao enviar dados: {error}")
+        pass
     finally:
         if websocket is not None:
             websocket.close()
@@ -110,7 +119,11 @@ def run_control_loop(arm: RobotArm, controller: Ps5ControllerInput) -> None:
     gripper_load_alert_active = False
     previous_gripper_angle = target_angles["gripper"]
     consecutive_gripper_load_validations = 0
+    consecutive_gripper_load_releases = 0
+    l2_double_press_detector = TriggerDoublePressDetector()
     last_metrics_collection = 0.0
+    last_controller_activity = time.monotonic()
+    previous_controller_color = None
 
     while True:
         current_time = time.monotonic()
@@ -120,6 +133,30 @@ def run_control_loop(arm: RobotArm, controller: Ps5ControllerInput) -> None:
 
         state = controller.read()
         delta_time = state.delta_time if state.delta_time is not None else 0.0
+
+        controller_has_activity = (
+            previous_axes is not None
+            and (
+                state.axes != previous_axes
+                or bool(state.buttons_pressed)
+                or bool(state.buttons_released)
+            )
+        )
+        if controller_has_activity:
+            last_controller_activity = current_time
+
+        controller_is_idle = (
+            current_time - last_controller_activity
+            >= CONTROLLER_IDLE_TIMEOUT_S
+        )
+        controller_color = color_for_controller_state(
+            movement_enabled=state.movement_enabled,
+            controller_is_idle=controller_is_idle,
+        )
+        if controller_color != previous_controller_color:
+            set_dualsense_color(controller_color)
+            previous_controller_color = controller_color
+
         print_input_changes(
             state,
             previous_axes,
@@ -149,6 +186,7 @@ def run_control_loop(arm: RobotArm, controller: Ps5ControllerInput) -> None:
             move_arm_to_home(arm, output_fn=print, service="r2-x")
             target_angles = arm.current_angles()
             arm.atuator_object = False
+            arm.finish_close_gripper_ability()
             gripper_load_alert_active = False
             previous_gripper_angle = target_angles["gripper"]
             consecutive_gripper_load_validations = 0
@@ -211,17 +249,66 @@ def run_control_loop(arm: RobotArm, controller: Ps5ControllerInput) -> None:
 
         # Gatilhos -> Garra: R2 abre; L2 fecha.
         l2 = axes.get("l2", 0.0)
-        if not state.movement_enabled or l2 == 0.0:
+
+        # Desabilitar o movimento também encerra qualquer comando automático.
+        # Uma habilidade nunca deve voltar a mover o robô ao rearmar o controle.
+        if not state.movement_enabled:
+            arm.finish_close_gripper_ability()
+
+        # L2 + L2 -> habilidade de fechamento completo da garra.
+        # A detecção usa a borda de pressão do eixo analógico. Assim, segurar o
+        # L2 não é confundido com vários toques consecutivos.
+        if (
+            state.movement_enabled
+            and l2_double_press_detector.update(l2, current_time)
+        ):
+            arm.start_close_gripper_ability()
+            consecutive_gripper_load_releases = 0
+            print("[HABILIDADE] Fechamento automático da garra iniciado.")
+
+        if (
+            not state.movement_enabled
+            or (l2 == 0.0 and not arm.atuator_object)
+        ):
             apply_load_to_adaptive_trigger(0, 0.0, 0.0)
+
+        if state.movement_enabled and arm.atuator_object:
+            apply_load_to_adaptive_trigger(
+                raw_load=0,
+                measured_velocity_deg_s=0.0,
+                trigger_value=l2,
+                hold_force=True,
+            )
 
         if state.movement_enabled and r2 != 0.0 and not home_shortcut_active:
             target_angles["gripper"] += JOG_SPEED_DEG_S * delta_time * r2
             arm.atuator_object = False
+            arm.finish_close_gripper_ability()
             gripper_load_alert_active = False
             consecutive_gripper_load_validations = 0
+            consecutive_gripper_load_releases = 0
             target_changed = True
-        elif state.movement_enabled and l2 != 0.0 and not arm.atuator_object:
-            target_angles["gripper"] -= JOG_SPEED_DEG_S * delta_time * l2
+        elif (
+            state.movement_enabled
+            and not arm.atuator_object
+            and (l2 != 0.0 or arm.close_gripper_ability_active)
+        ):
+            # Na habilidade, a garra fecha na velocidade integral mesmo depois
+            # que o operador solta o L2. O limite físico ainda será aplicado.
+            close_intensity = (
+                1.0 if arm.close_gripper_ability_active else l2
+            )
+            target_angles["gripper"] -= (
+                JOG_SPEED_DEG_S * delta_time * close_intensity
+            )
+            target_changed = True
+        elif (
+            state.movement_enabled
+            and arm.atuator_object
+            and arm.close_gripper_ability_active
+        ):
+            # Durante uma obstrução, continuamos apenas coletando o estado do
+            # servo. O comando permanece na posição atual e não aperta mais.
             target_changed = True
             
         # Movimento não bloqueante com `command` para cada junta
@@ -260,7 +347,16 @@ def run_control_loop(arm: RobotArm, controller: Ps5ControllerInput) -> None:
                             trigger_value=l2,
                         )
                         
-                    gripper_angle_error = clamped_angle - current_gripper_angle
+                    gripper_validation_target = clamped_angle
+                    if arm.close_gripper_ability_active:
+                        # Mantemos como referência o destino final da habilidade.
+                        # Isso permite reconhecer que ainda existe uma obstrução,
+                        # embora o servo esteja parado com segurança onde tocou.
+                        gripper_validation_target = joint.config.min_angle
+
+                    gripper_angle_error = (
+                        gripper_validation_target - current_gripper_angle
+                    )
                     gripper_current = joint.current_current()
                     previous_gripper_angle = current_gripper_angle
 
@@ -278,7 +374,10 @@ def run_control_loop(arm: RobotArm, controller: Ps5ControllerInput) -> None:
                                 f"[GARRA] Load atual: {gripper_load_magnitude}\n"
                             )
 
-                    if l2 != 0.0 and not arm.atuator_object:
+                    gripper_is_closing = (
+                        l2 != 0.0 or arm.close_gripper_ability_active
+                    )
+                    if gripper_is_closing:
                         # TODO: Essa verficiação deve ser feita dentro da classe do braço -> robot_arm
                         gripper_load_is_valid = validate_load(
                             raw_load=gripper_load,
@@ -287,12 +386,34 @@ def run_control_loop(arm: RobotArm, controller: Ps5ControllerInput) -> None:
                             current_a=gripper_current,
                         )
 
-                        if gripper_load_is_valid:
+                        if arm.atuator_object and arm.close_gripper_ability_active:
+                            # A habilidade não termina quando encontra algo.
+                            # Ela aguarda a pressão desaparecer por algumas
+                            # amostras antes de voltar a fechar automaticamente.
+                            if gripper_load_is_valid:
+                                consecutive_gripper_load_releases = 0
+                            else:
+                                consecutive_gripper_load_releases += 1
+
+                            if (
+                                consecutive_gripper_load_releases
+                                >= GRIPPER_ABILITY_RELEASE_VALIDATIONS
+                            ):
+                                arm.atuator_object = False
+                                consecutive_gripper_load_releases = 0
+                                print(
+                                    "[HABILIDADE] Obstrução removida. "
+                                    "Retomando fechamento da garra."
+                                )
+                        elif gripper_load_is_valid:
                             consecutive_gripper_load_validations += 1
                         else:
                             consecutive_gripper_load_validations = 0
 
-                        if consecutive_gripper_load_validations >= 3:
+                        if (
+                            not arm.atuator_object
+                            and consecutive_gripper_load_validations >= 3
+                        ):
                             target_angles["gripper"] = current_gripper_angle
                             joint.command(
                                 current_gripper_angle,
@@ -300,6 +421,14 @@ def run_control_loop(arm: RobotArm, controller: Ps5ControllerInput) -> None:
                                 acc=joint_acc,
                             )
                             arm.atuator_object = True
+                            apply_load_to_adaptive_trigger(
+                                raw_load=gripper_load,
+                                measured_velocity_deg_s=(
+                                    measured_gripper_velocity
+                                ),
+                                trigger_value=l2,
+                                hold_force=True,
+                            )
                             gripper_load_alert_active = False
                             consecutive_gripper_load_validations = 0
                             print(
@@ -309,6 +438,19 @@ def run_control_loop(arm: RobotArm, controller: Ps5ControllerInput) -> None:
                                 f"Erro={abs(gripper_angle_error):.2f}°, "
                                 f"Corrente={gripper_current:.3f} A"
                             )
+
+                    if (
+                        arm.close_gripper_ability_active
+                        and not arm.atuator_object
+                        and clamped_angle == joint.config.min_angle
+                        and abs(gripper_angle_error)
+                        <= GRIPPER_ABILITY_ANGLE_TOLERANCE_DEG
+                    ):
+                        arm.finish_close_gripper_ability()
+                        print(
+                            "[HABILIDADE] Fechamento automático da garra "
+                            "concluído."
+                        )
                 else:
                     joint.command(clamped_angle)
         time.sleep(0.02)  # Pequena pausa para evitar uso excessivo da CPU

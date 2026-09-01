@@ -1,4 +1,5 @@
 from collections.abc import Callable
+from dataclasses import dataclass
 import math
 from time import monotonic
 from typing import Protocol
@@ -26,6 +27,45 @@ class ControllerDevice(Protocol):
 DeviceFactory = Callable[[str], ControllerDevice]
 DeviceLister = Callable[[], list[str]]
 Clock = Callable[[], float]
+
+L2_ABILITY_PRESS_THRESHOLD = 0.20
+L2_DOUBLE_PRESS_INTERVAL_S = 0.45
+
+
+@dataclass
+class TriggerDoublePressDetector:
+    """Detecta dois acionamentos completos de um gatilho em pouco tempo.
+
+    O gatilho do DualSense é um eixo analógico, e não um botão. Por isso,
+    consideramos uma pressão somente quando ele cruza o limite configurado.
+    Manter o gatilho pressionado não gera novos acionamentos.
+    """
+
+    press_threshold: float = L2_ABILITY_PRESS_THRESHOLD
+    interval_seconds: float = L2_DOUBLE_PRESS_INTERVAL_S
+    _trigger_was_pressed: bool = False
+    _last_press_time: float | None = None
+
+    def update(self, trigger_value: float, timestamp: float) -> bool:
+        trigger_is_pressed = trigger_value >= self.press_threshold
+        new_press_started = trigger_is_pressed and not self._trigger_was_pressed
+        self._trigger_was_pressed = trigger_is_pressed
+
+        if not new_press_started:
+            return False
+
+        previous_press_time = self._last_press_time
+        self._last_press_time = timestamp
+
+        if (
+            previous_press_time is not None
+            and timestamp - previous_press_time <= self.interval_seconds
+        ):
+            # O próximo duplo toque deve começar um novo par de pressões.
+            self._last_press_time = None
+            return True
+
+        return False
 
 
 def find_ps5_controller_device(
@@ -177,6 +217,7 @@ class Ps5ControllerInput(ControlInput):
 
         self._movement_enabled = False
         self._emergency_stop = False
+        self._circle_double_press_detector = TriggerDoublePressDetector()
 
     def open(self) -> None:
         """Abre o dispositivo configurado e inicia o controle desarmado."""
@@ -205,8 +246,8 @@ class Ps5ControllerInput(ControlInput):
             self._handle_disconnection()
             raise ConnectionError("Conexão com o controle PS5 foi perdida") from error
 
-        self._update_emergency_stop()
         timestamp = self._clock()
+        self._update_emergency_stop(timestamp)
         delta_time = (
             0.0 if self._last_timestamp is None else timestamp - self._last_timestamp
         )
@@ -322,11 +363,9 @@ class Ps5ControllerInput(ControlInput):
 
         self._movement_enabled = not self._movement_enabled
 
-    def _update_emergency_stop(self) -> None:
-        l2_active = self._axes["l2"] > 0.0 or "l2" in self._buttons_held
-        r2_active = self._axes["r2"] > 0.0 or "r2" in self._buttons_held
-
-        if l2_active and r2_active:
+    def _update_emergency_stop(self, timestamp: float) -> None:
+        circle_value = 1.0 if "circle" in self._buttons_held else 0.0
+        if self._circle_double_press_detector.update(circle_value, timestamp):
             self._emergency_stop = True
             self._movement_enabled = False
 
@@ -343,6 +382,7 @@ class Ps5ControllerInput(ControlInput):
         self._buttons_held.clear()
         self._buttons_released.clear()
         self._last_timestamp = None
+        self._circle_double_press_detector = TriggerDoublePressDetector()
 
     @staticmethod
     def _new_axes() -> dict[str, float]:

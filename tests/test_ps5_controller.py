@@ -7,6 +7,7 @@ from evdev import ecodes
 
 from src.infrastructure.input.ps5_controller import (
     Ps5ControllerInput,
+    TriggerDoublePressDetector,
     find_ps5_controller_device,
 )
 
@@ -219,7 +220,7 @@ class Ps5ControllerInputTestCase(unittest.TestCase):
         self.assertTrue(armed.movement_enabled)
         self.assertFalse(disarmed.movement_enabled)
 
-    def test_trigger_pressures_are_preserved_and_trigger_emergency(self) -> None:
+    def test_trigger_pressures_are_preserved_without_triggering_emergency(self) -> None:
         self.input.open()
         state = self.read_events(
             FakeEvent(ecodes.EV_ABS, ecodes.ABS_Z, 64),
@@ -227,18 +228,25 @@ class Ps5ControllerInputTestCase(unittest.TestCase):
         )
         self.assertEqual(state.axes["l2"], 64 / 255)
         self.assertEqual(state.axes["r2"], 192 / 255)
+        self.assertFalse(state.emergency_stop)
+        self.assertFalse(state.movement_enabled)
+
+    def test_double_circle_triggers_emergency(self) -> None:
+        self.input.open()
+        self.read_events(FakeEvent(ecodes.EV_KEY, ecodes.BTN_EAST, 1))
+        self.read_events(FakeEvent(ecodes.EV_KEY, ecodes.BTN_EAST, 0))
+        state = self.read_events(FakeEvent(ecodes.EV_KEY, ecodes.BTN_EAST, 1))
+
         self.assertTrue(state.emergency_stop)
         self.assertFalse(state.movement_enabled)
 
-    def test_ps_rearms_after_emergency_only_when_triggers_are_released(self) -> None:
+    def test_ps_rearms_after_circle_emergency(self) -> None:
         self.input.open()
+        self.read_events(FakeEvent(ecodes.EV_KEY, ecodes.BTN_EAST, 1))
+        self.read_events(FakeEvent(ecodes.EV_KEY, ecodes.BTN_EAST, 0))
+        self.read_events(FakeEvent(ecodes.EV_KEY, ecodes.BTN_EAST, 1))
         self.read_events(
-            FakeEvent(ecodes.EV_ABS, ecodes.ABS_Z, 255),
-            FakeEvent(ecodes.EV_ABS, ecodes.ABS_RZ, 255),
-        )
-        self.read_events(
-            FakeEvent(ecodes.EV_ABS, ecodes.ABS_Z, 0),
-            FakeEvent(ecodes.EV_ABS, ecodes.ABS_RZ, 0),
+            FakeEvent(ecodes.EV_KEY, ecodes.BTN_EAST, 0),
         )
         rearmed = self.read_events(FakeEvent(ecodes.EV_KEY, ecodes.BTN_MODE, 1))
         self.assertFalse(rearmed.emergency_stop)
@@ -246,10 +254,9 @@ class Ps5ControllerInputTestCase(unittest.TestCase):
 
     def test_reset_preserves_latched_emergency(self) -> None:
         self.input.open()
-        self.read_events(
-            FakeEvent(ecodes.EV_ABS, ecodes.ABS_Z, 255),
-            FakeEvent(ecodes.EV_ABS, ecodes.ABS_RZ, 255),
-        )
+        self.read_events(FakeEvent(ecodes.EV_KEY, ecodes.BTN_EAST, 1))
+        self.read_events(FakeEvent(ecodes.EV_KEY, ecodes.BTN_EAST, 0))
+        self.read_events(FakeEvent(ecodes.EV_KEY, ecodes.BTN_EAST, 1))
         self.input.reset()
         state = self.input.read()
         self.assertTrue(state.emergency_stop)
@@ -274,6 +281,29 @@ class Ps5ControllerInputTestCase(unittest.TestCase):
         with self.assertRaises(ConnectionError):
             self.input.read()
         self.assertFalse(self.input.is_available())
+
+
+class TriggerDoublePressDetectorTestCase(unittest.TestCase):
+    def test_detects_two_separate_presses_inside_interval(self) -> None:
+        detector = TriggerDoublePressDetector()
+
+        self.assertFalse(detector.update(1.0, 10.00))
+        self.assertFalse(detector.update(0.0, 10.10))
+        self.assertTrue(detector.update(1.0, 10.30))
+
+    def test_holding_trigger_does_not_count_as_double_press(self) -> None:
+        detector = TriggerDoublePressDetector()
+
+        self.assertFalse(detector.update(1.0, 10.00))
+        self.assertFalse(detector.update(1.0, 10.10))
+        self.assertFalse(detector.update(1.0, 10.20))
+
+    def test_does_not_detect_presses_outside_interval(self) -> None:
+        detector = TriggerDoublePressDetector()
+
+        self.assertFalse(detector.update(1.0, 10.00))
+        self.assertFalse(detector.update(0.0, 10.10))
+        self.assertFalse(detector.update(1.0, 10.60))
 
 
 if __name__ == "__main__":
