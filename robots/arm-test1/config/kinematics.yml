@@ -1,0 +1,55 @@
+# EXPERIMENTAL: referência fornecida pelo usuário em 2026-10-05.
+# A leitura abaixo é assumida como correspondente à pose simulada.
+# Sentidos físicos/DH coincidentes são uma hipótese ainda não validada.
+# theta_offset_deg = theta_simulado - q_referencia.
+# q foi recalculado dos counts com a calibração atual, sem arredondar a 2 casas:
+# junta            counts  zero_position  direction  q_referencia_deg
+# base_yaw         2069    2065           +1         0.3515625
+# shoulder_pitch   2056    2050           +1         0.52734375
+# elbow_pitch      2032    2033           -1         0.087890625
+# wrist_pitch      2048    2060           -1         1.0546875
+# wrist_roll       2173    2164           -1        -0.791015625
+# Revisar os offsets se a calibração ou a correspondência entre poses mudar.
+#
+# Dados confirmados pelo responsável pelo robô: DH clássico, mm, graus;
+# ordem da tabela: theta, alpha, a, d; linhas da base até wrist_roll.
+# theta na pose simulada, em graus (referência, NÃO offsets):
+# base_yaw=0; shoulder_pitch=0; elbow_pitch=0; wrist_pitch=-90; wrist_roll=0.
+#
+# dh_0 e dh_5 identificam os referenciais matemáticos da tabela.
+# A relação física com world/base e a relação dh_5 -> TCP não estão confirmadas.
+# partial=false indica as cinco juntas rotativas, não validação física ou TCP.
+# gripper controla abertura e não integra esta cadeia de pose.
+convention: standard_dh
+units:
+  distance: mm
+  angle: deg
+base_frame: dh_0
+end_frame: dh_5
+partial: false
+chain:
+  - joint: base_yaw
+    theta_offset_deg: -0.3515625
+    alpha_deg: 90
+    a_mm: 28
+    d_mm: 83
+  - joint: shoulder_pitch
+    theta_offset_deg: -0.52734375
+    alpha_deg: 0
+    a_mm: 111
+    d_mm: 0
+  - joint: elbow_pitch
+    theta_offset_deg: -0.087890625
+    alpha_deg: 0
+    a_mm: 137
+    d_mm: 0
+  - joint: wrist_pitch
+    theta_offset_deg: -91.0546875
+    alpha_deg: 90
+    a_mm: 0
+    d_mm: 0
+  - joint: wrist_roll
+    theta_offset_deg: 0.791015625
+    alpha_deg: -90
+    a_mm: 0
+    d_mm: 42

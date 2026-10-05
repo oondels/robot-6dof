@@ -37,11 +37,13 @@ src/
 ├── application/
 │   ├── joint.py
 │   ├── joint_config.py
+│   ├── kinematics.py
 │   ├── movement_status.py
 │   ├── robot_arm.py
 │   └── ports/
 │       └── servo_bus.py
 ├── infrastructure/
+│   ├── kinematics_loader.py
 │   └── scservo_bus.py
 ├── actions/
 ├── calibration/
@@ -82,6 +84,30 @@ registrador ou formato de erro do SDK.
 Agrega juntas, valida nomes e IDs únicos, coordena torque coletivo e envia poses
 sincronizadas por `ServoBus.command_positions_sync()`. A política de pose fica no
 núcleo; o empacotamento do `SyncWrite` fica no adaptador.
+
+### Cinemática direta offline
+
+`application/kinematics.py` representa a geometria DH separadamente da calibração
+de `JointConfig`. Recebe ângulos físicos por nome e retorna a transformação final,
+posição, rotação e transformações acumuladas. Usa somente a biblioteca padrão,
+sem ler encoders ou conhecer `RobotArm`, `ServoBus` ou o SDK.
+
+`infrastructure/kinematics_loader.py` lê diretamente um `kinematics.yml` com
+PyYAML e constrói uma configuração validada. Não inicia o sistema de perfis:
+`arm_profile.py` e `profile.yml` continuam sem implementação.
+
+```text
+kinematics.yml → carregador → KinematicConfig ─┐
+                                            ├→ forward_kinematics → resultado
+dicionário de ângulos físicos em graus ───────┘
+```
+
+Uma aplicação pode obter os ângulos com `RobotArm.current_angles()` e selecionar
+explicitamente as juntas da cadeia antes do cálculo. Essa leitura é separada da
+matemática e não ocorre na API offline. O núcleo não reaplica `direction`.
+
+Contrato, convenção, frames e exemplo executável estão no
+[guia de cinemática direta](FORWARD_KINEMATICS.md).
 
 ### `ServoBus`
 
@@ -170,6 +196,7 @@ command_pose()  envia vários alvos em um pacote sincronizado
 move_pose()     envia a pose e monitora todas as juntas
 ```
 
-Essas operações ainda representam controle angular discreto. Geração de
-trajetória, controle cartesiano e cinemática são responsabilidades futuras e não
-devem ser misturadas ao adaptador de hardware.
+Essas operações representam controle angular discreto. A cinemática direta
+offline é uma responsabilidade matemática separada. Cinemática inversa,
+trajetórias cartesianas e controle cartesiano permanecem fora desse fluxo e
+não devem ser misturados ao adaptador de hardware.

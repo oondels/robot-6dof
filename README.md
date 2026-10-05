@@ -26,8 +26,9 @@ O projeto prioriza **segurança física**, **separação estrita de responsabili
 | **Movimento Simultâneo Atômico (`SyncWrite`)** | ✅ Concluído | Despacho de pacote broadcast único via `SyncWritePosEx` para início simultâneo de todas as juntas com monitoramento conjunto de convergência. |
 | **Roteamento de Ações e CLI (`actions/` e `main.py`)** | ✅ Concluído | CLI com suporte a flags (`--action`, `--port`, `--baudrate`), despachando para status, testador interativo de poses ou módulo mirror. |
 | **Ferramentas de Calibração e Bancada (`calibration/`)** | ✅ Concluído | Leitor de counts sob demanda, leitor contínuo por movimento, testador de junta individual e testador de poses sincronizadas. |
-| **Suíte de Testes Automatizados (`tests/`)** | ✅ Concluído | **112 testes unitários** passando com `unittest`, `FakeServoBus` e `FakeServo`, sem hardware conectado. |
-| **Cinemática Direta / Inversa e Trajetórias Cartesianas** | ⏳ Futuro | Planejado para versões posteriores após consolidação da camada de controle angular. |
+| **Suíte de Testes Automatizados (`tests/`)** | ✅ Disponível | Testes com `unittest`, `FakeServoBus` e `FakeServo`, incluindo cinemática offline. |
+| **Cinemática Direta (DH clássico)** | ✅ API offline | Matrizes, posição, orientação e frames acumulados; configuração do braço experimental, ainda sem validação física. Consulte o [guia de FK](docs/FORWARD_KINEMATICS.md). |
+| **Cinemática Inversa e Trajetórias Cartesianas** | ⏳ Futuro | Planejado para versões posteriores. |
 
 ---
 
